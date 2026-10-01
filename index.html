@@ -1,0 +1,1436 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F7F6FA">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>衣小人原型</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fredoka:wght@500;600&display=swap" media="print" onload="this.media='all'">
+<script src="three.min.js"></script>
+<style>
+/* 布局：左侧原型导览 + 居中的 iPhone 画框；≤520px 时 App 直接铺满屏幕 */
+:root{
+  --bg:#E8E6EE; --app:#F7F6FA; --card:#FFFFFF; --tile:#F0EEF4;
+  --ink:#24202C; --ink2:#5D5768; --mute:#9690A1; --line:#E4E1EA;
+  --accent:#EC5A8A; --accent-2:#C93D6F; --accent-soft:#FCE4EC; --on-accent:#FFFFFF;
+  --mint:#D6F0E5; --mint-ink:#1F6F53; --butter:#FFF0C4; --butter-ink:#7E5A06; --danger:#D23F4D;
+  --frame:#1C1A21; --shadow:0 1px 2px rgba(36,32,44,.05),0 6px 18px rgba(36,32,44,.06);
+  --f-display:"Fredoka","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",system-ui,sans-serif;
+  --f-body:"PingFang SC","HarmonyOS Sans SC","Hiragino Sans GB","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+  --f-mono:"DM Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F0E13; --app:#17151C; --card:#221F29; --tile:#2A2732;
+  --ink:#F2EFF6; --ink2:#C4BECE; --mute:#8B8596; --line:#34303D;
+  --accent:#FF79A3; --accent-2:#FF9BBB; --accent-soft:#3F1F2C; --on-accent:#2A0D19;
+  --mint:#173A2E; --mint-ink:#8BDDBB; --butter:#3A3120; --butter-ink:#F1CF77; --danger:#FF6B77;
+  --frame:#000; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F0E13; --app:#17151C; --card:#221F29; --tile:#2A2732;
+  --ink:#F2EFF6; --ink2:#C4BECE; --mute:#8B8596; --line:#34303D;
+  --accent:#FF79A3; --accent-2:#FF9BBB; --accent-soft:#3F1F2C; --on-accent:#2A0D19;
+  --mint:#173A2E; --mint-ink:#8BDDBB; --butter:#3A3120; --butter-ink:#F1CF77; --danger:#FF6B77;
+  --frame:#000; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25); color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+svg{flex:none}
+
+/* 外框 */
+.wrap{min-height:100%;display:flex;align-items:center;justify-content:center;gap:56px;padding-block:24px;padding-inline:16px}
+.side{width:270px;flex:none;display:flex;flex-direction:column;gap:18px}
+.side .brand{font-family:var(--f-display);font-size:30px;font-weight:600;letter-spacing:-.01em}
+.side .brand small{display:block;font-family:var(--f-mono);font-size:12px;font-weight:400;color:var(--mute);letter-spacing:.04em;margin-top:2px}
+.side p{color:var(--ink2);line-height:1.6;margin:0}
+.pnav{display:flex;flex-direction:column;gap:2px}
+.pnav button{display:flex;gap:10px;align-items:baseline;text-align:left;padding:7px 10px;border-radius:10px;color:var(--ink2)}
+.pnav button:hover{background:var(--card)}
+.pnav button.on{background:var(--card);color:var(--ink);font-weight:600;box-shadow:var(--shadow)}
+.pnav .no{font-family:var(--f-mono);font-size:11px;color:var(--mute);width:20px;flex:none}
+.pnav .grp{font-size:11px;color:var(--mute);letter-spacing:.1em;padding:10px 10px 4px}
+.note{background:var(--butter);color:var(--butter-ink);border-radius:14px;padding:12px 14px;font-size:12.5px;line-height:1.6}
+.note b{display:block;margin-bottom:2px}
+.note ul{margin:0;padding-left:16px}
+
+.phone{position:relative;width:390px;height:min(844px,calc(100vh - 48px));min-height:620px;background:var(--app);border-radius:54px;
+  box-shadow:0 0 0 11px var(--frame),0 0 0 12px #44414d,0 40px 80px -24px rgba(30,20,50,.45);overflow:hidden;display:flex;flex-direction:column;flex:none}
+.sbar{height:50px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:8px 30px 0 36px;font-family:var(--f-display);font-weight:600;font-size:15px;position:relative}
+.sbar .island{position:absolute;left:50%;top:11px;transform:translateX(-50%);width:118px;height:34px;border-radius:20px;background:#000}
+.sbar .ic{display:flex;gap:5px;align-items:center}
+.viewport{position:relative;flex:1;min-height:0}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:0 16px 28px;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.tabbar{flex:none;display:grid;grid-template-columns:repeat(5,1fr);padding:8px 4px 28px;background:var(--app);border-top:1px solid var(--line)}
+.tabbar button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--mute);padding-top:2px}
+.tabbar button.on{color:var(--accent);font-weight:600}
+@media (max-width:900px){.side{display:none}}
+@media (max-width:520px){
+  .wrap{padding:0;display:block;height:100%}
+  .phone{width:100%;height:100%;min-height:0;border-radius:0;box-shadow:none}
+  .sbar{display:none}
+  .tabbar{padding-bottom:10px}
+}
+
+/* 头部 */
+.hdr{position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:10px;margin:0 -16px;padding:10px 16px 12px;background:var(--app)}
+.hdr h2{flex:1;margin:0;font-size:17px;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr .sp{width:38px;flex:none}
+.ibtn{width:38px;height:38px;flex:none;border-radius:13px;display:grid;place-items:center;background:var(--card);box-shadow:var(--shadow);color:var(--ink)}
+.tbtn{height:38px;padding:0 14px;border-radius:13px;background:var(--accent);color:var(--on-accent);font-weight:600;flex:none}
+.tblock{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:14px 0 14px}
+.eyebrow{font-size:12px;color:var(--mute);letter-spacing:.12em}
+h1.big{margin:2px 0 0;font-family:var(--f-display);font-size:30px;font-weight:600;letter-spacing:-.01em;line-height:1.1}
+h1.big .num{font-variant-numeric:tabular-nums}
+
+/* 通用 */
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:2px 16px 4px}
+.chips::-webkit-scrollbar{display:none}
+.chips.wrapc{flex-wrap:wrap;overflow:visible;margin:0;padding:0}
+.chip{flex:none;height:32px;padding:0 14px;border-radius:16px;background:var(--card);font-size:13px;color:var(--ink2);display:inline-flex;align-items:center;gap:6px;box-shadow:inset 0 0 0 1px var(--line)}
+.chip.on{background:var(--ink);color:var(--app);box-shadow:none}
+.chip .n{font-family:var(--f-mono);font-size:11px;opacity:.6}
+.chip.dot::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.search{display:flex;align-items:center;gap:8px;height:44px;border-radius:14px;background:var(--card);padding:0 12px;box-shadow:var(--shadow);color:var(--mute);margin-bottom:12px}
+.search input{flex:1;min-width:0;border:0;background:none;height:100%;font-size:15px;outline:none;color:var(--ink)}
+.search button{color:var(--ink2);display:flex;align-items:center;gap:4px;font-size:13px}
+.search button.act{color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.card{background:var(--card);border-radius:20px;padding:8px;text-align:left;display:flex;flex-direction:column;gap:8px;box-shadow:var(--shadow);min-width:0}
+.thumb{aspect-ratio:1;border-radius:14px;background:var(--tile);display:grid;place-items:center;overflow:hidden;position:relative}
+.thumb>svg,.thumb>img{width:80%;height:80%;object-fit:contain}
+.meta{padding:0 4px 4px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.code{font-family:var(--f-mono);font-size:11.5px;color:var(--accent-2);letter-spacing:.02em}
+.name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:12px;color:var(--mute)}
+.badge{position:absolute;top:8px;left:8px;font-family:var(--f-mono);font-size:10.5px;background:var(--card);color:var(--ink2);padding:2px 7px;border-radius:8px}
+.empty{padding:40px 12px;text-align:center;color:var(--mute);line-height:1.7}
+.fab{position:absolute;right:18px;bottom:18px;z-index:8;height:54px;padding:0 20px 0 16px;border-radius:27px;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;gap:6px;font-weight:600;font-size:15px;box-shadow:0 12px 24px -10px var(--accent)}
+.btn{height:48px;border-radius:16px;padding:0 18px;font-weight:600;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--card);box-shadow:inset 0 0 0 1px var(--line)}
+.btn.pri{background:var(--accent);color:var(--on-accent);box-shadow:0 10px 22px -12px var(--accent)}
+.btn.soft{background:var(--accent-soft);color:var(--accent-2);box-shadow:none}
+.btn.danger{color:var(--danger)}
+.btn.block{width:100%}
+.btn.sm{height:38px;font-size:13px;border-radius:12px;padding:0 12px}
+.btn[disabled]{opacity:.4;pointer-events:none}
+.row{display:flex;gap:10px}
+.row>.btn{flex:1;min-width:0}
+.sec{background:var(--card);border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow);margin-top:12px}
+.sec h3{margin:0;font-size:15px;font-weight:600}
+.fl{display:flex;flex-direction:column;gap:8px;min-width:0}
+.lab{font-size:12px;color:var(--mute);letter-spacing:.04em;display:flex;justify-content:space-between;gap:8px}
+.lab a,.lab button{color:var(--accent-2);font-size:12px}
+.inp{height:44px;border-radius:12px;background:var(--tile);border:0;padding:0 12px;width:100%;font-size:15px;outline:none}
+.inp:focus{box-shadow:inset 0 0 0 2px var(--accent)}
+textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
+.inp.mono{font-family:var(--f-mono);letter-spacing:.04em}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sws{display:flex;flex-wrap:wrap;gap:10px}
+.sw{width:30px;height:30px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.14)}
+.sw.on{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--tile);border-radius:14px;padding:4px;gap:4px}
+.seg button{height:34px;border-radius:10px;font-size:14px;color:var(--ink2)}
+.seg button.on{background:var(--card);color:var(--ink);font-weight:600;box-shadow:var(--shadow)}
+.aibox{background:var(--mint);color:var(--mint-ink);border-radius:14px;padding:10px 12px;font-size:13px;line-height:1.5;display:flex;gap:8px;align-items:flex-start}
+.tip{background:var(--butter);color:var(--butter-ink);border-radius:14px;padding:10px 12px;font-size:12.5px;line-height:1.6}
+.err{color:var(--danger);font-size:13px}
+.kv{display:flex;flex-direction:column}
+.kv div{display:flex;justify-content:space-between;gap:16px;padding:11px 0;border-top:1px solid var(--line);font-size:14px}
+.kv div:first-child{border-top:0}
+.kv span{color:var(--mute);flex:none}
+.kv b{font-weight:500;text-align:right;min-width:0;overflow-wrap:anywhere}
+.hero-thumb{aspect-ratio:1;border-radius:26px;background:var(--card);display:grid;place-items:center;box-shadow:var(--shadow);margin-top:4px}
+.hero-thumb>svg,.hero-thumb>img{width:72%;height:72%;object-fit:contain}
+.codebox{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--tile);border-radius:12px;padding:10px 12px}
+.codebox .code{font-size:18px}
+.codebox .rk{font-size:12px;color:var(--mute);text-align:right;line-height:1.4}
+.meta .cl{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+.rank{font-family:var(--f-mono);font-size:10.5px;color:var(--mute)}
+.bigcode{font-family:var(--f-mono);font-size:22px;color:var(--accent-2);margin-top:16px;letter-spacing:.03em}
+.ititle{font-size:22px;font-weight:600;margin:2px 0 8px}
+.hscroll{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin:0 -14px;padding:0 14px}
+.hscroll::-webkit-scrollbar{display:none}
+
+/* 底部中间的「今天」 */
+.tabbar button.mid .tc{width:48px;height:48px;border-radius:17px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;margin-top:-20px;box-shadow:0 10px 20px -8px var(--accent),0 0 0 5px var(--app)}
+.tabbar button.mid{color:var(--ink2)}
+.tabbar button.mid.on{color:var(--accent)}
+
+/* 今天 */
+.drawcard{background:var(--card);border-radius:26px;box-shadow:var(--shadow);padding:12px;display:grid;grid-template-columns:44% minmax(0,1fr);gap:12px;align-items:center}
+.drawcard .fig{border-radius:20px;overflow:hidden;background:var(--accent-soft)}
+.drawcard .fig svg{display:block;width:100%;height:auto}
+.dlist{display:flex;flex-direction:column;gap:8px;min-width:0}
+.ditm{display:flex;align-items:center;gap:8px;padding:6px;border-radius:14px;background:var(--tile);text-align:left;width:100%;min-width:0}
+.ditm .thumb{width:44px;flex:none;border-radius:10px;background:var(--card)}
+.ditm .meta{padding:0;flex:1}
+.ditm .lk{color:var(--mute);flex:none;display:grid;place-items:center;width:22px}
+.ditm.add{justify-content:center;color:var(--accent-2);font-size:13px;padding:12px;background:none;box-shadow:inset 0 0 0 1.5px var(--line)}
+.drawcard .fig{position:relative}
+.figmode{position:absolute;left:8px;top:8px;font-size:11.5px;font-weight:600;background:var(--card);color:var(--ink2);padding:4px 9px;border-radius:10px;box-shadow:var(--shadow)}
+.btn.done{background:var(--mint);color:var(--mint-ink);box-shadow:none;cursor:default}
+.card.cur{box-shadow:inset 0 0 0 2px var(--accent)}
+.card[disabled]{opacity:.35;pointer-events:none}
+.flipin{animation:flipin .55s cubic-bezier(.2,.8,.2,1)}
+@keyframes flipin{from{transform:perspective(900px) rotateY(-100deg) scale(.95);opacity:.2}}
+.donebadge{margin-top:10px;display:flex;gap:6px;align-items:center;justify-content:center;background:var(--mint);color:var(--mint-ink);border-radius:12px;padding:9px;font-size:12.5px}
+.linkbtn{display:block;margin:12px auto 0;color:var(--accent-2);font-size:13px}
+.weekstrip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:8px}
+.wd{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 3px 8px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);font-size:11px;color:var(--mute);position:relative}
+.wd b{font-family:var(--f-display);font-size:15px;color:var(--ink);font-weight:600}
+.wd .th{width:100%;aspect-ratio:1;border-radius:8px;background:var(--tile);display:grid;place-items:center;margin-top:2px}
+.wd .th>svg,.wd .th>img{width:82%;height:82%;object-fit:contain}
+.wd.on{background:var(--ink);color:var(--app)}
+.wd.on b{color:var(--app)}
+.wd .ok{position:absolute;top:-4px;right:-3px;width:16px;height:16px;border-radius:50%;background:var(--mint-ink);color:var(--card);display:grid;place-items:center}
+.wd .ok svg{width:10px;height:10px}
+.weeknav{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--card);border-radius:18px;padding:8px;box-shadow:var(--shadow)}
+.weeknav>div{text-align:center}
+.weeknav b{display:block;font-size:15px}
+.weeknav span{font-size:12px;color:var(--mute)}
+.weeknav .ibtn{box-shadow:none;background:var(--tile)}
+.days{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.dayrow{display:flex;align-items:center;gap:8px;background:var(--card);border-radius:18px;padding:10px;box-shadow:var(--shadow)}
+.dayrow.today{box-shadow:inset 0 0 0 2px var(--accent),var(--shadow)}
+.dmain{flex:1;display:flex;align-items:center;gap:10px;min-width:0;text-align:left}
+.dl{width:44px;flex:none;text-align:center}
+.dl b{display:block;font-size:14px}
+.dl span{font-size:11px;color:var(--mute);font-family:var(--f-mono)}
+.dth{flex:1;display:flex;gap:6px;min-width:0;overflow:hidden;align-items:center}
+.dth .thumb{width:42px;flex:none;border-radius:10px}
+.st{font-size:11px;color:var(--mint-ink);display:flex;align-items:center;gap:2px;flex:none}
+
+/* 标签输入 */
+.tagin{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:44px;border-radius:12px;background:var(--tile);padding:6px 8px}
+.tagin:focus-within{box-shadow:inset 0 0 0 2px var(--accent)}
+.tagin input{flex:1;min-width:110px;border:0;background:none;outline:none;height:32px;font-size:15px;padding:0 4px}
+.tag{display:inline-flex;align-items:center;gap:2px;height:28px;padding:0 3px 0 10px;border-radius:14px;background:var(--accent-soft);color:var(--accent-2);font-size:13px;font-weight:500}
+.tag button{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:var(--accent-2)}
+.tagdd{margin-top:6px;background:var(--card);border-radius:14px;box-shadow:0 0 0 1px var(--line),0 14px 28px -14px rgba(36,32,44,.3);max-height:232px;overflow-y:auto;padding:6px}
+.tagdd button{display:flex;width:100%;justify-content:space-between;align-items:center;gap:12px;padding:10px;border-radius:10px;text-align:left;font-size:14px}
+.tagdd button:hover{background:var(--tile)}
+.tagdd .new{color:var(--accent-2);font-weight:600}
+.tagdd small{color:var(--mute);font-family:var(--f-mono);font-size:11px;font-weight:400}
+.tagdd .none{padding:10px;color:var(--mute);font-size:13px}
+
+/* 抽屉、提示 */
+.sheet{position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;justify-content:flex-end}
+.sheet-bg{position:absolute;inset:0;background:rgba(20,14,30,.38);animation:fade .2s}
+.sheet-panel{position:relative;background:var(--app);border-radius:26px 26px 0 0;padding:10px 16px 22px;max-height:86%;overflow-y:auto;animation:up .28s cubic-bezier(.2,.8,.2,1)}
+.grab{width:38px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px}
+.sheet-title{font-size:17px;font-weight:600;margin-bottom:4px}
+.sheet-sub{color:var(--mute);font-size:13px;margin-bottom:14px;line-height:1.5}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;align-items:center;gap:14px;background:var(--card);border-radius:18px;padding:14px;text-align:left;box-shadow:var(--shadow);cursor:pointer}
+.opt .oi{width:44px;height:44px;border-radius:14px;background:var(--accent-soft);color:var(--accent-2);display:grid;place-items:center;flex:none}
+.opt b{display:block;font-size:15px;font-weight:600}
+.opt small{color:var(--mute);font-size:12.5px}
+.toast{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:40;background:var(--ink);color:var(--app);padding:10px 16px;border-radius:14px;font-size:13.5px;max-width:88%;text-align:center;animation:drop .25s;box-shadow:0 10px 30px -10px rgba(0,0,0,.4)}
+@keyframes fade{from{opacity:0}}
+@keyframes up{from{transform:translateY(40px);opacity:.4}}
+@keyframes drop{from{transform:translate(-50%,-12px);opacity:0}}
+
+/* 抠图 */
+.checker{background:conic-gradient(var(--tile) 25%,var(--card) 0 50%,var(--tile) 0 75%,var(--card) 0) 0 0/22px 22px}
+.cutstage{position:relative;aspect-ratio:1;border-radius:24px;overflow:hidden;box-shadow:var(--shadow);display:grid;place-items:center}
+.cutstage canvas,.cutstage img{width:100%;height:100%;object-fit:contain;display:block;touch-action:none}
+.scan{position:absolute;inset:0;background:rgba(255,255,255,.28);display:grid;place-items:end center;padding-bottom:16px;font-size:13px;font-weight:600;color:#3a2c40}
+.scan::after{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--accent);box-shadow:0 0 18px 2px var(--accent);animation:scan 1.3s ease-in-out infinite alternate}
+.scan span{background:rgba(255,255,255,.85);padding:6px 12px;border-radius:12px}
+@keyframes scan{to{top:calc(100% - 3px)}}
+
+/* 搭配 */
+.stage{position:relative;width:min(100%,300px);margin:4px auto 0;aspect-ratio:3/4;border-radius:24px;background:radial-gradient(var(--line) 1.1px,transparent 1.4px) 0 0/16px 16px,var(--card);box-shadow:var(--shadow);overflow:hidden}
+.piece{position:absolute;transform:translate(-50%,-50%);touch-action:none;cursor:grab;border-radius:10px}
+.piece>svg,.piece>img{display:block;width:100%;aspect-ratio:1;object-fit:contain;pointer-events:none}
+.piece.sel{outline:2px dashed var(--accent);outline-offset:2px}
+.stage-empty{position:absolute;inset:0;display:grid;place-items:center;color:var(--mute);font-size:13px;padding:24px;text-align:center}
+.tools{display:flex;justify-content:center;gap:8px;margin-top:12px;min-height:38px;align-items:center}
+.tools .hint{color:var(--mute);font-size:12.5px}
+.mini{position:relative;aspect-ratio:3/4;border-radius:14px;background:var(--tile);overflow:hidden}
+.mini .piece{pointer-events:none;cursor:default}
+.drawer .ditems{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin:0 -14px;padding:2px 14px 4px}
+.drawer .ditems::-webkit-scrollbar{display:none}
+.ditem{flex:none;width:76px;display:flex;flex-direction:column;gap:4px;align-items:center}
+.ditem .thumb{width:76px;border-radius:14px;box-shadow:inset 0 0 0 2px transparent}
+.ditem.on .thumb{box-shadow:inset 0 0 0 2px var(--accent)}
+.ditem .code{font-size:10.5px}
+.ditem .ck{position:absolute;top:5px;right:5px;width:18px;height:18px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center}
+
+/* 3D 与形象 */
+.t3{position:relative;width:100%;height:400px;border-radius:26px;background:linear-gradient(180deg,var(--accent-soft),var(--tile) 70%);overflow:hidden}
+.t3.sm{height:290px}
+.t3 canvas{display:block;width:100%!important;height:100%!important;touch-action:pan-y;cursor:grab}
+.t3 .hint3{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);font-size:12px;color:var(--ink2);background:var(--card);padding:5px 10px;border-radius:10px;display:flex;gap:5px;align-items:center;white-space:nowrap;pointer-events:none;opacity:.9}
+.t3fail{position:absolute;inset:0;display:grid;place-items:center;color:var(--mute);padding:20px;text-align:center}
+.statchips{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:12px}
+.statchips span{background:var(--card);border-radius:12px;padding:8px 6px;font-size:11px;color:var(--mute);box-shadow:var(--shadow);text-align:center;white-space:nowrap}
+.statchips b{display:block;font-family:var(--f-display);font-size:17px;color:var(--ink);font-weight:600}
+.sl{display:flex;flex-direction:column;gap:6px}
+.sl-top{display:flex;justify-content:space-between;align-items:baseline;font-size:14px}
+.sl-v{color:var(--mute);font-size:12px}
+.sl-v b{font-family:var(--f-display);font-size:18px;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent);margin:0}
+.bmi{font-size:12.5px;color:var(--mute)}
+.result{border-radius:24px;overflow:hidden;box-shadow:var(--shadow)}
+.result svg{display:block;width:100%;height:auto}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:10px;align-items:center;color:var(--mute)}
+.steps li.on{color:var(--ink);font-weight:600}
+.steps li.ok{color:var(--mint-ink)}
+.spin{width:18px;height:18px;border-radius:50%;border:2.5px solid var(--line);border-top-color:var(--accent);animation:rot .8s linear infinite;flex:none}
+.dotc{width:18px;height:18px;border-radius:50%;background:var(--tile);flex:none;display:grid;place-items:center}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* 我的 */
+.profile{display:flex;align-items:center;gap:14px;padding:14px 0 6px}
+.profile .av{width:64px;height:64px;border-radius:22px;background:var(--accent-soft);overflow:hidden;flex:none}
+.profile .av svg{width:100%;height:100%}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.stat{background:var(--card);border-radius:18px;padding:12px 14px;box-shadow:var(--shadow)}
+.stat b{display:block;font-family:var(--f-display);font-size:24px;font-weight:600;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--mute)}
+.bars{display:flex;flex-direction:column;gap:10px}
+.bars .br{display:grid;grid-template-columns:36px 1fr 28px;gap:10px;align-items:center;font-size:13px}
+.bars .tr{height:8px;border-radius:4px;background:var(--tile);overflow:hidden}
+.bars .tr i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.bars .br em{font-style:normal;font-family:var(--f-mono);font-size:12px;color:var(--mute);text-align:right}
+.menu{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin-top:12px;overflow:hidden}
+.mi{display:flex;align-items:center;gap:12px;padding:14px;width:100%;text-align:left;border-top:1px solid var(--line)}
+.mi:first-child{border-top:0}
+.mi .mic{width:32px;height:32px;border-radius:10px;background:var(--tile);display:grid;place-items:center;color:var(--ink2);flex:none}
+.mi span{flex:1}
+.mi small{color:var(--mute);font-size:12px}
+.mi>svg:last-child{color:var(--mute)}
+.toprow{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.toprow:first-of-type{border-top:0}
+.toprow .thumb{width:44px;border-radius:10px;flex:none}
+.toprow .meta{flex:1;padding:0}
+
+/* 引导 */
+.onb{min-height:100%;display:flex;flex-direction:column;padding-top:18px;gap:16px}
+.onb h1{font-family:var(--f-display);font-size:30px;line-height:1.25;margin:0;font-weight:600;text-wrap:balance}
+.onb p{margin:0;color:var(--ink2);line-height:1.6}
+.dots{display:flex;gap:6px}
+.dots i{width:18px;height:5px;border-radius:3px;background:var(--line)}
+.dots i.on{background:var(--accent);width:28px}
+.onb .skip{margin-left:auto;color:var(--mute);font-size:13px}
+.onb .grow{flex:1}
+.onb-fig{border-radius:28px;overflow:hidden;background:var(--accent-soft)}
+.onb-fig svg{display:block;width:100%;height:auto}
+
+@media (prefers-reduced-motion: reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <aside class="side" aria-label="原型导览">
+    <div class="brand">衣小人<small>可点击原型 v0.1 · 调界面用</small></div>
+    <p>衣柜管理、搭配、3D 小人都能点。左边可以直接跳到任意页面，右边就是手机里的样子。</p>
+    <nav class="pnav" id="pnav"></nav>
+    <div class="note"><b>Demo 里这些是模拟的</b>
+      <ul><li>抠图结果、AI 识别、AI 试穿效果图</li><li>淘宝链接解析</li><li>3D 小人是简化造型，只验证交互</li></ul>
+      数据只存在你这个浏览器里。</div>
+  </aside>
+
+  <div class="phone" id="phone">
+    <div class="sbar" aria-hidden="true"><span>9:41</span><div class="island"></div>
+      <span class="ic"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg>
+      <svg width="26" height="12" viewBox="0 0 26 12"><rect x=".5" y=".5" width="22" height="11" rx="3.5" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="17" height="8" rx="2" fill="currentColor"/><rect x="24" y="4" width="1.6" height="4" rx=".8" fill="currentColor" opacity=".5"/></svg></span>
+    </div>
+    <div class="viewport">
+      <div id="screen" class="screen"></div>
+      <button id="fab" class="fab" hidden></button>
+      <div id="sheet" class="sheet" hidden></div>
+      <div id="toast" class="toast" hidden></div>
+    </div>
+    <nav id="tabbar" class="tabbar" aria-label="主导航"></nav>
+  </div>
+</div>
+
+<script>
+/* ---------- 小工具 ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Math.random().toString(36).slice(2, 9);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const clone = o => JSON.parse(JSON.stringify(o));
+const loadImg = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+
+const I = (() => {
+  const s = (d, extra = '') => `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${d}</svg>`;
+  return {
+    hanger: s('<path d="M12 6.5a2 2 0 1 1 2 2c-1 .3-2 1-2 2v1"/><path d="M12 11.5 3.4 17.6a1 1 0 0 0 .6 1.9h16a1 1 0 0 0 .6-1.9Z"/>'),
+    shirt: s('<path d="M8.5 3.5 3 6.5l2 4 2.2-1v11h9.6v-11l2.2 1 2-4-5.5-3a3.5 3.5 0 0 1-7 0Z"/>'),
+    person: s('<circle cx="12" cy="7" r="3.6"/><path d="M5 21c0-4 3.1-7 7-7s7 3 7 7"/>'),
+    smile: s('<circle cx="12" cy="12" r="9"/><path d="M8.6 14.5c1.9 2 4.9 2 6.8 0"/><path d="M9 9.5h.01M15 9.5h.01"/>'),
+    plus: s('<path d="M12 5v14M5 12h14"/>'),
+    search: s('<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/>'),
+    filter: s('<path d="M4 6h16M7 12h10M10 18h4"/>'),
+    back: s('<path d="m15 5-7 7 7 7"/>'),
+    camera: s('<path d="M4 8h3l2-3h6l2 3h3v11H4Z"/><circle cx="12" cy="13" r="3.5"/>'),
+    image: s('<rect x="4" y="5" width="16" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="m20 16-5-5-9 8"/>'),
+    link: s('<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'),
+    spark: s('<path d="m12 3 1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9Z"/><path d="M19 16v4M17 18h4"/>'),
+    edit: s('<path d="M4 20h4L19 9l-4-4L4 16Z"/>'),
+    trash: s('<path d="M5 7h14M10 7V4.5h4V7M7 7l1 13h8l1-13"/>'),
+    chev: s('<path d="m9 5 7 7-7 7"/>', 'width="18" height="18"'),
+    x: s('<path d="M6 6l12 12M18 6 6 18"/>'),
+    up: s('<path d="M12 19V6M6 11l6-6 6 6"/>', 'width="18" height="18"'),
+    down: s('<path d="M12 5v13M6 13l6 6 6-6"/>', 'width="18" height="18"'),
+    zin: s('<circle cx="11" cy="11" r="6.5"/><path d="M11 8v6M8 11h6M20 20l-4.2-4.2"/>', 'width="18" height="18"'),
+    zout: s('<circle cx="11" cy="11" r="6.5"/><path d="M8 11h6M20 20l-4.2-4.2"/>', 'width="18" height="18"'),
+    rotate: s('<path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4h-4"/>', 'width="15" height="15"'),
+    ruler: s('<path d="M3.5 16.5 16.5 3.5l4 4-13 13Z"/><path d="m7.5 12.5 2 2M10.5 9.5l2 2M13.5 6.5l2 2"/>'),
+    palette: s('<path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-1.3-1-1.6-1-2.8 0-1 .8-1.5 1.8-1.5H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3Z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/>'),
+    hash: s('<path d="M9.5 4 7.5 20M16.5 4l-2 16M4.5 9h15M3.5 15h15"/>'),
+    shield: s('<path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6Z"/>'),
+    pages: s('<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>'),
+    replay: s('<path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M4 4v4h4"/>'),
+    check: s('<path d="m5 12 5 5 9-10"/>', 'width="14" height="14" stroke-width="2.6"'),
+    cal: s('<rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M9 3v4M15 3v4"/>'),
+    dice: s('<rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1.2" fill="currentColor"/><circle cx="15" cy="15" r="1.2" fill="currentColor"/><circle cx="15" cy="9" r="1.2" fill="currentColor"/><circle cx="9" cy="15" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>', 'width="20" height="20"'),
+    lock: s('<rect x="6" y="11" width="12" height="9" rx="2"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/>', 'width="16" height="16"'),
+    unlock: s('<rect x="6" y="11" width="12" height="9" rx="2"/><path d="M8.5 11V8a3.5 3.5 0 0 1 6.8-1.2"/>', 'width="16" height="16"'),
+    heart: s('<path d="M12 20s-7-4.4-7-9.6A4 4 0 0 1 12 8a4 4 0 0 1 7 2.4C19 15.6 12 20 12 20Z"/>', 'width="18" height="18"'),
+    sun: s('<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/>'),
+    grid: s('<path d="M4 9h16M4 15h16M9 4v16M15 4v16"/>', 'width="18" height="18"'),
+  };
+})();
+
+/* ---------- 基础数据 ---------- */
+const CATS = {
+  top: { n: '上衣', subs: ['T恤', '衬衫', '卫衣', '针织', '外套'] },
+  bottom: { n: '下装', subs: ['牛仔裤', '半身裙', '短裤', '西裤'] },
+  shoes: { n: '鞋子', subs: ['运动鞋', '乐福鞋', '靴子'] },
+  acc: { n: '饰品', subs: ['包', '帽子', '耳饰'] },
+};
+const CAT_KEYS = ['top', 'bottom', 'shoes', 'acc'];
+const COLORS = [['白','#F5F4F1'],['黑','#2A2930'],['灰','#A3A1AA'],['米','#E9DEC8'],['卡其','#C9B48B'],['棕','#7C4E31'],['粉','#F5BFCD'],['红','#D8475F'],['橙','#F09A52'],['黄','#F3D46C'],['绿','#8DBE8B'],['蓝','#5A7DB3'],['浅蓝','#BCD3F0'],['紫','#A78BD6'],['藏青','#2F3B5E']];
+const colorHex = n => (COLORS.find(c => c[0] === n) || COLORS[0])[1];
+const SEASONS = ['春', '夏', '秋', '冬'];
+const OCCASIONS = ['通勤', '休闲', '约会', '运动', '旅行'];
+const SOURCES = ['拍照', '相册', '淘宝', '其他'];
+const SKINS = ['#FBE1D2', '#F3CDB3', '#E0AE88', '#BC8160', '#8C5A3E'];
+const HAIRS = [['short', '短发'], ['long', '长发'], ['pony', '马尾'], ['bun', '丸子头']];
+const HAIR_COLORS = ['#2B2220', '#5A3A2A', '#9C6B3E', '#D6B070', '#8F86A8'];
+const BODY_FIELDS = [['h','身高','cm',140,195],['w','体重','kg',35,110],['bust','胸围','cm',65,130],['waist','腰围','cm',50,120],['hip','臀围','cm',70,135]];
+
+/* ---------- 单品插画（Demo 用，正式版是真实抠图照片） ---------- */
+function shade(hex, amt) {
+  const n = parseInt(hex.slice(1), 16);
+  const f = v => clamp(v + amt, 0, 255);
+  return '#' + ((1 << 24) + (f(n >> 16) << 16) + (f((n >> 8) & 255) << 8) + f(n & 255)).toString(16).slice(1);
+}
+function lum(hex) { const n = parseInt(hex.slice(1), 16); return 0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255); }
+const strokeOf = c => lum(c) < 70 ? shade(c, 60) : shade(c, -52);
+const SW = 'stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"';
+const LS = 'M32 16 L42 12 Q50 19 58 12 L68 16 L84 28 L91 74 L81 76 L72 42 L72 88 L28 88 L28 42 L19 76 L9 74 L16 28 Z';
+const P = (d, c, s, extra = '') => `<path d="${d}" fill="${c}" stroke="${s}" ${SW} ${extra}/>`;
+const L = (d, s, extra = '') => `<path d="${d}" fill="none" stroke="${s}" ${SW} ${extra}/>`;
+const ART = {
+  'T恤': (c, d) => P('M30 18 L42 13 Q50 21 58 13 L70 18 L87 33 L78 43 L70 38 L70 87 L30 87 L30 38 L22 43 L13 33 Z', c, d) + L('M42 13 Q50 21 58 13', d) + L('M30 81 L70 81', d, 'opacity=".5"'),
+  '衬衫': (c, d) => P(LS, c, d) + P('M42 12 L50 26 L58 12 L55 9 L50 17 L45 9 Z', c, d) + L('M50 26 L50 88', d) + [36, 48, 60, 72].map(y => `<circle cx="53" cy="${y}" r="1.3" fill="${d}"/>`).join('') + L('M18 70 L10 68 M82 70 L90 68', d),
+  '卫衣': (c, d) => P(LS, c, d) + P('M40 13 Q50 3 60 13 Q50 21 40 13 Z', c, d) + L('M37 62 L63 62 L60 78 L40 78 Z', d) + L('M46 18 L45 30 M54 18 L55 30', d) + L('M28 83 L72 83 M18 71 L10 69 M82 71 L90 69', d),
+  '针织': (c, d) => P(LS, c, d) + L('M42 12 Q50 22 58 12', d) + L('M28 82 L72 82', d) + [32, 37, 42, 47, 52, 57, 62, 67].map(x => L(`M${x} 83 L${x} 87`, d, 'opacity=".6"')).join('') + L('M18 70 L10 68 M82 70 L90 68', d),
+  '外套': (c, d) => P('M31 15 L42 11 L50 30 L58 11 L69 15 L85 28 L92 80 L82 82 L73 42 L73 93 L27 93 L27 42 L18 82 L8 80 L15 28 Z', c, d) + P('M42 11 L45 42 L50 30 Z', shade(c, lum(c) < 70 ? 20 : -14), d) + P('M58 11 L55 42 L50 30 Z', shade(c, lum(c) < 70 ? 20 : -14), d) + L('M50 30 L50 93', d) + [52, 66].map(y => `<circle cx="54" cy="${y}" r="1.6" fill="${d}"/>`).join('') + L('M32 70 L42 70 M58 70 L68 70', d),
+  '牛仔裤': (c, d) => P('M30 10 L70 10 L75 92 L56 92 L50 34 L44 92 L25 92 Z', c, d) + L('M30 17 L70 17 M50 17 L50 34', d) + L('M34 17 Q36 27 45 27 M66 17 Q64 27 55 27', d) + L('M29 50 L28 88 M71 50 L72 88', d, 'stroke-dasharray="2 2.4" opacity=".7"'),
+  '半身裙': (c, d) => P('M34 20 L66 20 L84 84 L16 84 Z', c, d) + P('M34 12 L66 12 L66 20 L34 20 Z', c, d) + L('M42 20 L35 84 M50 20 L50 84 M58 20 L65 84', d, 'opacity=".75"'),
+  '短裤': (c, d) => P('M28 16 L72 16 L77 64 L55 64 L50 40 L45 64 L23 64 Z', c, d) + L('M28 23 L72 23 M50 23 L50 40', d),
+  '西裤': (c, d) => P('M32 10 L68 10 L71 92 L55 92 L50 32 L45 92 L29 92 Z', c, d) + L('M32 16 L68 16', d) + L('M38 22 L37 90 M62 22 L63 90', d, 'opacity=".45"'),
+  '运动鞋': (c, d) => P('M10 66 Q12 46 30 44 L42 46 Q54 50 64 56 L84 60 Q93 62 91 70 L91 72 L10 72 Z', c, d) + P('M8 72 L93 72 Q93 80 86 80 L14 80 Q8 80 8 72 Z', '#FFFFFF', shade('#FFFFFF', -60)) + L('M36 49 L42 55 M42 48 L48 55 M48 50 L54 57', d) + L('M10 60 L17 58', d),
+  '乐福鞋': (c, d) => P('M8 66 Q10 50 28 49 Q50 48 68 55 Q88 60 91 68 L91 72 L8 72 Z', c, d) + P('M7 72 L92 72 L92 77 L7 77 Z', d, d) + L('M46 52 Q56 60 66 55', d) + `<circle cx="56" cy="56" r="1.6" fill="${d}"/>`,
+  '靴子': (c, d) => P('M30 12 L52 12 L54 54 Q72 56 84 62 Q92 66 91 74 L28 74 Z', c, d) + P('M27 74 L92 74 L92 81 L27 81 Z', d, d) + L('M34 16 L34 70', d, 'stroke-dasharray="2 2.4" opacity=".8"') + L('M30 20 L52 20', d, 'opacity=".5"'),
+  '包': (c, d) => L('M36 40 Q36 14 50 14 Q64 14 64 40', d, 'stroke-width="3.2"') + P('M20 38 L80 38 L75 88 L25 88 Z', c, d) + L('M22 50 L78 50', d, 'opacity=".6"'),
+  '帽子': (c, d) => P('M20 62 Q20 26 50 26 Q80 26 80 62 Z', c, d) + L('M50 26 L50 62 M36 30 Q41 45 38 62 M64 30 Q59 45 62 62', d, 'opacity=".6"') + P('M58 61 Q86 56 95 66 Q82 72 58 67 Z', c, d) + `<circle cx="50" cy="26" r="3" fill="${d}"/>`,
+  '耳饰': (c, d) => L('M36 18 Q36 9 42 11 L42 32 M60 18 Q60 9 66 11 L66 32', '#C9A45C') + P('M42 33 m-11 11 a11 11 0 1 0 22 0 a11 11 0 1 0 -22 0', c, d) + P('M66 33 m-11 11 a11 11 0 1 0 22 0 a11 11 0 1 0 -22 0', c, d) + '<circle cx="38" cy="40" r="3" fill="#fff" opacity=".85"/><circle cx="62" cy="40" r="3" fill="#fff" opacity=".85"/>',
+};
+const artInner = (sub, color) => (ART[sub] || ART['T恤'])(color, strokeOf(color));
+function art(it) {
+  if (it.img) return `<img src="${it.img}" alt="${esc(it.name)}">`;
+  return `<svg viewBox="0 0 100 100" role="img" aria-label="${esc(it.name || it.sub)}">${artInner(it.sub, it.color || colorHex(it.colorName))}</svg>`;
+}
+
+/* ---------- 状态 ---------- */
+const KEY = 'yixiaoren-proto-v1';
+function seed() {
+  let t = Date.now() - 86400000 * 60;
+  const mk = (code, name, cat, sub, colorName, seasons, brand, price, worn, tags = []) =>
+    ({ id: uid(), code, no: +code.split('-')[1], name, cat, sub, colorName, color: colorHex(colorName), seasons, brand, price, source: '拍照', tags, note: '', img: null, worn, created: (t += 86400000) });
+  const items = [
+    mk('T-001', '基础白 T', 'top', 'T恤', '白', ['春', '夏'], 'UNIQLO', 79, 23, ['百搭']),
+    mk('T-002', '浅蓝牛津衬衫', 'top', '衬衫', '浅蓝', ['春', '秋'], '', 199, 9),
+    mk('T-003', '燕麦色连帽卫衣', 'top', '卫衣', '米', ['秋', '冬'], '', 259, 14, ['舒服']),
+    mk('T-004', '黑色西装外套', 'top', '外套', '黑', ['春', '秋'], '', 599, 6, ['通勤']),
+    mk('T-005', '樱粉针织开衫', 'top', '针织', '粉', ['春', '秋'], '', 229, 8),
+    mk('B-001', '直筒牛仔裤', 'bottom', '牛仔裤', '蓝', ['春', '秋', '冬'], "Levi's", 499, 31, ['百搭']),
+    mk('B-002', '藏青百褶半裙', 'bottom', '半身裙', '藏青', ['春', '秋'], '', 189, 7),
+    mk('B-003', '卡其短裤', 'bottom', '短裤', '卡其', ['夏'], '', 129, 5),
+    mk('B-004', '灰色垂感西裤', 'bottom', '西裤', '灰', ['春', '秋', '冬'], '', 329, 12, ['通勤']),
+    mk('S-001', '小白鞋', 'shoes', '运动鞋', '白', ['春', '夏', '秋'], '', 399, 40),
+    mk('S-002', '棕色乐福鞋', 'shoes', '乐福鞋', '棕', ['春', '秋'], '', 459, 11),
+    mk('S-003', '黑色短靴', 'shoes', '靴子', '黑', ['秋', '冬'], '', 689, 9),
+    mk('A-001', '帆布托特包', 'acc', '包', '米', ['春', '夏', '秋', '冬'], '', 99, 26),
+    mk('A-002', '粉色棒球帽', 'acc', '帽子', '粉', ['春', '夏'], '', 69, 6),
+    mk('A-003', '珍珠耳环', 'acc', '耳饰', '白', ['春', '夏', '秋', '冬'], '', 159, 10),
+  ];
+  const by = c => items.find(i => i.code === c).id;
+  const st = { items, plan: {}, outfits: [], body: { h: 163, w: 50, bust: 83, waist: 64, hip: 89 },
+    look: { skin: SKINS[0], hair: 'long', hairColor: HAIR_COLORS[0] },
+    rules: { top: { p: 'T', d: 3 }, bottom: { p: 'B', d: 3 }, shoes: { p: 'S', d: 3 }, acc: { p: 'A', d: 3 }, sep: '-' },
+    seq: { top: 5, bottom: 4, shoes: 3, acc: 3 }, onboarded: false };
+  const mkO = (name, occasion, codes) => { const o = { id: uid(), name, occasion, pieces: [] }; codes.forEach(c => o.pieces.push({ iid: by(c) })); tidy(o, items); return o; };
+  st.outfits = [
+    mkO('周一通勤', '通勤', ['T-001', 'T-004', 'B-004', 'S-002', 'A-001']),
+    mkO('周末出街', '休闲', ['T-003', 'B-001', 'S-001', 'A-002']),
+    mkO('约会穿搭', '约会', ['T-005', 'B-002', 'S-003', 'A-003']),
+  ];
+  return st;
+}
+let S;
+function loadState() {
+  try { const raw = localStorage.getItem(KEY); if (raw) S = JSON.parse(raw); } catch (e) {}
+  if (!S) S = seed();
+  S.plan = S.plan || {};
+  // 旧数据迁移：没有永久序号的单品，从编号末尾的数字取
+  S.items.forEach(i => { if (i.no == null) { const m = String(i.code).match(/(\d+)$/); i.no = m ? +m[1] : (S.seq[i.cat] = (S.seq[i.cat] || 0) + 1); } });
+  CAT_KEYS.forEach(k => S.seq[k] = Math.max(S.seq[k] || 0, ...S.items.filter(i => i.cat === k).map(i => i.no)));
+  syncCodes();
+}
+// 编号 = 规则前缀 + 永久序号。序号只增不减，删除的单品序号作废、不再复用
+const fmtCode = (cat, no, rules = S.rules) => rules[cat].p + rules.sep + String(no).padStart(rules[cat].d, '0');
+function syncCodes() { S.items.forEach(i => i.code = fmtCode(i.cat, i.no)); }
+// 排序 = 该大类里现存单品按序号排的位置，删除后自动往前补
+function rankOf(it) { const list = S.items.filter(i => i.cat === it.cat).sort((a, b) => a.no - b.no); return [list.indexOf(it) + 1, list.length]; }
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); }
+  catch (e) { toast('这个浏览器的存储空间满了，刚才的图片没能保存'); }
+}
+const itemById = id => S.items.find(i => i.id === id);
+const nextCode = cat => fmtCode(cat, (S.seq[cat] || 0) + 1);
+
+/* ---------- 搭配排版 ---------- */
+const SLOT = { top: { x: 50, y: 30, w: 52 }, bottom: { x: 50, y: 64, w: 44 }, shoes: { x: 50, y: 89, w: 30 }, acc: { x: 80, y: 17, w: 26 } };
+function placeFor(it, o, items) {
+  const find = id => (items || S.items).find(i => i.id === id);
+  const same = o.pieces.filter(q => q.iid !== it.id && find(q.iid)?.cat === it.cat).length;
+  const s = SLOT[it.cat];
+  let x = s.x, y = s.y;
+  if (it.cat === 'acc') y += same * 24;
+  else if (same) { x += same * 16; y += same * 3; }
+  const z = it.cat === 'acc' ? 40 + same : it.cat === 'top' ? 20 + same : it.cat === 'bottom' ? 10 + same : 30;
+  return { iid: it.id, x, y, w: s.w, z };
+}
+function tidy(o, items) {
+  const find = id => (items || S.items).find(i => i.id === id);
+  const src = o.pieces.slice(); o.pieces = [];
+  src.forEach(p => { const it = find(p.iid); if (it) o.pieces.push(placeFor(it, o, items)); });
+}
+const pieceHTML = (p, i, sel) => { const it = itemById(p.iid); if (!it) return ''; return `<div class="piece${sel === i ? ' sel' : ''}" data-pi="${i}" style="left:${p.x}%;top:${p.y}%;width:${p.w}%;z-index:${p.z}">${art(it)}</div>`; };
+const miniHTML = o => `<div class="mini">${o.pieces.map((p, i) => pieceHTML(p, i, -1)).join('')}</div>`;
+
+/* ---------- 路由 ---------- */
+const UI = { mode: 'real', F: { cat: 'all', q: '', colors: [], seasons: [] }, occ: '全部', dcat: 'top' };
+const ROOTS = ['wardrobe', 'outfits', 'today', 'avatar', 'me'];
+let NAV = [{ n: 'wardrobe', p: {} }];
+const cur = () => NAV[NAV.length - 1];
+function go(n, p = {}) { NAV.push({ n, p }); render(); }
+function back() { if (NAV.length > 1) NAV.pop(); render(); }
+function tabTo(n) { NAV = [{ n, p: {} }]; render(); }
+const rerender = () => render(true);
+function render(keep) {
+  const sc = $('#screen'), st = keep ? sc.scrollTop : 0, c = cur();
+  sc.innerHTML = SCREENS[c.n](c.p);
+  sc.scrollTop = st;
+  const root = ROOTS.includes(c.n) && NAV.length === 1;
+  $('#tabbar').hidden = !root;
+  document.querySelectorAll('#tabbar [data-tab]').forEach(b => { const on = b.dataset.tab === c.n; b.classList.toggle('on', on); on ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'); });
+  const fab = $('#fab');
+  if (c.n === 'wardrobe') { fab.hidden = false; fab.dataset.act = 'add'; fab.innerHTML = I.plus + '添加单品'; }
+  else if (c.n === 'outfits') { fab.hidden = false; fab.dataset.act = 'newOutfit'; fab.innerHTML = I.plus + '新建搭配'; }
+  else fab.hidden = true;
+  if (AFTER[c.n]) AFTER[c.n](c.p);
+  markNav();
+}
+
+/* ---------- 提示与抽屉 ---------- */
+let toastT;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 2200); }
+function openSheet(html) { const s = $('#sheet'); s.innerHTML = `<div class="sheet-bg" data-act="closeSheet"></div><div class="sheet-panel" role="dialog"><div class="grab"></div>${html}</div>`; s.hidden = false; }
+function setSheet(html) { const p = $('.sheet-panel'); if (p) p.innerHTML = `<div class="grab"></div>${html}`; }
+function closeSheet() { const s = $('#sheet'); s.hidden = true; s.innerHTML = ''; }
+
+/* ---------- 共用片段 ---------- */
+const hdr = (title, right = '<span class="sp"></span>', noBack) => `<div class="hdr">${noBack ? '<span class="sp"></span>' : `<button class="ibtn" data-act="back" aria-label="返回">${I.back}</button>`}<h2>${title}</h2>${right}</div>`;
+const seg = (act, opts, val) => `<div class="seg" role="tablist">${opts.map(([v, l]) => `<button role="tab" aria-selected="${v === val}" class="${v === val ? 'on' : ''}" data-act="${act}" data-v="${v}">${l}</button>`).join('')}</div>`;
+const bmiOf = b => b.w / ((b.h / 100) ** 2);
+const bmiText = b => `BMI ${bmiOf(b).toFixed(1)} · 只用来推算小人的胖瘦，不会给你打标签`;
+const slidersHTML = b => BODY_FIELDS.map(([k, l, u, mn, mx]) => `<div class="sl"><div class="sl-top"><label for="sl-${k}">${l}</label><span class="sl-v"><b id="sv-${k}">${b[k]}</b> ${u}</span></div><input type="range" id="sl-${k}" min="${mn}" max="${mx}" step="1" value="${b[k]}" data-inp="body" data-k="${k}"></div>`).join('') + `<div class="bmi" id="bmi">${bmiText(b)}</div>`;
+
+/* ---------- 页面 ---------- */
+const SCREENS = {}, AFTER = {}, ACT = {}, INP = {};
+
+function filtered() {
+  const F = UI.F, q = F.q.trim().toLowerCase();
+  return S.items.filter(i => (F.cat === 'all' || i.cat === F.cat)
+    && (!q || [i.code, i.name, i.brand, i.sub, ...(i.tags || [])].join(' ').toLowerCase().includes(q))
+    && (!F.colors.length || F.colors.includes(i.colorName))
+    && (!F.seasons.length || (i.seasons || []).some(s => F.seasons.includes(s))))
+    .sort((a, b) => CAT_KEYS.indexOf(a.cat) - CAT_KEYS.indexOf(b.cat) || a.no - b.no);
+}
+function gridHTML() {
+  const list = filtered();
+  if (!list.length) return `<div class="empty" style="grid-column:1/-1">没有符合条件的单品<br>换个关键词，或者清除筛选试试</div>`;
+  return list.map(i => `<button class="card" data-act="openItem" data-id="${i.id}"><div class="thumb">${art(i)}${i.worn ? `<span class="badge">穿 ${i.worn} 次</span>` : ''}</div><div class="meta"><span class="cl"><span class="code">${esc(i.code)}</span><span class="rank">${CATS[i.cat].n} #${rankOf(i)[0]}</span></span><span class="name">${esc(i.name)}</span></div></button>`).join('');
+}
+SCREENS.wardrobe = () => {
+  const cnt = k => k === 'all' ? S.items.length : S.items.filter(i => i.cat === k).length;
+  const nf = UI.F.colors.length + UI.F.seasons.length;
+  return `<div class="tblock"><div><div class="eyebrow">我的衣柜</div><h1 class="big"><span class="num">${S.items.length}</span> 件单品</h1></div>
+    <button class="ibtn" data-act="goRules" aria-label="编号规则">${I.hash}</button></div>
+  <div class="search">${I.search}<input id="q" type="search" placeholder="搜编号、名称、品牌、标签" value="${esc(UI.F.q)}" data-inp="q" aria-label="搜索单品">
+    <button class="${nf ? 'act' : ''}" data-act="filter">${I.filter}${nf ? `筛选 ${nf}` : '筛选'}</button></div>
+  <div class="chips">${[['all', '全部'], ...CAT_KEYS.map(k => [k, CATS[k].n])].map(([k, n]) => `<button class="chip${UI.F.cat === k ? ' on' : ''}" data-act="cat" data-v="${k}">${n}<span class="n">${cnt(k)}</span></button>`).join('')}</div>
+  <div class="grid" id="grid">${gridHTML()}</div><div style="height:70px"></div>`;
+};
+INP.q = el => { UI.F.q = el.value; $('#grid').innerHTML = gridHTML(); };
+ACT.cat = el => { UI.F.cat = el.dataset.v; rerender(); };
+ACT.openItem = el => go('item', { id: el.dataset.id });
+ACT.goRules = () => go('rules', {});
+
+function filterSheet() {
+  const used = [...new Set(S.items.map(i => i.colorName))];
+  return `<div class="sheet-title">筛选</div><div class="sheet-sub">可以多选，结果会立刻更新</div>
+  <div class="fl"><div class="lab">颜色</div><div class="chips wrapc">${COLORS.filter(c => used.includes(c[0])).map(([n, h]) => `<button class="chip${UI.F.colors.includes(n) ? ' on' : ''}" data-act="fcolor" data-v="${n}"><i class="sw" style="width:14px;height:14px;background:${h}"></i>${n}</button>`).join('')}</div></div>
+  <div class="fl" style="margin-top:16px"><div class="lab">季节</div><div class="chips wrapc">${SEASONS.map(s => `<button class="chip${UI.F.seasons.includes(s) ? ' on' : ''}" data-act="fseason" data-v="${s}">${s}</button>`).join('')}</div></div>
+  <div class="row" style="margin-top:22px"><button class="btn" data-act="fclear">清除筛选</button><button class="btn pri" data-act="closeSheet">看 ${filtered().length} 件</button></div>`;
+}
+const toggleIn = (arr, v) => { const i = arr.indexOf(v); i < 0 ? arr.push(v) : arr.splice(i, 1); };
+ACT.filter = () => openSheet(filterSheet());
+ACT.fcolor = el => { toggleIn(UI.F.colors, el.dataset.v); rerender(); setSheet(filterSheet()); };
+ACT.fseason = el => { toggleIn(UI.F.seasons, el.dataset.v); rerender(); setSheet(filterSheet()); };
+ACT.fclear = () => { UI.F.colors = []; UI.F.seasons = []; rerender(); closeSheet(); };
+ACT.closeSheet = closeSheet;
+
+/* 添加方式 */
+const addSheet = () => `<div class="sheet-title">添加单品</div><div class="sheet-sub">拍下来会自动抠图、识别类别和颜色，你确认一下就能入库</div>
+<div class="opts">
+  <label class="opt"><input type="file" accept="image/*" capture="environment" hidden data-file="拍照"><span class="oi">${I.camera}</span><span><b>拍照</b><small>把衣服平铺或挂起来，拍一张正面</small></span></label>
+  <label class="opt"><input type="file" accept="image/*" hidden data-file="相册"><span class="oi">${I.image}</span><span><b>从相册选</b><small>已经拍过的衣服照片、买家秀都可以</small></span></label>
+  <button class="opt" data-act="toTaobao"><span class="oi">${I.link}</span><span><b>淘宝链接 / 截图</b><small>在淘宝点「分享」复制链接，或者截个图</small></span></button>
+  <button class="opt" data-act="sampleCut"><span class="oi">${I.spark}</span><span><b>用示例照片体验</b><small>没有照片也能先走一遍流程</small></span></button>
+</div>`;
+ACT.add = () => openSheet(addSheet());
+ACT.toTaobao = () => { closeSheet(); go('taobao', {}); };
+ACT.sampleCut = async () => { closeSheet(); go('cutout', await makeSample()); };
+
+const SAMPLES = [{ cat: 'top', sub: '衬衫', colorName: '浅蓝' }, { cat: 'bottom', sub: '半身裙', colorName: '卡其' }, { cat: 'shoes', sub: '运动鞋', colorName: '白' }, { cat: 'top', sub: '针织', colorName: '紫' }];
+let sampleI = 0;
+async function makeSample() {
+  const s = SAMPLES[sampleI++ % SAMPLES.length], c = colorHex(s.colorName);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="600" height="600">${artInner(s.sub, c)}</svg>`;
+  const img = await loadImg('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg));
+  const cv = document.createElement('canvas'); cv.width = cv.height = 600; const x = cv.getContext('2d');
+  const gr = x.createLinearGradient(0, 0, 0, 600); gr.addColorStop(0, '#E6DCCF'); gr.addColorStop(1, '#C9B89F');
+  x.fillStyle = gr; x.fillRect(0, 0, 600, 600);
+  x.fillStyle = 'rgba(110,80,50,.10)'; for (let i = 18; i < 600; i += 46) x.fillRect(0, i, 600, 2);
+  x.fillStyle = 'rgba(60,40,20,.16)'; x.beginPath(); x.ellipse(316, 324, 230, 225, 0, 0, Math.PI * 2); x.fill();
+  x.drawImage(img, 40, 30, 520, 520);
+  const orig = cv.toDataURL('image/jpeg', 0.88);
+  const cv2 = document.createElement('canvas'); cv2.width = cv2.height = 600; cv2.getContext('2d').drawImage(img, 40, 30, 520, 520);
+  return { orig, cut: cv2.toDataURL('image/png'), source: '拍照', ai: { ...s, name: s.colorName + s.sub } };
+}
+function readImage(file) {
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => loadImg(fr.result).then(im => {
+      const s = Math.min(1, 720 / Math.max(im.width, im.height)), c = document.createElement('canvas');
+      c.width = Math.round(im.width * s); c.height = Math.round(im.height * s);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', 0.85));
+    }, rej);
+    fr.onerror = rej; fr.readAsDataURL(file);
+  });
+}
+async function guessAI(url) {
+  const im = await loadImg(url), c = document.createElement('canvas'); c.width = c.height = 24;
+  const x = c.getContext('2d'); x.drawImage(im, 0, 0, 24, 24);
+  const d = x.getImageData(6, 6, 12, 12).data; let r = 0, g = 0, b = 0, n = 0;
+  for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; n++; }
+  r /= n; g /= n; b /= n;
+  let best = COLORS[0], bd = 1e9;
+  COLORS.forEach(cl => { const v = parseInt(cl[1].slice(1), 16), dd = (r - (v >> 16)) ** 2 + (g - ((v >> 8) & 255)) ** 2 + (b - (v & 255)) ** 2; if (dd < bd) { bd = dd; best = cl; } });
+  return { cat: 'top', sub: 'T恤', colorName: best[0], name: best[0] + '色上衣', guess: true };
+}
+document.addEventListener('change', async e => {
+  const el = e.target;
+  if (!el.dataset || !el.dataset.file || !el.files || !el.files[0]) return;
+  const src = el.dataset.file; closeSheet();
+  try {
+    const url = await readImage(el.files[0]);
+    const ai = await guessAI(url);
+    go('cutout', { orig: url, cut: url, source: src === '截图' ? '淘宝' : src, ai, upload: true });
+  } catch (err) { toast('这张图片读不出来，换一张试试'); }
+});
+
+/* 淘宝导入 */
+SCREENS.taobao = p => {
+  p.state = p.state || 'idle';
+  const res = p.state === 'done' ? `<div class="sec"><div class="aibox">${I.spark}<span>识别成功（Demo 模拟结果）。正式版会读取商品标题、主图、价格和规格。</span></div>
+    <div style="display:flex;gap:12px;align-items:center"><div class="thumb" style="width:92px;flex:none">${art({ sub: '衬衫', colorName: '米', color: colorHex('米'), name: '示例商品' })}</div>
+    <div class="meta" style="padding:0"><span class="name" style="white-space:normal">法式方领泡泡袖衬衫</span><span class="sub">示例女装店 · 米白 / M 码</span><span style="font-family:var(--f-display);font-size:20px;font-weight:600">¥159</span></div></div>
+    <button class="btn pri block" data-act="tbAdd">加入衣柜</button></div>` : '';
+  return hdr('从淘宝导入') + `
+  <div class="sec"><h3>粘贴商品链接</h3>
+    <textarea class="inp" id="tbLink" placeholder="在淘宝商品页点「分享」→「复制链接」，粘贴到这里" aria-label="淘宝商品链接">${esc(p.link || '')}</textarea>
+    ${p.err ? `<div class="err">${p.err}</div>` : ''}
+    <button class="btn pri block" data-act="tbParse" ${p.state === 'loading' ? 'disabled' : ''}>${p.state === 'loading' ? '<span class="spin"></span>正在识别…' : '识别商品'}</button></div>
+  ${res}
+  <div class="sec"><h3>或者上传商品截图</h3><p class="sub" style="margin:0;line-height:1.6">截一张商品主图或详情页，AI 会识别衣服并自动抠图</p>
+    <label class="btn block" style="cursor:pointer"><input type="file" accept="image/*" hidden data-file="截图">${I.image}选择截图</label></div>
+  <div class="tip" style="margin-top:12px">正式版的做法：在淘宝 App 里点「分享」，直接选「衣小人」就能导入，不用来回复制。</div>`;
+};
+ACT.tbParse = () => {
+  const p = cur().p; p.link = $('#tbLink').value.trim();
+  if (!p.link) { p.err = '先粘贴一个商品链接，或者在下面上传截图'; return rerender(); }
+  p.err = ''; p.state = 'loading'; rerender();
+  setTimeout(() => { if (cur().p !== p) return; p.state = 'done'; rerender(); }, 1200);
+};
+ACT.tbAdd = () => go('itemForm', { d: newDraft({ cat: 'top', sub: '衬衫', colorName: '米', name: '法式方领泡泡袖衬衫' }, { price: '159', source: '淘宝', note: '从淘宝链接导入 · 示例女装店', seasons: ['春', '夏'] }) });
+
+/* 抠图确认 */
+SCREENS.cutout = p => {
+  p.tool = p.tool || 'erase'; p.view = p.view || 'cut'; p.brush = p.brush || 18;
+  return hdr('确认抠图') + `
+  ${seg('cutView', [['orig', '原图'], ['cut', '抠图结果']], p.view)}
+  <div class="cutstage checker" style="margin-top:12px">
+    <canvas id="cutcv" ${p.view === 'orig' ? 'hidden' : ''} aria-label="抠图结果，可用手指擦除或恢复"></canvas>
+    <img id="cutorig" src="${p.orig}" alt="原图" ${p.view === 'cut' ? 'hidden' : ''}>
+    <div class="scan" id="scan" ${p.processed ? 'hidden' : ''}><span>正在去除背景…</span></div>
+  </div>
+  ${p.upload ? '<div class="tip" style="margin-top:12px">Demo 还没接入真实抠图，你上传的照片会原样保留。可以先用下面的橡皮擦手动擦掉背景，正式版会自动完成。</div>' : ''}
+  <div class="sec"><div class="lab">边缘不满意？用手指涂抹修正</div>
+    ${seg('cutTool', [['erase', '擦除'], ['restore', '恢复']], p.tool)}
+    <div class="sl"><div class="sl-top"><label for="brush">笔刷大小</label><span class="sl-v"><b id="brushv">${p.brush}</b></span></div><input type="range" id="brush" min="6" max="48" value="${p.brush}" data-inp="brush"></div>
+  </div>
+  <button class="btn pri block" style="margin-top:16px" data-act="cutNext">下一步：填写信息</button>`;
+};
+AFTER.cutout = p => {
+  const cv = $('#cutcv'), ctx = cv.getContext('2d');
+  Promise.all([loadImg(p.orig), loadImg(p.cut)]).then(([o, c]) => {
+    p._o = o; cv.width = c.naturalWidth; cv.height = c.naturalHeight;
+    if (p._data) ctx.putImageData(p._data, 0, 0); else ctx.drawImage(c, 0, 0);
+    if (!p.processed) setTimeout(() => { p.processed = true; const s = $('#scan'); if (s) s.hidden = true; }, 1400);
+  });
+  let last = null;
+  const pt = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * cv.width / r.width, (e.clientY - r.top) * cv.height / r.height]; };
+  const dab = ([x, y]) => {
+    const rad = p.brush * cv.width / 300;
+    ctx.save(); ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2);
+    if (p.tool === 'erase') { ctx.globalCompositeOperation = 'destination-out'; ctx.fill(); }
+    else if (p._o) { ctx.clip(); ctx.drawImage(p._o, 0, 0, cv.width, cv.height); }
+    ctx.restore();
+  };
+  const stroke = e => { const q = pt(e); if (last) { const n = Math.ceil(Math.hypot(q[0] - last[0], q[1] - last[1]) / 4); for (let i = 1; i <= n; i++) dab([last[0] + (q[0] - last[0]) * i / n, last[1] + (q[1] - last[1]) * i / n]); } else dab(q); last = q; };
+  cv.addEventListener('pointerdown', e => { if (!p.processed) return; cv.setPointerCapture(e.pointerId); last = null; stroke(e); });
+  cv.addEventListener('pointermove', e => { if (last) stroke(e); });
+  const end = () => { if (last) p._data = ctx.getImageData(0, 0, cv.width, cv.height); last = null; };
+  cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+};
+ACT.cutView = el => { const p = cur().p; p.view = el.dataset.v; $('#cutcv').hidden = p.view !== 'cut'; $('#cutorig').hidden = p.view !== 'orig'; el.parentNode.querySelectorAll('button').forEach(b => { b.classList.toggle('on', b === el); b.setAttribute('aria-selected', b === el); }); };
+ACT.cutTool = el => { const p = cur().p; p.tool = el.dataset.v; el.parentNode.querySelectorAll('button').forEach(b => { b.classList.toggle('on', b === el); b.setAttribute('aria-selected', b === el); }); };
+INP.brush = el => { cur().p.brush = +el.value; $('#brushv').textContent = el.value; };
+ACT.cutNext = () => {
+  const p = cur().p, cv = $('#cutcv');
+  if (!p.processed) return toast('还在抠图，稍等一下');
+  const s = Math.min(1, 480 / Math.max(cv.width, cv.height)), o = document.createElement('canvas');
+  o.width = Math.round(cv.width * s); o.height = Math.round(cv.height * s); o.getContext('2d').drawImage(cv, 0, 0, o.width, o.height);
+  go('itemForm', { d: newDraft(p.ai, { img: o.toDataURL('image/png'), source: p.source }) });
+};
+
+/* 单品信息 */
+function newDraft(ai = {}, extra = {}) {
+  const cat = ai.cat || 'top';
+  return { cat, sub: ai.sub || CATS[cat].subs[0], name: ai.name || '', colorName: ai.colorName || '白',
+    seasons: [], brand: '', price: '', source: '拍照', tags: [], note: '', img: null, ai: ai.sub ? ai : null, ...extra };
+}
+SCREENS.itemForm = p => {
+  const d = p.d, r = S.rules[d.cat];
+  const preview = art({ ...d, color: colorHex(d.colorName), name: d.name || d.sub });
+  return hdr(p.editId ? '编辑单品' : '单品信息', `<button class="tbtn" data-act="saveItem">${p.editId ? '保存' : '入库'}</button>`) + `
+  <div style="display:flex;gap:14px;align-items:center;margin-top:4px">
+    <div class="thumb checker" style="width:112px;flex:none;border-radius:20px">${preview}</div>
+    ${d.ai ? `<div class="aibox" style="flex:1">${I.spark}<span>AI 识别${d.ai.guess ? '（Demo 按主色估算）' : '（模拟）'}：<b>${CATS[d.ai.cat].n} · ${d.ai.sub} · ${d.ai.colorName}</b><br>已帮你填好，不对的直接改</span></div>`
+      : `<div class="tip" style="flex:1">${d.img ? '' : '没有照片的单品会用插画占位，之后可以补拍。'}</div>`}
+  </div>
+  <div class="sec">
+    <div class="fl"><label class="lab" for="f-name">名称</label><input class="inp" id="f-name" data-bind="name" value="${esc(d.name)}" placeholder="比如：${esc(d.colorName + d.sub)}"></div>
+    <div class="fl"><div class="lab">类别</div>${seg('fcat', CAT_KEYS.map(k => [k, CATS[k].n]), d.cat)}
+      <div class="chips wrapc">${CATS[d.cat].subs.map(s => `<button class="chip${d.sub === s ? ' on' : ''}" data-act="fsub" data-v="${s}">${s}</button>`).join('')}</div></div>
+    <div class="fl"><div class="lab"><span>编号</span><button data-act="goRules">规则：${esc(r.p)}${esc(S.rules.sep)}${'0'.repeat(r.d - 1)}1 · 修改</button></div>
+      ${codeBox(p)}</div>
+  </div>
+  <div class="sec">
+    <div class="fl"><div class="lab">颜色 · ${d.colorName}</div><div class="sws">${COLORS.map(([n, h]) => `<button class="sw${d.colorName === n ? ' on' : ''}" style="background:${h}" data-act="fcolor2" data-v="${n}" aria-label="${n}" title="${n}"></button>`).join('')}</div></div>
+    <div class="fl"><div class="lab">适合季节</div><div class="chips wrapc">${SEASONS.map(s => `<button class="chip${d.seasons.includes(s) ? ' on' : ''}" data-act="fseason2" data-v="${s}">${s}</button>`).join('')}</div></div>
+  </div>
+  <div class="sec">
+    <div class="two"><div class="fl"><label class="lab" for="f-brand">品牌</label><input class="inp" id="f-brand" data-bind="brand" value="${esc(d.brand)}" placeholder="选填"></div>
+      <div class="fl"><label class="lab" for="f-price">价格（元）</label><input class="inp" id="f-price" type="number" inputmode="decimal" data-bind="price" value="${esc(d.price)}" placeholder="选填"></div></div>
+    <div class="fl"><div class="lab">来源</div><div class="chips wrapc">${SOURCES.map(s => `<button class="chip${d.source === s ? ' on' : ''}" data-act="fsource" data-v="${s}">${s}</button>`).join('')}</div></div>
+    <div class="fl"><label class="lab" for="f-tag">标签</label><div id="tagbox"><div class="tagin" id="tagin">${tagInner(d)}</div><div class="tagdd" id="tagdd" hidden></div></div></div>
+    <div class="fl"><label class="lab" for="f-note">备注</label><textarea class="inp" id="f-note" data-bind="note" placeholder="尺码、洗涤方式、搭配心得…">${esc(d.note)}</textarea></div>
+  </div>
+  <button class="btn pri block" style="margin-top:16px" data-act="saveItem">${p.editId ? '保存修改' : '放进衣柜'}</button>`;
+};
+const TAG_PRESETS = ['通勤', '百搭', '显瘦', '舒服', '约会', '度假', '正式', '运动', '复古', '基础款'];
+function tagPool() { const m = new Map(); TAG_PRESETS.forEach(t => m.set(t, 0)); S.items.forEach(i => (i.tags || []).forEach(t => m.set(t, (m.get(t) || 0) + 1))); return [...m].sort((a, b) => b[1] - a[1]); }
+const splitTags = str => String(str).split(/[,，、]+/).map(t => t.trim().slice(0, 12)).filter(Boolean);
+const tagInner = d => d.tags.map((t, i) => `<span class="tag">${esc(t)}<button type="button" data-act="tagDel" data-i="${i}" aria-label="删除标签 ${esc(t)}">${I.x.replace('width="22" height="22"', 'width="13" height="13"')}</button></span>`).join('')
+  + `<input id="f-tag" data-inp="tag" placeholder="${d.tags.length ? '继续添加' : '选一个，或输入新标签'}" autocomplete="off" enterkeyhint="done" aria-label="添加标签">`;
+function tagDD(d, q) {
+  q = q.trim();
+  const pool = tagPool().filter(([t]) => !d.tags.includes(t) && (!q || t.toLowerCase().includes(q.toLowerCase())));
+  const exists = pool.some(([t]) => t === q) || d.tags.includes(q);
+  let h = q && !exists ? `<button type="button" class="new" data-act="tagAdd" data-v="${esc(q)}">＋ 新建标签「${esc(q)}」<small>回车</small></button>` : '';
+  h += pool.map(([t, n]) => `<button type="button" data-act="tagAdd" data-v="${esc(t)}">${esc(t)}<small>${n ? n + ' 件在用' : '常用'}</small></button>`).join('');
+  return h || '<div class="none">常用标签都选上了，输入文字可以新建</div>';
+}
+function showTagDD(show) { const dd = $('#tagdd'), inp = $('#f-tag'); if (!dd || !inp) return; dd.hidden = !show; if (show) dd.innerHTML = tagDD(cur().p.d, inp.value); }
+function refreshTags() { $('#tagin').innerHTML = tagInner(cur().p.d); $('#f-tag').focus(); showTagDD(true); }
+function addTags(str) { const d = cur().p.d; splitTags(str).forEach(t => { if (!d.tags.includes(t)) d.tags.push(t); }); refreshTags(); }
+ACT.tagAdd = el => addTags(el.dataset.v);
+ACT.tagDel = el => { cur().p.d.tags.splice(+el.dataset.i, 1); refreshTags(); };
+INP.tag = el => { if (/[,，、]/.test(el.value)) addTags(el.value); else showTagDD(true); };
+AFTER.itemForm = () => {
+  const box = $('#tagbox');
+  box.addEventListener('pointerdown', e => { if (e.target.closest('button')) e.preventDefault(); });
+  box.addEventListener('click', e => { if (e.target.id === 'tagin') $('#f-tag').focus(); });
+  box.addEventListener('focusin', () => showTagDD(true));
+  box.addEventListener('focusout', () => setTimeout(() => { if (!box.contains(document.activeElement)) showTagDD(false); }, 120));
+  box.addEventListener('keydown', e => {
+    if (e.target.id !== 'f-tag' || e.isComposing || e.keyCode === 229) return;
+    if (e.key === 'Enter') { e.preventDefault(); if (e.target.value.trim()) addTags(e.target.value); }
+    else if (e.key === 'Backspace' && !e.target.value) { const d = cur().p.d; if (d.tags.length) { d.tags.pop(); refreshTags(); } }
+  });
+};
+function codeBox(p) {
+  const d = p.d, it = p.editId && itemById(p.editId), n = S.items.filter(i => i.cat === d.cat).length;
+  if (it && it.cat === d.cat) { const [k, t] = rankOf(it); return `<div class="codebox"><span class="code">${esc(it.code)}</span><span class="rk">${CATS[d.cat].n}第 ${k} 件 / 共 ${t} 件</span></div><div class="sub">编号自动生成，入库后不会变</div>`; }
+  const code = nextCode(d.cat);
+  return `<div class="codebox"><span class="code">${esc(code)}</span><span class="rk">将是${CATS[d.cat].n}第 ${n + 1} 件</span></div><div class="sub">${it ? `改了类别，保存后换成新编号，原编号 ${esc(it.code)} 作废` : '保存时自动分配，不能修改'}</div>`;
+}
+ACT.fcat = el => { const d = cur().p.d, v = el.dataset.v; if (d.cat === v) return; d.cat = v; d.sub = CATS[v].subs[0]; rerender(); };
+ACT.fsub = el => { cur().p.d.sub = el.dataset.v; rerender(); };
+ACT.fcolor2 = el => { cur().p.d.colorName = el.dataset.v; rerender(); };
+ACT.fseason2 = el => { toggleIn(cur().p.d.seasons, el.dataset.v); rerender(); };
+ACT.fsource = el => { cur().p.d.source = el.dataset.v; rerender(); };
+ACT.saveItem = () => {
+  const p = cur().p, d = p.d, old = p.editId && itemById(p.editId);
+  const pend = $('#f-tag') && $('#f-tag').value.trim(); if (pend) splitTags(pend).forEach(t => { if (!d.tags.includes(t)) d.tags.push(t); });
+  const no = old && old.cat === d.cat ? old.no : (S.seq[d.cat] = (S.seq[d.cat] || 0) + 1), code = fmtCode(d.cat, no);
+  const data = { code, no, name: String(d.name || '').trim() || d.colorName + d.sub, cat: d.cat, sub: d.sub, colorName: d.colorName, color: colorHex(d.colorName),
+    seasons: d.seasons.slice(), brand: String(d.brand || '').trim(), price: d.price === '' || d.price == null ? null : Number(d.price), source: d.source,
+    tags: d.tags.slice(), note: d.note || '', img: d.img };
+  let id = p.editId;
+  if (id) Object.assign(itemById(id), data);
+  else { id = uid(); S.items.push({ id, worn: 0, created: Date.now(), ...data }); }
+  save();
+  toast(p.editId ? '修改已保存' : `已放进衣柜，编号 ${code}`);
+  NAV = [{ n: 'wardrobe', p: {} }, { n: 'item', p: { id } }]; render();
+};
+
+/* 单品详情 */
+SCREENS.item = p => {
+  const it = itemById(p.id);
+  if (!it) return hdr('单品') + '<div class="empty">这件单品已经删除了</div>';
+  const inO = S.outfits.filter(o => o.pieces.some(q => q.iid === it.id));
+  return hdr('', `<button class="ibtn" data-act="editItem" aria-label="编辑">${I.edit}</button>`) + `
+  <div class="hero-thumb ${it.img ? 'checker' : ''}">${art(it)}</div>
+  <div class="sec"><h3>出现在 ${inO.length} 套搭配里</h3>
+    ${inO.length ? `<div class="hscroll">${inO.map(o => `<button style="width:110px;flex:none;text-align:left" data-act="openOutfit" data-id="${o.id}">${miniHTML(o)}<div class="name" style="font-size:13px;margin-top:6px">${esc(o.name)}</div></button>`).join('')}</div>` : '<div class="sub">还没有搭配用到它</div>'}</div>
+  <div class="bigcode">${esc(it.code)}</div><div class="ititle">${esc(it.name)}</div>
+  <div class="row"><button class="btn soft" data-act="worn">今天穿了 · 第 ${it.worn + 1} 次</button><button class="btn" data-act="newOutfitWith">${I.plus}用它搭一套</button></div>
+  <div class="sec"><div class="kv">
+    <div><span>编号</span><b>${esc(it.code)} <span class="sub">· 永久不变</span></b></div>
+    <div><span>排序</span><b>${CATS[it.cat].n}第 ${rankOf(it)[0]} 件 / 共 ${rankOf(it)[1]} 件</b></div>
+    <div><span>类别</span><b>${CATS[it.cat].n} · ${it.sub}</b></div>
+    <div><span>颜色</span><b><i class="sw" style="display:inline-block;width:12px;height:12px;vertical-align:-1px;background:${it.color};margin-right:6px"></i>${it.colorName}</b></div>
+    <div><span>季节</span><b>${(it.seasons || []).join(' / ') || '—'}</b></div>
+    <div><span>品牌</span><b>${esc(it.brand) || '—'}</b></div>
+    <div><span>价格</span><b>${it.price != null ? '¥' + it.price : '—'}</b></div>
+    <div><span>来源</span><b>${esc(it.source)}</b></div>
+    <div><span>穿着</span><b>${it.worn} 次${it.price && it.worn ? ` · 每次 ¥${(it.price / it.worn).toFixed(1)}` : ''}</b></div>
+    ${it.tags && it.tags.length ? `<div><span>标签</span><b>${it.tags.map(esc).join('、')}</b></div>` : ''}
+    ${it.note ? `<div><span>备注</span><b>${esc(it.note)}</b></div>` : ''}
+  </div></div>
+  <button class="btn danger block" style="margin-top:16px" data-act="delItem">${I.trash}删除这件单品</button>`;
+};
+ACT.worn = () => { const it = itemById(cur().p.id); it.worn++; save(); rerender(); toast(`记下了，「${it.name}」穿了 ${it.worn} 次`); };
+ACT.editItem = () => { const it = itemById(cur().p.id); go('itemForm', { editId: it.id, d: { ...clone(it), tags: [...(it.tags || [])], price: it.price ?? '', ai: null } }); };
+ACT.delItem = () => {
+  const it = itemById(cur().p.id), n = S.outfits.filter(o => o.pieces.some(q => q.iid === it.id)).length;
+  openSheet(`<div class="sheet-title">删除「${esc(it.name)}」？</div><div class="sheet-sub">${n ? `它也会从 ${n} 套搭配里移除。` : ''}编号 ${esc(it.code)} 会作废，之后的新衣服不会再用它；其余${CATS[it.cat].n}的排序会自动往前补。删除后不能恢复。</div><div class="row"><button class="btn" data-act="closeSheet">取消</button><button class="btn pri" style="background:var(--danger)" data-act="delItemYes">删除</button></div>`);
+};
+ACT.delItemYes = () => {
+  const id = cur().p.id; S.items = S.items.filter(i => i.id !== id);
+  S.outfits.forEach(o => o.pieces = o.pieces.filter(q => q.iid !== id)); save(); closeSheet(); toast('已删除'); tabTo('wardrobe');
+};
+ACT.newOutfitWith = () => { const it = itemById(cur().p.id); const d = { name: '', occasion: '休闲', pieces: [] }; d.pieces.push(placeFor(it, d)); UI.dcat = it.cat === 'top' ? 'bottom' : 'top'; go('outfitEdit', { d, sel: -1 }); };
+
+/* 编号规则 */
+SCREENS.rules = p => {
+  p.r = p.r || clone(S.rules);
+  const r = p.r, sample = k => r[k].p + r.sep + '1'.padStart(r[k].d, '0');
+  return hdr('编号规则', '<button class="tbtn" data-act="saveRules">保存</button>') + `
+  <p class="sub" style="line-height:1.6;margin:4px 0 0">每件衣服入库时自动分配一个序号，只增不减，删掉的衣服序号也不会给新衣服用。这里只改显示格式，改完所有单品的编号会一起更新，序号本身不变。</p>
+  <div class="sec"><div class="fl"><div class="lab">分隔符</div>${seg('rsep', [['-', 'T-001'], ['', 'T001'], ['_', 'T_001'], ['.', 'T.001']], r.sep)}</div></div>
+  ${CAT_KEYS.map(k => `<div class="sec"><div style="display:flex;justify-content:space-between;align-items:center"><h3>${CATS[k].n}</h3><span class="code" id="pv-${k}" style="font-size:15px">${esc(sample(k))}</span></div>
+    <div class="two"><div class="fl"><label class="lab" for="rp-${k}">前缀</label><input class="inp mono" id="rp-${k}" maxlength="4" value="${esc(r[k].p)}" data-inp="rp" data-k="${k}" autocomplete="off"></div>
+    <div class="fl"><div class="lab">序号位数</div>${seg('rdig', [['2', '2 位'], ['3', '3 位'], ['4', '4 位']].map(([v, l]) => [k + ':' + v, l]), k + ':' + r[k].d)}</div></div></div>`).join('')}
+  <div class="sec"><h3>两种编号的区别</h3><div class="kv">
+    <div><span>编号</span><b>T-007：永久唯一，删掉 T-003 之后，下一件还是 T-008</b></div>
+    <div><span>排序</span><b>上衣第 5 件：按现存衣服重新数，删掉一件后面的自动往前补</b></div></div></div>`;
+};
+INP.rp = el => { const p = cur().p, k = el.dataset.k; el.value = el.value.toUpperCase().replace(/\s/g, ''); p.r[k].p = el.value; $('#pv-' + k).textContent = p.r[k].p + p.r.sep + '1'.padStart(p.r[k].d, '0'); };
+ACT.rsep = el => { cur().p.r.sep = el.dataset.v; rerender(); };
+ACT.rdig = el => { const [k, v] = el.dataset.v.split(':'); cur().p.r[k].d = +v; rerender(); };
+function rulesValid(r) {
+  const ps = CAT_KEYS.map(k => r[k].p);
+  if (ps.some(x => !x)) return '每个大类都需要一个前缀';
+  if (new Set(ps).size !== ps.length) return '四个大类的前缀不能重复';
+  return '';
+}
+ACT.saveRules = () => { const p = cur().p, e = rulesValid(p.r); if (e) return toast(e); S.rules = clone(p.r); syncCodes(); save(); toast('已保存，所有编号已按新格式显示'); back(); };
+/* 搭配列表 */
+SCREENS.outfits = () => {
+  const list = S.outfits.filter(o => UI.occ === '全部' || o.occasion === UI.occ);
+  return `<div class="tblock"><div><div class="eyebrow">搭配</div><h1 class="big"><span class="num">${S.outfits.length}</span> 套搭配</h1></div></div>
+  <div class="chips">${['全部', ...OCCASIONS].map(o => `<button class="chip${UI.occ === o ? ' on' : ''}" data-act="occ" data-v="${o}">${o}</button>`).join('')}</div>
+  ${list.length ? `<div class="grid">${list.map(o => `<button class="card" data-act="openOutfit" data-id="${o.id}">${miniHTML(o)}<div class="meta"><span class="name">${esc(o.name)}</span><span class="sub">${o.occasion} · ${o.pieces.length} 件</span></div></button>`).join('')}</div>`
+    : `<div class="empty">这个场合还没有搭配<br>点右下角新建一套</div>`}<div style="height:70px"></div>`;
+};
+ACT.occ = el => { UI.occ = el.dataset.v; rerender(); };
+ACT.openOutfit = el => { const o = S.outfits.find(x => x.id === el.dataset.id); if (o) go('outfitEdit', { d: clone(o), sel: -1 }); };
+ACT.newOutfit = () => go('outfitEdit', { d: { name: '', occasion: UI.occ === '全部' ? '休闲' : UI.occ, pieces: [] }, sel: -1 });
+
+/* 搭配画布 */
+const stageInner = p => p.d.pieces.length ? p.d.pieces.map((q, i) => pieceHTML(q, i, p.sel)).join('') : '<div class="stage-empty">从下方挑选单品放进来<br>拖动调整位置</div>';
+const toolsInner = p => p.sel < 0 || !p.d.pieces[p.sel] ? '<span class="hint">点画布里的单品，可以缩放、调整上下层</span>'
+  : [['minus', I.zout, '缩小'], ['plus', I.zin, '放大'], ['up', I.up, '上移一层'], ['down', I.down, '下移一层'], ['del', I.x, '移出搭配']].map(([op, ic, l]) => `<button class="ibtn" data-act="pz" data-op="${op}" aria-label="${l}" title="${l}">${ic}</button>`).join('');
+const drawerInner = p => {
+  const ids = new Set(p.d.pieces.map(q => q.iid)), list = S.items.filter(i => i.cat === UI.dcat);
+  return `${seg('dcat', CAT_KEYS.map(k => [k, CATS[k].n]), UI.dcat)}<div class="ditems" style="margin-top:12px">${list.map(i => `<button class="ditem${ids.has(i.id) ? ' on' : ''}" data-act="padd" data-id="${i.id}" aria-pressed="${ids.has(i.id)}"><div class="thumb">${art(i)}${ids.has(i.id) ? `<span class="ck">${I.check}</span>` : ''}</div><span class="code">${esc(i.code)}</span></button>`).join('') || '<div class="sub">这个分类还没有单品</div>'}</div>`;
+};
+SCREENS.outfitEdit = p => {
+  const d = p.d;
+  return hdr(d.id ? '编辑搭配' : '新建搭配', '<button class="tbtn" data-act="saveOutfit">保存</button>') + `
+  <div class="stage" id="stage">${stageInner(p)}</div>
+  <div class="tools" id="tools">${toolsInner(p)}</div>
+  <div class="row" style="margin-top:10px"><button class="btn sm" data-act="tidy">${I.grid}一键摆好</button><button class="btn sm soft" data-act="tryon">${I.spark}AI 试穿</button></div>
+  <div class="sec drawer" id="drawer">${drawerInner(p)}</div>
+  <div class="sec"><div class="fl"><label class="lab" for="o-name">名称</label><input class="inp" id="o-name" data-inp="oname" value="${esc(d.name)}" placeholder="比如：周五看展"></div>
+    <div class="fl"><div class="lab">场合</div><div class="chips wrapc">${OCCASIONS.map(o => `<button class="chip${d.occasion === o ? ' on' : ''}" data-act="focc" data-v="${o}">${o}</button>`).join('')}</div></div></div>
+  ${d.id ? `<button class="btn danger block" style="margin-top:16px" data-act="delOutfit">${I.trash}删除这套搭配</button>` : ''}`;
+};
+function refreshStage(p) { $('#stage').innerHTML = stageInner(p); $('#tools').innerHTML = toolsInner(p); $('#drawer').innerHTML = drawerInner(p); }
+AFTER.outfitEdit = p => {
+  const stage = $('#stage');
+  stage.addEventListener('pointerdown', e => {
+    const el = e.target.closest('.piece');
+    if (!el) { if (p.sel !== -1) { p.sel = -1; stage.querySelectorAll('.piece').forEach(x => x.classList.remove('sel')); $('#tools').innerHTML = toolsInner(p); } return; }
+    const i = +el.dataset.pi, pc = p.d.pieces[i], r = stage.getBoundingClientRect(), sx = e.clientX, sy = e.clientY, ox = pc.x, oy = pc.y;
+    p.sel = i; stage.querySelectorAll('.piece').forEach(x => x.classList.toggle('sel', x === el)); $('#tools').innerHTML = toolsInner(p);
+    el.setPointerCapture(e.pointerId);
+    const mv = ev => { pc.x = clamp(ox + (ev.clientX - sx) / r.width * 100, 0, 100); pc.y = clamp(oy + (ev.clientY - sy) / r.height * 100, 0, 100); el.style.left = pc.x + '%'; el.style.top = pc.y + '%'; };
+    const up = () => { el.removeEventListener('pointermove', mv); el.removeEventListener('pointerup', up); el.removeEventListener('pointercancel', up); };
+    el.addEventListener('pointermove', mv); el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+  });
+};
+INP.oname = el => { cur().p.d.name = el.value; };
+ACT.dcat = el => { UI.dcat = el.dataset.v; $('#drawer').innerHTML = drawerInner(cur().p); };
+ACT.padd = el => {
+  const p = cur().p, id = el.dataset.id, i = p.d.pieces.findIndex(q => q.iid === id);
+  if (i >= 0) { p.d.pieces.splice(i, 1); p.sel = -1; } else { p.d.pieces.push(placeFor(itemById(id), p.d)); p.sel = p.d.pieces.length - 1; }
+  refreshStage(p);
+};
+ACT.pz = el => {
+  const p = cur().p, pc = p.d.pieces[p.sel]; if (!pc) return;
+  const op = el.dataset.op;
+  if (op === 'plus') pc.w = clamp(pc.w * 1.12, 10, 95);
+  if (op === 'minus') pc.w = clamp(pc.w / 1.12, 10, 95);
+  if (op === 'up') pc.z = Math.max(...p.d.pieces.map(q => q.z)) + 1;
+  if (op === 'down') pc.z = Math.min(...p.d.pieces.map(q => q.z)) - 1;
+  if (op === 'del') { p.d.pieces.splice(p.sel, 1); p.sel = -1; }
+  refreshStage(p);
+};
+ACT.tidy = () => { const p = cur().p; tidy(p.d); p.sel = -1; refreshStage(p); };
+ACT.focc = el => { cur().p.d.occasion = el.dataset.v; rerender(); };
+ACT.tryon = () => { const p = cur().p; if (!p.d.pieces.length) return toast('先放几件单品进画布'); go('tryon', { pieces: clone(p.d.pieces) }); };
+ACT.saveOutfit = () => {
+  const d = cur().p.d; if (!d.pieces.length) return toast('搭配里还没有单品');
+  d.name = d.name.trim() || `搭配 ${S.outfits.length + 1}`;
+  if (d.id) { const i = S.outfits.findIndex(o => o.id === d.id); S.outfits[i] = clone(d); } else { d.id = uid(); S.outfits.unshift(clone(d)); }
+  save(); toast(`「${d.name}」已保存`); tabTo('outfits');
+};
+ACT.delOutfit = () => openSheet(`<div class="sheet-title">删除这套搭配？</div><div class="sheet-sub">衣柜里的单品不会受影响。</div><div class="row"><button class="btn" data-act="closeSheet">取消</button><button class="btn pri" style="background:var(--danger)" data-act="delOutfitYes">删除</button></div>`);
+ACT.delOutfitYes = () => { const id = cur().p.d.id; S.outfits = S.outfits.filter(o => o.id !== id); save(); closeSheet(); toast('已删除'); tabTo('outfits'); };
+
+/* AI 试穿（Demo：用 2D 插画示意生成结果） */
+let gidN = 0;
+function figureSVG(pieces, mode, body, look, opt = {}) {
+  const Q = mode === 'q', cx = 100;
+  const its = pieces.map(p => ({ p, it: itemById(p.iid) })).filter(x => x.it).sort((a, b) => a.p.z - b.p.z);
+  const bmi = bmiOf(body);
+  const wf = clamp(0.5 * (body.hip / 89) + 0.2 * (body.bust / 83) + 0.3 * Math.pow(bmi / 18.8, 0.7), 0.8, 1.5);
+  const wwf = clamp(body.waist / 64, 0.8, 1.6);
+  const hs = Q ? 1 : clamp(body.h / 163, 0.9, 1.12);
+  const G = Q ? { hy: 118, hr: 58, sh: 172, wa: 222, hi: 250, le: 352, sw: 31, lx: 15, arm: 80, lw: 26, aw: 18 }
+    : { hy: 388 - 334 * hs, hr: 21, sh: 388 - 302 * hs, wa: 388 - 238 * hs, hi: 388 - 198 * hs, le: 388, sw: 30, lx: 12, arm: 124 * hs, lw: 17, aw: 11 };
+  const Sh = G.sw * wf, Wa = G.sw * 0.74 * wf * Math.sqrt(wwf), Hp = G.sw * 0.98 * wf;
+  const skin = look.skin, hc = look.hairColor, R = G.hr;
+  const nest = (it, x, y, w, h, flip) => {
+    const inner = it.img ? `<image href="${it.img}" x="0" y="0" width="100" height="100" preserveAspectRatio="xMidYMid meet"/>` : artInner(it.sub, it.color);
+    const sv = `<svg x="${flip ? 0 : x}" y="${flip ? 0 : y}" width="${w}" height="${h}" viewBox="0 0 100 100" preserveAspectRatio="none" overflow="visible">${inner}</svg>`;
+    return flip ? `<g transform="translate(${x + w} ${y}) scale(-1 1)">${sv}</g>` : sv;
+  };
+  const gid = 'fg' + (++gidN);
+  const BG = [['#FDE4EE', '#F1ECFF'], ['#E2F4EB', '#F7F1E4'], ['#E4EDFB', '#FCEFF4']][(opt.bg || 0) % 3];
+  let s = '';
+  if (opt.bg !== false) s += `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${BG[0]}"/><stop offset="1" stop-color="${BG[1]}"/></linearGradient></defs><rect width="200" height="420" fill="url(#${gid})"/><ellipse cx="100" cy="${G.le + 8}" rx="${Q ? 62 : 50}" ry="8" fill="#3a2a40" opacity=".08"/>`;
+  if (look.hair === 'long') s += `<path d="M${cx - R * 1.05} ${G.hy} Q${cx - R * 1.2} ${G.hy + R * (Q ? 1.15 : 2.9)} ${cx} ${G.hy + R * (Q ? 1.25 : 3)} Q${cx + R * 1.2} ${G.hy + R * (Q ? 1.15 : 2.9)} ${cx + R * 1.05} ${G.hy} Z" fill="${hc}"/>`;
+  if (look.hair === 'pony') s += `<ellipse cx="${cx + R * 0.98}" cy="${G.hy + R * 0.25}" rx="${R * 0.32}" ry="${R * (Q ? 0.75 : 1.35)}" fill="${hc}"/>`;
+  [-1, 1].forEach(g => { s += `<path d="M${cx + g * (Sh - 2)} ${G.sh + 6} L${cx + g * (Sh + (Q ? 10 : 8))} ${G.sh + G.arm}" stroke="${skin}" stroke-width="${G.aw * Math.sqrt(wf)}" stroke-linecap="round"/>`; });
+  [-1, 1].forEach(g => { s += `<path d="M${cx + g * Hp * 0.5} ${G.hi - 10} L${cx + g * G.lx * wf} ${G.le - 6}" stroke="${skin}" stroke-width="${G.lw * Math.sqrt(wf)}" stroke-linecap="round"/>`; });
+  const torso = `M${cx - Sh} ${G.sh} Q${cx - Sh} ${G.sh - 8} ${cx - 8} ${G.sh - 8} L${cx + 8} ${G.sh - 8} Q${cx + Sh} ${G.sh - 8} ${cx + Sh} ${G.sh} Q${cx + Wa + 3} ${(G.sh + G.wa) / 2} ${cx + Wa} ${G.wa} Q${cx + Hp + 2} ${(G.wa + G.hi) / 2} ${cx + Hp} ${G.hi} L${cx - Hp} ${G.hi} Q${cx - Hp - 2} ${(G.wa + G.hi) / 2} ${cx - Wa} ${G.wa} Q${cx - Wa - 3} ${(G.sh + G.wa) / 2} ${cx - Sh} ${G.sh} Z`;
+  const has = c => its.some(x => x.it.cat === c);
+  s += `<path d="${torso}" fill="${has('top') ? skin : '#E9E3F1'}"/>`;
+  if (!has('bottom')) s += `<path d="M${cx - Hp} ${G.wa + 8} L${cx + Hp} ${G.wa + 8} L${cx + Hp + 2} ${G.hi + 16} L${cx + 2} ${G.hi + 16} L${cx} ${G.hi} L${cx - 2} ${G.hi + 16} L${cx - Hp - 2} ${G.hi + 16} Z" fill="#6B6480"/>`;
+  s += `<rect x="${cx - R * 0.32}" y="${G.hy + R * 0.7}" width="${R * 0.64}" height="${G.sh - G.hy - R * 0.7}" fill="${skin}"/>`;
+  const RATIO = { 'T恤': .40, '衬衫': .44, '卫衣': .44, '针织': .44, '外套': .46 };
+  its.filter(x => x.it.cat === 'bottom').forEach(({ it }) => {
+    const hipW = 2 * Hp, low = G.wa + (G.hi - G.wa) * 0.2;
+    if (it.sub === '半身裙') { const w = 2 * Wa / 0.32 * 1.05, h = Q ? 118 : 190; s += nest(it, cx - w / 2, G.wa - 0.12 * h, w, h); }
+    else if (it.sub === '短裤') { const w = hipW / 0.44, h = Q ? 100 : 160; s += nest(it, cx - w / 2, low - 0.16 * h, w, h); }
+    else { const ratio = it.sub === '西裤' ? .36 : .40, w = hipW / ratio * 1.02, h = (G.le - low + 4) / 0.84; s += nest(it, cx - w / 2, low - 0.10 * h, w, h); }
+  });
+  its.filter(x => x.it.cat === 'top').forEach(({ it }) => {
+    const long = it.sub === '外套', w = 2 * Sh / (RATIO[it.sub] || .44) * 0.86, h = ((G.hi - G.sh) + (long ? (Q ? 26 : 44) : (Q ? 8 : 14))) / 0.76;
+    s += nest(it, cx - w / 2, G.sh - 0.15 * h, w, h);
+  });
+  its.filter(x => x.it.cat === 'shoes').slice(-1).forEach(({ it }) => {
+    const z = Q ? 46 : 40, y = G.le - z * 0.7;
+    s += nest(it, cx - G.lx * wf - z * 0.72, y, z, z, true) + nest(it, cx + G.lx * wf - z * 0.28, y, z, z);
+  });
+  its.filter(x => x.it.sub === '包').forEach(({ it }) => { const z = Q ? 56 : 52; s += nest(it, cx + Sh + (Q ? 0 : -2), G.sh + G.arm - z * 0.4, z, z); });
+  if (look.hair === 'bun') s += `<circle cx="${cx}" cy="${G.hy - R * 1.08}" r="${R * 0.42}" fill="${hc}"/>`;
+  s += `<ellipse cx="${cx}" cy="${G.hy}" rx="${R}" ry="${R * 1.05}" fill="${skin}"/>`;
+  if (Q) {
+    [-1, 1].forEach(g => { const ex = cx + g * R * 0.38, ey = G.hy + R * 0.15; s += `<ellipse cx="${ex}" cy="${ey}" rx="6.5" ry="8.5" fill="#2B2230"/><circle cx="${ex + 2.2}" cy="${ey - 3}" r="2.4" fill="#fff"/><ellipse cx="${cx + g * R * 0.62}" cy="${G.hy + R * 0.42}" rx="8" ry="5" fill="#FF8FB0" opacity=".5"/>`; });
+    s += `<path d="M${cx - 5} ${G.hy + R * 0.45} Q${cx} ${G.hy + R * 0.56} ${cx + 5} ${G.hy + R * 0.45}" fill="none" stroke="#7A3D52" stroke-width="2" stroke-linecap="round"/>`;
+  } else {
+    [-1, 1].forEach(g => { s += `<circle cx="${cx + g * 7}" cy="${G.hy + 3}" r="1.7" fill="#2B2230"/>`; });
+    s += `<path d="M${cx - 3} ${G.hy + 11} Q${cx} ${G.hy + 13} ${cx + 3} ${G.hy + 11}" fill="none" stroke="#9A5A62" stroke-width="1.2" stroke-linecap="round"/>`;
+  }
+  const H = R * 1.06;
+  s += `<path d="M${cx - H} ${G.hy + H * 0.2} A${H} ${H * 1.08} 0 1 1 ${cx + H} ${G.hy + H * 0.2} L${cx + H * 0.9} ${G.hy - H * 0.05} Q${cx + H * 0.3} ${G.hy - H * 0.6} ${cx - H * 0.2} ${G.hy - H * 0.35} Q${cx - H * 0.6} ${G.hy - H * 0.15} ${cx - H * 0.9} ${G.hy + H * 0.05} Z" fill="${hc}"/>`;
+  its.filter(x => x.it.sub === '帽子').forEach(({ it }) => { const w = (Q ? 1.95 : 2.25) * R / 0.6; s += nest(it, cx - w / 2, (G.hy - R * 0.2) - 0.62 * w, w, w); });
+  its.filter(x => x.it.sub === '耳饰').forEach(({ it }) => { [-1, 1].forEach(g => { s += `<circle cx="${cx + g * R * 0.98}" cy="${G.hy + R * 0.42}" r="${R * 0.12}" fill="${it.color}" stroke="${strokeOf(it.color)}" stroke-width=".8"/>`; }); });
+  if (opt.mark) s += `<text x="100" y="410" text-anchor="middle" font-size="8" fill="#6d6078" font-family="PingFang SC, sans-serif">AI 效果图示意 · 正式版由生图模型生成</text>`;
+  return `<svg viewBox="${opt.vb || '0 0 200 420'}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${Q ? 'Q版' : '等比'}形象">${s}</svg>`;
+}
+SCREENS.tryon = p => {
+  p.mode = p.mode || UI.mode; p.done = p.done || {}; p.bg = p.bg || 0;
+  const its = p.pieces.map(q => itemById(q.iid)).filter(Boolean);
+  let body;
+  if (p.state === 'gen') body = `<div class="sec"><h3>正在生成${p.mode === 'q' ? ' Q 版' : '等比'}效果图</h3><ul class="steps">${['读取 ' + its.length + ' 件单品的照片', '套用你的身材数据', '生成上身效果图'].map((t, i) => `<li class="${i < p.step ? 'ok' : i === p.step ? 'on' : ''}">${i < p.step ? `<span class="dotc" style="background:var(--mint)">${I.check}</span>` : i === p.step ? '<span class="spin"></span>' : '<span class="dotc"></span>'}${t}</li>`).join('')}</ul></div>`;
+  else if (p.done[p.mode]) body = `<div class="result" style="margin-top:12px">${figureSVG(p.pieces, p.mode, S.body, S.look, { bg: p.bg, mark: true })}</div>
+    <div class="row" style="margin-top:12px"><button class="btn" data-act="tgen">${I.replay}重新生成</button><button class="btn pri" data-act="tsave">保存到相册</button></div>`;
+  else body = `<div class="sec"><h3>用这 ${its.length} 件单品生成效果图</h3><div class="hscroll">${its.map(i => `<div class="thumb" style="width:64px;flex:none">${art(i)}</div>`).join('')}</div>
+    <p class="sub" style="margin:0;line-height:1.6">会结合你的身材数据和${p.mode === 'q' ? ' Q 版形象' : '等比形象'}，生成一张穿上身的样子。</p>
+    <button class="btn pri block" data-act="tgen">${I.spark}生成效果图</button>
+    <div class="sub" style="text-align:center">Demo 不消耗额度 · 正式版每次生成约 1 次额度</div></div>`;
+  return hdr('AI 试穿') + seg('tmode', [['real', '等比的我'], ['q', 'Q 版的我']], p.mode) + body;
+};
+ACT.tmode = el => { cur().p.mode = el.dataset.v; rerender(); };
+ACT.tgen = () => {
+  const p = cur().p; p.state = 'gen'; p.step = 0; rerender();
+  const tick = () => { if (cur().p !== p) return; p.step++; if (p.step >= 3) { p.state = 'done'; p.done[p.mode] = true; p.bg = (p.bg + 1) % 3; } else setTimeout(tick, 700); rerender(); };
+  setTimeout(tick, 700);
+};
+ACT.tsave = () => toast('Demo：正式版会把效果图存进手机相册');
+
+/* ---------- 今天 & 本周排期（抽卡目前是纯随机） ---------- */
+const WD = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const parseYmd = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const todayStr = () => ymd(new Date());
+const addDays = (s, n) => { const d = parseYmd(s); d.setDate(d.getDate() + n); return ymd(d); };
+const weekStart = s => { const d = parseYmd(s); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return ymd(d); };
+const md = s => { const d = parseYmd(s); return `${d.getMonth() + 1}月${d.getDate()}日`; };
+const wdOf = s => WD[parseYmd(s).getDay()];
+const pick = a => a[Math.floor(Math.random() * a.length)];
+// 每个大类随机抽一件；饰品有 40% 概率不戴；锁定的单品保持不变
+function drawIds(prev = [], locks = []) {
+  const ids = [];
+  CAT_KEYS.forEach(cat => {
+    const pool = S.items.filter(i => i.cat === cat); if (!pool.length) return;
+    const locked = locks.map(itemById).find(i => i && i.cat === cat);
+    if (locked) return ids.push(locked.id);
+    if (cat === 'acc' && Math.random() < 0.4) return;
+    const old = prev.map(itemById).find(i => i && i.cat === cat);
+    ids.push(pick(pool.length > 1 && old ? pool.filter(i => i.id !== old.id) : pool).id);
+  });
+  return ids;
+}
+function planOf(date, create) {
+  let e = S.plan[date];
+  if (e) { e.ids = e.ids.filter(itemById); e.locks = (e.locks || []).filter(id => e.ids.includes(id)); }
+  if (!e && create) { e = S.plan[date] = { ids: drawIds(), locks: [], done: false }; save(); }
+  return e;
+}
+const piecesOf = ids => { const o = { pieces: ids.map(iid => ({ iid })) }; tidy(o); return o.pieces; };
+const curPlan = () => planOf(cur().p.sel || todayStr(), true);
+const counted = d => d <= todayStr();   // 今天和过去的日子，定下后才计入穿着次数
+function setIds(e, date, ids) {
+  if (e.done && counted(date)) { e.ids.forEach(id => { const i = itemById(id); if (i) i.worn = Math.max(0, i.worn - 1); }); ids.forEach(id => itemById(id).worn++); }
+  e.ids = ids; save();
+}
+
+SCREENS.today = p => {
+  const t = todayStr(), date = p.sel || t, isToday = date === t, past = date < t;
+  const e = planOf(date, !past), ws = weekStart(t);
+  const strip = `<div class="weekstrip">${[0, 1, 2, 3, 4, 5, 6].map(n => {
+    const d = addDays(ws, n), pe = planOf(d, false), first = pe && pe.ids.length && itemById(pe.ids[0]);
+    return `<button class="wd${d === date ? ' on' : ''}" data-act="openDay" data-d="${d}" aria-pressed="${d === date}" aria-label="${md(d)}${pe && pe.done ? ' 已定' : ''}">${d === t ? '今天' : wdOf(d).slice(1)}<b>${parseYmd(d).getDate()}</b><span class="th">${first ? art(first) : ''}</span>${pe && pe.done ? `<i class="ok">${I.check}</i>` : ''}</button>`;
+  }).join('')}</div>`;
+  const head = `<div class="tblock"><div><div class="eyebrow">${isToday ? '今天' : past ? '已经过去' : '提前安排'} · ${wdOf(date)}</div><h1 class="big">${md(date)}</h1></div><button class="ibtn" data-act="goWeek" aria-label="穿搭排期">${I.cal}</button></div>` + strip;
+  if (!e) return head + `<div class="empty">这天没有记录穿搭<br><button class="btn soft" style="margin-top:12px" data-act="makeDay">补记这天穿了什么</button></div>`;
+  if (!e.ids.length) return head + '<div class="empty">衣柜里还没有衣服<br>先去添加几件吧</div>';
+  const its = e.ids.map(itemById), hasAcc = its.some(i => i.cat === 'acc') || !S.items.some(i => i.cat === 'acc');
+  const okText = isToday ? '就穿这套' : past ? '那天穿的就是这套' : '定下这套';
+  return head + `
+  <div class="drawcard" id="drawcard" style="margin-top:14px">
+    <div class="fig">${figureSVG(piecesOf(e.ids), UI.mode, S.body, S.look, { bg: 0, vb: '10 12 180 400' })}<button class="figmode" data-act="figmode">${UI.mode === 'q' ? 'Q 版' : '等比'} ⇄</button></div>
+    <div class="dlist">${its.map(i => `<button class="ditm" data-act="swapItem" data-id="${i.id}" aria-label="换掉 ${esc(i.name)}"><div class="thumb">${art(i)}</div><div class="meta"><span class="code">${esc(i.code)}</span><span class="name">${esc(i.name)}</span></div><span class="lk">${I.chev}</span></button>`).join('')}
+      ${hasAcc ? '' : `<button class="ditm add" data-act="swapItem" data-id="">＋ 加一件饰品</button>`}
+      <div class="sub" style="font-size:11.5px;line-height:1.5">点单品可以单独换</div></div>
+  </div>
+  <div class="row" style="margin-top:12px"><button class="btn soft" data-act="redraw">${I.dice}随机换一套</button>
+    ${e.done ? `<div class="btn done" role="status">${I.check}已定下</div>` : `<button class="btn pri" data-act="confirmDay">${I.check}${okText}</button>`}</div>
+  <button class="linkbtn" data-act="pickOutfit">从我的搭配里选一套</button>`;
+};
+ACT.figmode = () => { UI.mode = UI.mode === 'q' ? 'real' : 'q'; rerender(); };
+ACT.goWeek = () => go('week', {});
+ACT.openDay = el => { const d = el.dataset.d; if (cur().n === 'today') { cur().p.sel = d; return rerender(); } NAV = [{ n: 'today', p: { sel: d } }]; render(); };
+ACT.makeDay = () => { curPlan(); rerender(); };
+ACT.redraw = () => { const d = cur().p.sel || todayStr(), e = curPlan(); setIds(e, d, drawIds(e.ids)); rerender(); const c = $('#drawcard'); if (c) c.classList.add('flipin'); };
+ACT.confirmDay = () => { const d = cur().p.sel || todayStr(), e = curPlan(); e.done = true; if (counted(d)) e.ids.forEach(id => itemById(id).worn++); save(); rerender(); toast(d === todayStr() ? '好，今天就穿这套' : counted(d) ? '记下了' : `${md(d)} 就穿这套`); };
+ACT.swapItem = el => {
+  const from = el.dataset.id, it = from && itemById(from), cat = it ? it.cat : 'acc', ids = curPlan().ids;
+  const list = S.items.filter(i => i.cat === cat);
+  openSheet(`<div class="sheet-title">${it ? `换一件${CATS[cat].n}` : '加一件饰品'}</div><div class="sheet-sub">${it ? `现在是「${esc(it.name)}」` : '选一件戴上'}</div>
+    <div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:0">${list.map(i => `<button class="card${i.id === from ? ' cur' : ''}" data-act="swapTo" data-from="${from}" data-to="${i.id}" ${ids.includes(i.id) && i.id !== from ? 'disabled' : ''}><div class="thumb">${art(i)}</div><div class="meta"><span class="code">${esc(i.code)}</span><span class="name" style="font-size:12.5px">${esc(i.name)}</span></div></button>`).join('')}</div>
+    ${cat === 'acc' && it ? `<button class="btn block" style="margin-top:14px" data-act="swapTo" data-from="${from}" data-to="">今天不戴饰品</button>` : ''}`);
+};
+ACT.swapTo = el => {
+  const d = cur().p.sel || todayStr(), e = curPlan(), from = el.dataset.from, to = el.dataset.to;
+  let ids = from ? e.ids.map(x => x === from ? to : x).filter(Boolean) : [...e.ids, to];
+  ids = ids.sort((a, b) => CAT_KEYS.indexOf(itemById(a).cat) - CAT_KEYS.indexOf(itemById(b).cat));
+  setIds(e, d, ids); closeSheet(); rerender();
+};
+ACT.pickOutfit = () => {
+  if (!S.outfits.length) return toast('还没有保存的搭配');
+  openSheet(`<div class="sheet-title">从我的搭配里选</div><div class="sheet-sub">选中后会替换这天的穿搭</div>
+    <div class="grid" style="margin-top:0">${S.outfits.map(o => `<button class="card" data-act="useOutfit" data-id="${o.id}">${miniHTML(o)}<div class="meta"><span class="name">${esc(o.name)}</span><span class="sub">${o.occasion} · ${o.pieces.length} 件</span></div></button>`).join('')}</div>`);
+};
+ACT.useOutfit = el => {
+  const d = cur().p.sel || todayStr(), e = curPlan(), o = S.outfits.find(x => x.id === el.dataset.id);
+  const ids = o.pieces.map(q => q.iid).filter(itemById).sort((a, b) => CAT_KEYS.indexOf(itemById(a).cat) - CAT_KEYS.indexOf(itemById(b).cat));
+  setIds(e, d, ids); closeSheet(); rerender(); toast(`换成了「${o.name}」`);
+};
+
+SCREENS.week = p => {
+  p.off = p.off || 0;
+  const t = todayStr(), ws = addDays(weekStart(t), p.off * 7), days = [0, 1, 2, 3, 4, 5, 6].map(n => addDays(ws, n));
+  const label = { '-1': '上周', '0': '本周', '1': '下周' }[p.off] || (p.off < 0 ? `${-p.off} 周前` : `${p.off} 周后`);
+  const rows = days.map(d => {
+    const past = d < t, e = planOf(d, false), its = e ? e.ids.map(itemById) : [];
+    return `<div class="dayrow${d === t ? ' today' : ''}"><button class="dmain" data-act="openDay" data-d="${d}"><span class="dl"><b>${d === t ? '今天' : wdOf(d)}</b><span>${d.slice(5).replace('-', '/')}</span></span>
+      <span class="dth">${its.length ? its.map(i => `<span class="thumb">${art(i)}</span>`).join('') : `<span class="sub">${past ? '没有记录' : '还没排'}</span>`}</span>${e && e.done ? `<span class="st">${I.check}已定</span>` : ''}</button>
+      ${!past && !(e && e.done) ? `<button class="ibtn" data-act="rerollDay" data-d="${d}" aria-label="重新摇${wdOf(d)}">${I.dice}</button>` : ''}</div>`;
+  }).join('');
+  const open = days.some(d => d >= t);
+  return hdr('穿搭排期') + `<div class="weeknav"><button class="ibtn" data-act="wk" data-v="-1" aria-label="上一周">${I.back}</button><div><b>${label}</b><span>${md(days[0])} – ${md(days[6])}</span></div><button class="ibtn" data-act="wk" data-v="1" aria-label="下一周">${I.chev}</button></div>
+  ${open ? `<div class="row" style="margin-top:12px"><button class="btn sm" data-act="fillWeek">把空着的排满</button><button class="btn sm soft" data-act="rerollWeek">${I.dice}全部重新摇</button></div>` : ''}
+  <div class="days">${rows}</div>
+  <p class="sub" style="line-height:1.6;margin-top:14px">现在是纯随机排的。点某一天可以单独换单品或整套；已经定下的日子不会被重新摇。</p>`;
+};
+const openDays = () => { const p = cur().p, t = todayStr(), ws = addDays(weekStart(t), (p.off || 0) * 7); return [0, 1, 2, 3, 4, 5, 6].map(n => addDays(ws, n)).filter(d => d >= t); };
+ACT.wk = el => { cur().p.off = (cur().p.off || 0) + +el.dataset.v; rerender(); };
+ACT.rerollDay = el => { const d = el.dataset.d, had = !!S.plan[d], e = planOf(d, true); if (had) e.ids = drawIds(e.ids, e.locks); save(); rerender(); };
+ACT.fillWeek = () => { let n = 0; openDays().forEach(d => { if (!S.plan[d]) { planOf(d, true); n++; } }); save(); rerender(); toast(n ? `排好了 ${n} 天` : '这周已经都排好了'); };
+ACT.rerollWeek = () => { let n = 0; openDays().forEach(d => { const e = planOf(d, true); if (!e.done) { e.ids = drawIds(e.ids, e.locks); n++; } }); save(); rerender(); toast(`重新摇了 ${n} 天`); };
+
+/* ---------- 3D 小人 ---------- */
+const T3 = { r: null, scene: null, cam: null, grp: null, drag: null, auto: true, raf: 0, w: 0, h: 0, mode: 'real' };
+const BASE_TOP = '#EAE4F2', BASE_BOT = '#6B6480', BASE_SHOE = '#F4F2F7';
+function t3init() {
+  if (T3.r) return true;
+  if (!window.THREE) return false;
+  try {
+    const r = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    r.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(28, 1, 0.01, 50);
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xcfc6dc, 0.95));
+    const dl = new THREE.DirectionalLight(0xffffff, 0.75); dl.position.set(1.5, 3, 2.5); scene.add(dl);
+    const fl = new THREE.DirectionalLight(0xffe6f0, 0.3); fl.position.set(-2, 1, -1.5); scene.add(fl);
+    const sh = new THREE.Mesh(new THREE.CircleGeometry(0.34, 40), new THREE.MeshBasicMaterial({ color: 0x3a2a40, transparent: true, opacity: 0.1 }));
+    sh.rotation.x = -Math.PI / 2; sh.position.y = 0.002; scene.add(sh);
+    const grp = new THREE.Group(); scene.add(grp);
+    const el = r.domElement;
+    el.addEventListener('pointerdown', e => { T3.drag = { x: e.clientX }; T3.auto = false; el.setPointerCapture(e.pointerId); });
+    el.addEventListener('pointermove', e => { if (!T3.drag) return; grp.rotation.y += (e.clientX - T3.drag.x) * 0.012; T3.drag.x = e.clientX; });
+    const end = () => T3.drag = null; el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+    Object.assign(T3, { r, scene, cam, grp });
+    return true;
+  } catch (e) { return false; }
+}
+function t3mount(host, body, look, mode) {
+  if (!host) return;
+  if (!t3init()) { host.insertAdjacentHTML('beforeend', '<div class="t3fail">3D 组件没加载出来，检查一下网络后刷新页面</div>'); return; }
+  host.prepend(T3.r.domElement); T3.w = T3.h = 0; T3.auto = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  T3.grp.rotation.y = -0.35;
+  t3build(body, look, mode);
+  if (!T3.raf) t3loop();
+}
+function t3loop() {
+  T3.raf = requestAnimationFrame(t3loop);
+  const el = T3.r.domElement;
+  if (!el.isConnected) { cancelAnimationFrame(T3.raf); T3.raf = 0; return; }
+  const host = el.parentNode, w = host.clientWidth, h = host.clientHeight;
+  if (w && h && (w !== T3.w || h !== T3.h)) { T3.w = w; T3.h = h; T3.r.setSize(w, h, false); T3.cam.aspect = w / h; T3.cam.updateProjectionMatrix(); }
+  if (T3.auto && !T3.drag) T3.grp.rotation.y += 0.005;
+  T3.r.render(T3.scene, T3.cam);
+}
+let t3pending = null;
+function t3rebuildSoon(body, look, mode) { if (t3pending) { t3pending = [body, look, mode]; return; } t3pending = [body, look, mode]; requestAnimationFrame(() => { const a = t3pending; t3pending = null; t3build(...a); }); }
+const mat = c => new THREE.MeshStandardMaterial({ color: c, roughness: 0.85, metalness: 0 });
+const vmat = () => new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85, metalness: 0 });
+function lathe(pts, segs = 40) { return new THREE.LatheGeometry(new THREE.SplineCurve(pts.map(p => new THREE.Vector2(p[0], p[1]))).getPoints(56), segs); }
+function colorByY(geo, fn) {
+  const pos = geo.attributes.position, cols = new Float32Array(pos.count * 3), c = new THREE.Color();
+  for (let i = 0; i < pos.count; i++) { c.set(fn(pos.getY(i))); cols[i * 3] = c.r; cols[i * 3 + 1] = c.g; cols[i * 3 + 2] = c.b; }
+  geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+}
+function mesh(g, geo, m, pos, scale) { const x = new THREE.Mesh(geo, m); if (pos) x.position.set(...pos); if (scale) x.scale.set(...scale); g.add(x); return x; }
+function addHair(g, look, cy, r, sy, q) {
+  const m = () => mat(look.hairColor);
+  const cap = mesh(g, new THREE.SphereGeometry(r * 1.07, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.55), m(), [0, cy, 0], [0.96, sy, 1.03]);
+  cap.rotation.x = -0.38;
+  if (look.hair === 'long') mesh(g, new THREE.SphereGeometry(r, 24, 16), m(), [0, cy - r * (q ? 0.3 : 0.95), -r * 0.42], [1.0, q ? 1.0 : 1.9, 0.55]);
+  if (look.hair === 'pony') {
+    mesh(g, new THREE.SphereGeometry(r * 0.3, 16, 12), m(), [0, cy + r * 0.3, -r * 1.02]);
+    const t = mesh(g, new THREE.CapsuleGeometry(r * 0.2, r * (q ? 0.7 : 1.3), 6, 12), m(), [0, cy - r * (q ? 0.25 : 0.5), -r * 1.15]); t.rotation.x = 0.28;
+  }
+  if (look.hair === 'bun') mesh(g, new THREE.SphereGeometry(r * 0.42, 20, 16), m(), [0, cy + r * sy * 1.0, -r * 0.2]);
+}
+function buildReal(g, b, look) {
+  const H = b.h / 100, k = H / 1.65, bmi = bmiOf(b), bf = clamp(Math.sqrt(bmi / 20.5), 0.8, 1.35), E = Math.PI * 1.75;
+  const hipA = b.hip / 100 / E, waA = b.waist / 100 / E, buA = b.bust / 100 / E;
+  const y0 = 0.47 * H, yS = 0.815 * H, T = yS - y0, neckR = 0.03 * H, skin = look.skin;
+  const tg = lathe([[0.02, y0 - 0.025], [hipA * 0.66, y0], [hipA, y0 + 0.14 * T], [(hipA + waA) / 2, y0 + 0.3 * T], [waA, y0 + 0.46 * T], [(waA + buA) / 2, y0 + 0.6 * T], [buA, y0 + 0.74 * T], [buA * 0.96, y0 + 0.88 * T], [buA * 0.62, y0 + 0.99 * T], [neckR, y0 + 1.03 * T]]);
+  colorByY(tg, y => y < y0 + 0.26 * T ? BASE_BOT : BASE_TOP);
+  mesh(g, tg, vmat(), null, [1, 1, 0.74]);
+  const armR = 0.036 * k * bf, L = 0.34 * H;
+  [-1, 1].forEach(s => {
+    mesh(g, new THREE.SphereGeometry(armR * 1.35, 20, 14), mat(BASE_TOP), [s * buA * 0.9, yS - 0.028 * H, 0], [1, 1, 0.9]);
+    const ag = lathe([[armR * 0.55, -L], [armR * 0.7, -0.78 * L], [armR * 0.82, -0.52 * L], [armR, -0.3 * L], [armR * 1.05, -0.08 * L], [armR * 0.8, 0.01], [0.01, 0.03 * L]], 24);
+    colorByY(ag, y => y > -0.3 * L ? BASE_TOP : skin);
+    const a = mesh(g, ag, vmat(), [s * (buA * 0.95 + armR * 0.5), yS - 0.03 * H, 0]); a.rotation.z = s * 0.09;
+    const hand = new THREE.Mesh(new THREE.SphereGeometry(armR * 0.85, 16, 12), mat(skin)); hand.scale.set(0.8, 1.35, 0.6); hand.position.set(0, -L - armR * 0.9, 0); a.add(hand);
+  });
+  const thR = hipA * 0.47, knR = 0.05 * k * bf, caR = 0.056 * k * bf, anR = 0.03 * k;
+  [-1, 1].forEach(s => {
+    const lg = lathe([[anR, 0.045 * H], [caR * 0.8, 0.13 * H], [caR, 0.2 * H], [knR, 0.28 * H], [thR * 0.8, 0.36 * H], [thR, y0 - 0.02 * H], [thR * 0.8, y0 + 0.03 * H]], 28);
+    colorByY(lg, y => y > y0 - 0.07 * H ? BASE_BOT : skin);
+    mesh(g, lg, vmat(), [s * hipA * 0.5, 0, 0], [1, 1, 0.95]);
+    mesh(g, new THREE.SphereGeometry(1, 20, 14), mat(BASE_SHOE), [s * hipA * 0.5, 0.03 * k, 0.035 * k], [0.043 * k, 0.032 * k, 0.1 * k]);
+  });
+  mesh(g, new THREE.CylinderGeometry(neckR, neckR * 1.08, 0.07 * H, 20), mat(skin), [0, yS + 0.02 * H, 0]);
+  const hr = 0.056 * H, hy = 0.925 * H;
+  mesh(g, new THREE.SphereGeometry(hr, 32, 24), mat(skin), [0, hy, 0], [0.92, 1.13, 1]);
+  [-1, 1].forEach(s => mesh(g, new THREE.SphereGeometry(0.0055 * H, 10, 8), mat('#2B2230'), [s * 0.019 * H, hy + 0.004 * H, hr * 0.92]));
+  addHair(g, look, hy, hr, 1.13, false);
+}
+function buildQ(g, b, look) {
+  const bmi = bmiOf(b), avg = (b.bust / 83 + b.waist / 64 + b.hip / 89) / 3;
+  const sW = clamp(Math.pow(bmi / 18.8, 0.45) * Math.pow(avg, 0.6), 0.78, 1.5), hF = clamp(b.h / 163, 0.9, 1.12), skin = look.skin;
+  const legL = 0.26 * hF, T = 0.3 * hF, y0 = legL, yS = y0 + T;
+  const hipA = 0.14 * sW * Math.pow(b.hip / 89 / avg, 0.5), waA = 0.122 * sW * Math.pow(b.waist / 64 / avg, 0.6), buA = 0.13 * sW * Math.pow(b.bust / 83 / avg, 0.5);
+  const tg = lathe([[0.02, y0 - 0.035], [hipA * 0.72, y0], [hipA, y0 + 0.18 * T], [waA, y0 + 0.5 * T], [buA, y0 + 0.78 * T], [buA * 0.8, y0 + 0.95 * T], [0.05, y0 + 1.03 * T]]);
+  colorByY(tg, y => y < y0 + 0.3 * T ? BASE_BOT : BASE_TOP);
+  mesh(g, tg, vmat(), null, [1, 1, 0.86]);
+  const armR = 0.048 * Math.pow(sW, 0.8), L = 0.24 * hF;
+  [-1, 1].forEach(s => {
+    const ag = lathe([[armR * 0.85, -L], [armR, -0.6 * L], [armR * 1.02, -0.1 * L], [0.01, 0.06 * L]], 20);
+    colorByY(ag, y => y > -0.4 * L ? BASE_TOP : skin);
+    const a = mesh(g, ag, vmat(), [s * (buA * 0.95 + armR * 0.3), yS - 0.05, 0]); a.rotation.z = s * 0.2;
+    const hand = new THREE.Mesh(new THREE.SphereGeometry(armR * 1.1, 16, 12), mat(skin)); hand.position.set(0, -L - armR * 0.6, 0); a.add(hand);
+    const lr = 0.062 * sW;
+    const lg = lathe([[lr * 0.85, 0.06], [lr, 0.14], [lr * 1.05, legL - 0.02], [lr * 0.9, legL + 0.03]], 20);
+    colorByY(lg, y => y > y0 - 0.09 ? BASE_BOT : skin);
+    mesh(g, lg, vmat(), [s * hipA * 0.48, 0, 0]);
+    mesh(g, new THREE.SphereGeometry(1, 20, 14), mat(BASE_SHOE), [s * hipA * 0.48, 0.045, 0.025], [0.072, 0.052, 0.1]);
+  });
+  const hr = 0.3, hy = yS + 0.02 + hr * 0.92;
+  mesh(g, new THREE.SphereGeometry(hr, 40, 30), mat(skin), [0, hy, 0], [1.05, 0.95, 0.98]);
+  const zs = (x, y) => 0.98 * Math.sqrt(Math.max(0, hr * hr - (x / 1.05) ** 2 - (y / 0.95) ** 2));
+  [-1, 1].forEach(s => {
+    const ex = s * 0.105, ey = -0.03;
+    mesh(g, new THREE.SphereGeometry(0.042, 20, 16), mat('#2B2230'), [ex, hy + ey, zs(ex, ey)], [0.85, 1.15, 0.45]);
+    mesh(g, new THREE.SphereGeometry(0.013, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffffff }), [ex + 0.014, hy + ey + 0.018, zs(ex, ey) + 0.016]);
+    const bl = mesh(g, new THREE.CircleGeometry(0.042, 24), new THREE.MeshBasicMaterial({ color: 0xff8fb0, transparent: true, opacity: 0.5 }), [s * 0.18, hy - 0.1, zs(s * 0.18, -0.1) + 0.004]);
+    bl.rotation.y = s * 0.6;
+  });
+  const mo = mesh(g, new THREE.TorusGeometry(0.022, 0.006, 8, 20, Math.PI), mat('#7A3D52'), [0, hy - 0.1, zs(0, -0.1) + 0.003]); mo.rotation.z = Math.PI;
+  addHair(g, look, hy, hr, 0.95, true);
+}
+function t3build(body, look, mode) {
+  if (!T3.r) return;
+  const g = T3.grp;
+  [...g.children].forEach(c => { g.remove(c); c.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); });
+  mode === 'q' ? buildQ(g, body, look) : buildReal(g, body, look);
+  const fitH = mode === 'q' ? 1.42 : 2.05, cy = mode === 'q' ? 0.64 : 0.97;
+  const dist = (fitH / 2) / Math.tan(THREE.MathUtils.degToRad(T3.cam.fov / 2));
+  T3.cam.position.set(0, cy + 0.05, dist); T3.cam.lookAt(0, cy, 0);
+}
+
+/* 形象 */
+const t3host = (cls = '') => `<div class="t3 ${cls}" id="t3"><span class="hint3">${I.rotate}左右拖动旋转</span></div>`;
+SCREENS.avatar = () => `<div class="tblock"><div><div class="eyebrow">我的形象</div><h1 class="big">${UI.mode === 'q' ? '可爱的我' : '等比的我'}</h1></div></div>
+  ${seg('mode', [['real', '等比'], ['q', 'Q 版']], UI.mode)}
+  <div style="margin-top:12px">${t3host()}</div>
+  <div class="statchips">${BODY_FIELDS.map(([k, l, u]) => `<span><b>${S.body[k]}</b>${l} ${u}</span>`).join('')}</div>
+  <div class="row" style="margin-top:14px"><button class="btn" data-act="goBody">${I.ruler}编辑身材</button><button class="btn" data-act="goLook">${I.palette}外观</button></div>
+  <button class="sec" style="width:100%;text-align:left;flex-direction:row;align-items:center" data-act="tab" data-tab="outfits"><span class="oi" style="width:40px;height:40px;border-radius:12px;background:var(--accent-soft);color:var(--accent-2);display:grid;place-items:center">${I.spark}</span><span style="flex:1"><b style="display:block">让小人穿上你的衣服</b><span class="sub">在任意一套搭配里点「AI 试穿」</span></span>${I.chev}</button>`;
+AFTER.avatar = () => t3mount($('#t3'), S.body, S.look, UI.mode);
+ACT.mode = el => { UI.mode = el.dataset.v; const p = cur().p; if (['avatar', 'today'].includes(cur().n)) return rerender(); el.parentNode.querySelectorAll('button').forEach(b => { b.classList.toggle('on', b === el); b.setAttribute('aria-selected', b === el); }); t3build(p.b || S.body, p.l || S.look, UI.mode); };
+ACT.goBody = () => go('body', {});
+ACT.goLook = () => go('look', {});
+SCREENS.body = p => { p.b = p.b || { ...S.body }; return hdr('编辑身材', '<button class="tbtn" data-act="bsave">保存</button>') + seg('mode', [['real', '等比'], ['q', 'Q 版']], UI.mode) + `<div style="margin-top:12px">${t3host('sm')}</div><div class="sec">${slidersHTML(p.b)}</div><p class="sub" style="line-height:1.6;margin-top:12px">身材数据只保存在你的手机里。正式版的等比小人会用更精细的人体模型。</p>`; };
+AFTER.body = p => t3mount($('#t3'), p.b, S.look, UI.mode);
+INP.body = el => { const p = cur().p, k = el.dataset.k; p.b[k] = +el.value; $('#sv-' + k).textContent = el.value; $('#bmi').textContent = bmiText(p.b); t3rebuildSoon(p.b, p.l || S.look, UI.mode); };
+ACT.bsave = () => { S.body = { ...cur().p.b }; save(); toast('身材已更新，小人也跟着变了'); back(); };
+SCREENS.look = p => {
+  p.l = p.l || { ...S.look }; const l = p.l;
+  return hdr('外观', '<button class="tbtn" data-act="lsave">保存</button>') + seg('mode', [['real', '等比'], ['q', 'Q 版']], UI.mode) + `<div style="margin-top:12px">${t3host('sm')}</div>
+  <div class="sec"><div class="fl"><div class="lab">肤色</div><div class="sws">${SKINS.map(c => `<button class="sw${l.skin === c ? ' on' : ''}" style="background:${c}" data-act="lskin" data-v="${c}" aria-label="肤色 ${c}"></button>`).join('')}</div></div>
+  <div class="fl"><div class="lab">发型</div><div class="chips wrapc">${HAIRS.map(([v, n]) => `<button class="chip${l.hair === v ? ' on' : ''}" data-act="lhair" data-v="${v}">${n}</button>`).join('')}</div></div>
+  <div class="fl"><div class="lab">发色</div><div class="sws">${HAIR_COLORS.map(c => `<button class="sw${l.hairColor === c ? ' on' : ''}" style="background:${c}" data-act="lhcol" data-v="${c}" aria-label="发色 ${c}"></button>`).join('')}</div></div></div>
+  <p class="sub" style="line-height:1.6;margin-top:12px">正式版会有更多脸型、发型和妆容可选。</p>`;
+};
+AFTER.look = p => t3mount($('#t3'), S.body, p.l, UI.mode);
+const lookSet = (k, el) => { const p = cur().p; p.l[k] = el.dataset.v; el.parentNode.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === el)); t3build(S.body, p.l, UI.mode); };
+ACT.lskin = el => lookSet('skin', el);
+ACT.lhair = el => lookSet('hair', el);
+ACT.lhcol = el => lookSet('hairColor', el);
+ACT.lsave = () => { S.look = { ...cur().p.l }; save(); toast('外观已保存'); back(); };
+
+/* 我的 */
+SCREENS.me = () => {
+  const total = S.items.reduce((a, i) => a + (i.price || 0), 0), worn = S.items.reduce((a, i) => a + i.worn, 0);
+  const max = Math.max(1, ...CAT_KEYS.map(k => S.items.filter(i => i.cat === k).length));
+  const top3 = S.items.slice().sort((a, b) => b.worn - a.worn).slice(0, 3);
+  const mi = (act, ic, t, sm = '') => `<button class="mi" data-act="${act}"><span class="mic">${ic}</span><span>${t}</span><small>${sm}</small>${I.chev}</button>`;
+  return `<div class="profile"><div class="av">${figureSVG([], 'q', S.body, S.look, { bg: false, vb: '34 40 132 132' })}</div><div><div class="eyebrow">我的</div><h1 class="big" style="font-size:24px">衣柜主人</h1></div></div>
+  <div class="stats"><div class="stat"><b>${S.items.length}</b><span>件单品</span></div><div class="stat"><b>${S.outfits.length}</b><span>套搭配</span></div><div class="stat"><b>¥${total.toLocaleString()}</b><span>衣柜总价</span></div><div class="stat"><b>${worn}</b><span>累计穿着次数</span></div></div>
+  <div class="sec"><h3>分类占比</h3><div class="bars">${CAT_KEYS.map(k => { const n = S.items.filter(i => i.cat === k).length; return `<div class="br"><span>${CATS[k].n}</span><div class="tr"><i style="width:${n / max * 100}%"></i></div><em>${n}</em></div>`; }).join('')}</div></div>
+  <div class="sec"><h3>最常穿</h3><div>${top3.map(i => `<button class="toprow" style="width:100%;text-align:left" data-act="openItem" data-id="${i.id}"><div class="thumb">${art(i)}</div><div class="meta"><span class="code">${esc(i.code)}</span><span class="name">${esc(i.name)}</span></div><span class="sub">${i.worn} 次</span></button>`).join('')}</div></div>
+  <div class="menu">${mi('goRules', I.hash, '编号规则', `${S.rules.top.p}${S.rules.sep}${'0'.repeat(S.rules.top.d - 1)}1`)}${mi('goBody', I.ruler, '身材数据', `${S.body.h}cm · ${S.body.w}kg`)}${mi('goLook', I.palette, '外观')}${mi('privacy', I.shield, '隐私与数据')}</div>
+  <div class="menu">${mi('replay', I.replay, '重新体验首次引导')}${mi('pagesSheet', I.pages, '原型页面导航')}</div>
+  <p class="sub" style="text-align:center;margin-top:18px">衣小人 · 可点击原型 v0.1</p>`;
+};
+ACT.privacy = () => openSheet(`<div class="sheet-title">隐私与数据</div><div class="sheet-sub">身材数据和衣柜照片只保存在本机。正式版会在这里提供：导出全部数据、注销账号并删除云端数据（App Store 要求）。</div><button class="btn block danger" data-act="resetAsk">清空并恢复示例数据</button>`);
+ACT.resetAsk = () => setSheet(`<div class="sheet-title">确定清空？</div><div class="sheet-sub">你添加的单品、搭配和身材数据都会被删除，恢复成示例衣柜。</div><div class="row"><button class="btn" data-act="closeSheet">取消</button><button class="btn pri" style="background:var(--danger)" data-act="resetYes">清空</button></div>`);
+ACT.resetYes = () => { S = seed(); S.onboarded = true; save(); closeSheet(); toast('已恢复示例数据'); tabTo('me'); };
+ACT.replay = () => { NAV = [{ n: 'onboard', p: { step: 0 } }]; render(); };
+
+/* 引导 */
+SCREENS.onboard = p => {
+  p.b = p.b || { ...S.body }; const st = p.step || 0;
+  const dots = `<div style="display:flex;align-items:center"><div class="dots">${[0, 1, 2].map(i => `<i class="${i === st ? 'on' : ''}"></i>`).join('')}</div>${st < 2 ? '<button class="skip" data-act="onbSkip">跳过</button>' : ''}</div>`;
+  if (st === 0) return `<div class="onb">${dots}<div class="onb-fig">${figureSVG(S.outfits[1] ? S.outfits[1].pieces : [], 'q', S.body, S.look, { bg: 0, vb: '10 20 180 360' })}</div>
+    <h1>把衣柜装进口袋，<br>再捏一个小小的你</h1><p>拍照就能入库，按你的编号整理；等比的你和 Q 版的你，都能换上自己的衣服。</p><div class="grow"></div>
+    <button class="btn pri block" data-act="onbNext">开始</button></div>`;
+  if (st === 1) return `<div class="onb">${dots}<h1 style="font-size:24px">先告诉我你的身材</h1><p>用来生成和你等比例的小人，只保存在你的手机里，之后随时可以改。</p>
+    ${t3host('sm')}<div class="sec" style="margin-top:0">${slidersHTML(p.b)}</div><button class="btn pri block" data-act="onbNext">生成我的小人</button></div>`;
+  return `<div class="onb">${dots}<h1 style="font-size:24px">你的小人做好啦</h1><p>切换看看两种样子。穿上自己的衣服，要在搭配里点「AI 试穿」。</p>
+    ${seg('mode', [['real', '等比'], ['q', 'Q 版']], UI.mode)}${t3host()}<button class="btn pri block" data-act="onbDone">看看今天穿什么</button></div>`;
+};
+AFTER.onboard = p => { if ((p.step || 0) >= 1) t3mount($('#t3'), p.b, S.look, UI.mode); };
+ACT.onbNext = () => { const p = cur().p; if (p.step === 1) { S.body = { ...p.b }; save(); } p.step = (p.step || 0) + 1; render(); };
+ACT.onbSkip = () => { S.onboarded = true; save(); tabTo('today'); };
+ACT.onbDone = () => { S.onboarded = true; save(); toast('欢迎！先看看今天穿什么'); tabTo('today'); };
+
+/* ---------- 原型页面导航 ---------- */
+const PAGES = [['首次打开', [['0', 'onboard', '首次引导']]],
+  ['今天', [['14', 'today', '今天穿什么'], ['15', 'week', '本周排期']]],
+  ['衣柜', [['1', 'wardrobe', '衣柜首页'], ['2', 'add', '添加方式'], ['2b', 'taobao', '淘宝导入'], ['3', 'cutout', '抠图确认'], ['4', 'itemForm', '单品信息'], ['5', 'item', '单品详情'], ['6', 'rules', '编号规则']]],
+  ['搭配', [['7', 'outfits', '搭配列表'], ['8', 'outfitEdit', '搭配画布'], ['9', 'tryon', 'AI 试穿']]],
+  ['形象', [['10', 'avatar', '我的形象'], ['11', 'body', '身材编辑'], ['12', 'look', '外观设置']]],
+  ['我的', [['13', 'me', '我的']]]];
+const pagesHTML = () => PAGES.map(([g, list]) => `<div class="grp">${g}</div>` + list.map(([no, k, n]) => `<button data-act="jump" data-k="${k}"><span class="no">${no}</span>${n}</button>`).join('')).join('');
+function markNav() { const n = cur().n; document.querySelectorAll('#pnav [data-k]').forEach(b => b.classList.toggle('on', b.dataset.k === n)); }
+ACT.pagesSheet = () => openSheet(`<div class="sheet-title">原型页面导航</div><div class="sheet-sub">直接跳到任意一页</div><nav class="pnav">${pagesHTML()}</nav>`);
+ACT.jump = async el => {
+  const k = el.dataset.k; closeSheet();
+  const o0 = S.outfits[0], i0 = S.items[0];
+  if (k === 'add') { tabTo('wardrobe'); openSheet(addSheet()); return; }
+  if (k === 'cutout') { const r = await makeSample(); NAV = [{ n: 'wardrobe', p: {} }, { n: 'cutout', p: r }]; }
+  else if (k === 'itemForm') NAV = [{ n: 'wardrobe', p: {} }, { n: 'itemForm', p: { d: newDraft({ cat: 'top', sub: '衬衫', colorName: '浅蓝', name: '浅蓝色衬衫' }) } }];
+  else if (k === 'item') NAV = [{ n: 'wardrobe', p: {} }, { n: 'item', p: { id: i0 && i0.id } }];
+  else if (k === 'taobao') NAV = [{ n: 'wardrobe', p: {} }, { n: 'taobao', p: {} }];
+  else if (k === 'rules') NAV = [{ n: 'me', p: {} }, { n: 'rules', p: {} }];
+  else if (k === 'outfitEdit') NAV = [{ n: 'outfits', p: {} }, { n: 'outfitEdit', p: { d: o0 ? clone(o0) : { name: '', occasion: '休闲', pieces: [] }, sel: -1 } }];
+  else if (k === 'tryon') NAV = [{ n: 'outfits', p: {} }, { n: 'tryon', p: { pieces: o0 ? clone(o0.pieces) : [] } }];
+  else if (k === 'week') NAV = [{ n: 'today', p: {} }, { n: 'week', p: {} }];
+  else if (k === 'body' || k === 'look') NAV = [{ n: 'avatar', p: {} }, { n: k, p: {} }];
+  else if (k === 'onboard') NAV = [{ n: 'onboard', p: { step: 0 } }];
+  else NAV = [{ n: k, p: {} }];
+  render();
+};
+
+/* ---------- 事件 ---------- */
+ACT.back = back;
+ACT.tab = el => tabTo(el.dataset.tab);
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (!el) return;
+  const f = ACT[el.dataset.act];
+  if (f) f(el, e);
+});
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.dataset.bind) { const d = cur().p.d; d[el.dataset.bind] = el.value; }
+  if (el.dataset.inp && INP[el.dataset.inp]) INP[el.dataset.inp](el, e);
+});
+
+/* ---------- 启动 ---------- */
+$('#tabbar').innerHTML = [['wardrobe', I.hanger, '衣柜'], ['outfits', I.shirt, '搭配'], ['today', I.sun, '今天'], ['avatar', I.person, '形象'], ['me', I.smile, '我的']].map(([k, ic, n]) => k === 'today'
+  ? `<button class="mid" data-act="tab" data-tab="${k}"><span class="tc">${ic}</span><span>${n}</span></button>`
+  : `<button data-act="tab" data-tab="${k}">${ic}<span>${n}</span></button>`).join('');
+$('#pnav').innerHTML = pagesHTML();
+loadState();
+NAV = S.onboarded ? [{ n: 'today', p: {} }] : [{ n: 'onboard', p: { step: 0 } }];
+render();
+</script>
+
+</body>
+</html>

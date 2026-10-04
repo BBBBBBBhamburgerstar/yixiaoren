@@ -2196,8 +2196,6 @@ function seedChats() {
     ],
   };
 }
-const CH_LINK = { l: '导入一个淘宝链接（示例）', s: '帮我录一下这件 https://m.tb.cn/h.demo123' };
-const CH_PHOTO = { l: '拍一件衣服', photo: 1 };
 const CH_ADD = { l: '添加衣服' }, CH_TODAY = { l: '今天穿什么' }, CH_TRIP = { l: '旅游穿什么' };
 const CH_DEFAULT = [CH_ADD, CH_TODAY, CH_TRIP];
 const SIZE_CH = ['XS', 'S', 'M', 'L', 'XL', '均码'].map(x => ({ l: x }));
@@ -2227,7 +2225,7 @@ function respond(text) {
   if (/https?:\/\/|tb\.cn|淘宝|天猫/i.test(text)) return startLinkFlow();
   if (/旅游|旅行|出差|出去玩|度假/.test(text)) return botSay([{ text: '出行穿搭还在做～之后告诉我去哪、玩几天，我会按天气和行程排好每天穿什么，再给你一张行李清单。', chips: CH_DEFAULT }]);
   if (/穿什么|今天穿|搭一套|搭配/.test(text)) { const e = planOf(todayStr(), true); if (!e.ids.length) { e.ids = drawIds(); save(); } return botSay([{ text: e.done ? '今天已经定下这套啦 👇' : '今天给你配了这套，不喜欢可以换 👇' }, { type: 'card', card: { k: 'outfit', date: todayStr() } }]); }
-  if (/录|添加|新买|买了/.test(text)) return botSay([{ text: '好呀！发一个商品链接给我，或者点下面的 ＋ 拍一张照片。', chips: [CH_LINK, CH_PHOTO] }]);
+  if (/录|添加|新买|买了/.test(text)) return botSay([{ text: '好呀！把商品链接粘贴发我，或者点右下角的 ＋，拍照或从相册选一张都行。' }]);
   if (/标签/.test(text)) return botSay([{ text: '批量整理标签还在做，下个版本就能用。现在录入单品时，我会顺便帮你打好标签。', chips: CH_DEFAULT }]);
   if (/博主/.test(text)) return botSay([{ text: '分析博主风格还在做，之后发几张截图给我就行。', chips: CH_DEFAULT }]);
   botSay([{ text: '我可以帮你添加衣服（发淘宝链接或照片，我来问尺码、颜色、价格），也可以帮你看看今天穿什么。', chips: CH_DEFAULT }]);

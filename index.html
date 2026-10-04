@@ -958,7 +958,7 @@ SCREENS.itemForm = p => {
     <div class="fl"><label class="lab" for="f-tag">标签</label><div id="tagbox"><div class="tagin" id="tagin">${tagInner(d)}</div><div class="tagdd" id="tagdd" hidden></div></div></div>
     <div class="fl"><label class="lab" for="f-note">备注</label><textarea class="inp" id="f-note" data-bind="note" placeholder="尺码、洗涤方式、搭配心得…">${esc(d.note)}</textarea></div>
   </div>
-  <button class="btn pri block" style="margin:16px 0" data-act="saveItem">${p.editId ? '保存修改' : '放进衣柜'}</button>
+  <div style="height:16px"></div>
   <div class="ibar fillbar">
     <div class="fillres${p.fillMsg && !p.fillMsg.ok ? ' warn' : ''}" role="status"><span class="fthumb${d.img ? ' checker' : ''}">${preview}</span>
       <span>${p.fillMsg ? esc(p.fillMsg.text) : d.ai ? `AI 识别${d.ai.guess ? '（按主色估算）' : '（模拟）'}：<b>${CATS[d.ai.cat].n} · ${d.ai.sub} · ${d.ai.colorName}</b>，不对的直接改，或者说一句` : '说一句话或打字，AI 帮你填好这件衣服的信息'}</span>

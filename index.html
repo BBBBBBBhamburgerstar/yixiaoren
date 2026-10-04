@@ -111,7 +111,8 @@ h1.big .num{font-variant-numeric:tabular-nums}
 .sub{font-size:12px;color:var(--mute)}
 .badge{position:absolute;top:8px;left:8px;font-family:var(--f-mono);font-size:10.5px;background:var(--card);color:var(--ink2);padding:2px 7px;border-radius:8px}
 .empty{padding:40px 12px;text-align:center;color:var(--mute);line-height:1.7}
-.fab{position:absolute;right:18px;bottom:18px;z-index:8;height:54px;padding:0 20px 0 16px;border-radius:27px;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;gap:6px;font-weight:600;font-size:15px;box-shadow:0 12px 24px -10px var(--accent)}
+.fab{position:absolute;right:18px;bottom:18px;z-index:8;height:54px;padding:0 20px 0 16px;border-radius:27px;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;gap:6px;font-weight:600;font-size:15px;box-shadow:0 12px 24px -10px var(--accent);transition:transform .25s ease,opacity .25s ease}
+.fab.away{transform:translateY(96px);opacity:0;pointer-events:none}
 .btn{height:48px;border-radius:16px;padding:0 18px;font-weight:600;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--card);box-shadow:inset 0 0 0 1px var(--line)}
 .btn.pri{background:var(--accent);color:var(--on-accent);box-shadow:0 10px 22px -12px var(--accent)}
 .btn.soft{background:var(--accent-soft);color:var(--accent-2);box-shadow:none}
@@ -667,7 +668,7 @@ function render(keep) {
   const root = ROOTS.includes(c.n) && NAV.length === 1;
   $('#tabbar').hidden = !root;
   document.querySelectorAll('#tabbar [data-tab]').forEach(b => { const on = b.dataset.tab === c.n; b.classList.toggle('on', on); on ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'); });
-  const fab = $('#fab');
+  const fab = $('#fab'); fab.classList.remove('away');
   if (c.n === 'wardrobe') { fab.hidden = false; fab.dataset.act = 'add'; fab.innerHTML = I.plus + '添加单品'; }
   else if (c.n === 'outfits') { fab.hidden = false; fab.dataset.act = 'newOutfit'; fab.innerHTML = I.plus + '新建搭配'; }
   else fab.hidden = true;
@@ -1861,6 +1862,15 @@ document.addEventListener('input', e => {
 /* ---------- 启动 ---------- */
 $('#tabbar').innerHTML = [['wardrobe', I.hanger, '衣柜'], ['outfits', I.shirt, '搭配'], ['today', I.sun, '今天'], ['chat', I.chat, '对话']].map(([k, ic, n]) => `<button data-act="tab" data-tab="${k}">${ic}<span>${n}</span></button>`).join('');
 $('#pnav').innerHTML = pagesHTML();
+// 往下滑时收起右下角按钮，避免挡住卡片；往上滑或滑到底再出现
+(() => { const sc = $('#screen'), fab = $('#fab'); let last = 0;
+  sc.addEventListener('scroll', () => {
+    const st = sc.scrollTop, atEnd = st + sc.clientHeight >= sc.scrollHeight - 4;
+    if (atEnd || st < 40 || st < last - 4) fab.classList.remove('away');
+    else if (st > last + 4) fab.classList.add('away');
+    last = st;
+  }, { passive: true });
+})();
 loadState();
 NAV = S.onboarded ? [{ n: 'today', p: {} }] : [{ n: 'onboard', p: { step: 0 } }];
 render();

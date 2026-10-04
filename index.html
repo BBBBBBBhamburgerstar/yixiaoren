@@ -1374,7 +1374,7 @@ SCREENS.wardrobe = () => {
   const cnt = k => k === 'all' ? S.items.length : S.items.filter(i => i.cat === k).length;
   const nf = UI.F.colors.length + UI.F.seasons.length;
   return `<div class="tblock"><div><div class="eyebrow">我的衣柜</div><h1 class="big"><span class="num">${S.items.length}</span> 件单品</h1></div>
-    <div class="tbr"><button class="ibtn" data-act="goRules" aria-label="编号规则">${I.hash}</button>${meBtn()}</div></div>
+    <div class="tbr">${meBtn()}</div></div>
   <div class="search">${I.search}<input id="q" type="search" placeholder="搜编号、名称、品牌、标签" value="${esc(UI.F.q)}" data-inp="q" aria-label="搜索单品">
     <button class="${nf ? 'act' : ''}" data-act="filter">${I.filter}${nf ? `筛选 ${nf}` : '筛选'}</button></div>
   <div class="chips">${[['all', '全部'], ...CAT_KEYS.map(k => [k, CATS[k].n])].map(([k, n]) => `<button class="chip${UI.F.cat === k ? ' on' : ''}" data-act="cat" data-v="${k}">${n}<span class="n">${cnt(k)}</span></button>`).join('')}</div>

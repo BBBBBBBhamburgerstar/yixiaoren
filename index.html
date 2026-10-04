@@ -108,7 +108,9 @@ h1.big .num{font-variant-numeric:tabular-nums}
 .thumb{aspect-ratio:1;border-radius:14px;background:var(--tile);display:grid;place-items:center;overflow:hidden;position:relative}
 .thumb>svg,.thumb>img{width:80%;height:80%;object-fit:contain}
 .meta{padding:0 4px 4px;display:flex;flex-direction:column;gap:3px;min-width:0}
-.code{font-family:var(--f-mono);font-size:11.5px;color:var(--accent-2);letter-spacing:.02em}
+/* 编号统一弱化：浅灰小字，放在名称下面 */
+.code{font-family:var(--f-mono);font-size:10.5px;color:var(--mute);opacity:.8;letter-spacing:0}
+.meta .code,.meta .cl{order:3}
 .name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sub{font-size:12px;color:var(--mute)}
 .badge{position:absolute;top:8px;left:8px;font-family:var(--f-mono);font-size:10.5px;background:var(--card);color:var(--ink2);padding:2px 7px;border-radius:8px}
@@ -430,7 +432,8 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .ditem{flex:none;width:76px;display:flex;flex-direction:column;gap:4px;align-items:center}
 .ditem .thumb{width:76px;border-radius:14px;box-shadow:inset 0 0 0 2px transparent}
 .ditem.on .thumb{box-shadow:inset 0 0 0 2px var(--accent)}
-.ditem .code{font-size:10.5px}
+.ditem .code{font-size:9.5px}
+.ditem .dnm{font-size:11px;color:var(--ink2);width:100%;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ditem .ck{position:absolute;top:5px;right:5px;width:18px;height:18px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center}
 
 /* 3D 与形象 */
@@ -1182,7 +1185,7 @@ SCREENS.rules = p => {
   return hdr('编号规则', '<button class="tbtn" data-act="saveRules">保存</button>') + `
   <p class="sub" style="line-height:1.6;margin:4px 0 0">每件衣服入库时自动分配一个序号，只增不减，删掉的衣服序号也不会给新衣服用。这里只改显示格式，改完所有单品的编号会一起更新，序号本身不变。</p>
   <div class="sec"><div class="fl"><div class="lab">分隔符</div>${seg('rsep', [['-', 'T-001'], ['', 'T001'], ['_', 'T_001'], ['.', 'T.001']], r.sep)}</div></div>
-  ${CAT_KEYS.map(k => `<div class="sec"><div style="display:flex;justify-content:space-between;align-items:center"><h3>${CATS[k].n}</h3><span class="code" id="pv-${k}" style="font-size:15px">${esc(sample(k))}</span></div>
+  ${CAT_KEYS.map(k => `<div class="sec"><div style="display:flex;justify-content:space-between;align-items:center"><h3>${CATS[k].n}</h3><span class="code" id="pv-${k}" style="font-size:15px;color:var(--accent-2);opacity:1">${esc(sample(k))}</span></div>
     <div class="two"><div class="fl"><label class="lab" for="rp-${k}">前缀</label><input class="inp mono" id="rp-${k}" maxlength="4" value="${esc(r[k].p)}" data-inp="rp" data-k="${k}" autocomplete="off"></div>
     <div class="fl"><div class="lab">序号位数</div>${seg('rdig', [['2', '2 位'], ['3', '3 位'], ['4', '4 位']].map(([v, l]) => [k + ':' + v, l]), k + ':' + r[k].d)}</div></div></div>`).join('')}
   <div class="sec"><h3>两种编号的区别</h3><div class="kv">
@@ -1236,7 +1239,7 @@ const toolsInner = p => p.sel < 0 || !p.d.pieces[p.sel] ? '<span class="hint">�
   : [['minus', I.zout, '缩小'], ['plus', I.zin, '放大'], ['up', I.up, '上移一层'], ['down', I.down, '下移一层'], ['del', I.x, '移出搭配']].map(([op, ic, l]) => `<button class="ibtn" data-act="pz" data-op="${op}" aria-label="${l}" title="${l}">${ic}</button>`).join('');
 const drawerInner = p => {
   const ids = new Set(p.d.pieces.map(q => q.iid)), list = S.items.filter(i => i.cat === UI.dcat);
-  return `${seg('dcat', CAT_KEYS.map(k => [k, CATS[k].n]), UI.dcat)}<div class="ditems" style="margin-top:12px">${list.map(i => `<button class="ditem${ids.has(i.id) ? ' on' : ''}" data-act="padd" data-id="${i.id}" aria-pressed="${ids.has(i.id)}"><div class="thumb">${art(i)}${ids.has(i.id) ? `<span class="ck">${I.check}</span>` : ''}</div><span class="code">${esc(i.code)}</span></button>`).join('') || '<div class="sub">这个分类还没有单品</div>'}</div>`;
+  return `${seg('dcat', CAT_KEYS.map(k => [k, CATS[k].n]), UI.dcat)}<div class="ditems" style="margin-top:12px">${list.map(i => `<button class="ditem${ids.has(i.id) ? ' on' : ''}" data-act="padd" data-id="${i.id}" aria-pressed="${ids.has(i.id)}"><div class="thumb">${art(i)}${ids.has(i.id) ? `<span class="ck">${I.check}</span>` : ''}</div><span class="dnm">${esc(i.name)}</span><span class="code">${esc(i.code)}</span></button>`).join('') || '<div class="sub">这个分类还没有单品</div>'}</div>`;
 };
 SCREENS.outfitEdit = p => {
   const d = p.d;

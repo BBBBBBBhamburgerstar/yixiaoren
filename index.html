@@ -265,7 +265,6 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .ibar{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;gap:8px;margin:0 -16px;padding:10px 12px 12px;background:var(--app);border-top:1px solid var(--line)}
 .screen.chatmode{padding-bottom:0}
 .ib-btn{width:38px;height:38px;flex:none;border-radius:50%;display:grid;place-items:center;color:var(--ink2);background:var(--card);box-shadow:var(--shadow);cursor:pointer}
-.ib-btn.call{background:var(--accent-soft);color:var(--accent-2);box-shadow:none}
 .ib-btn.send{background:var(--accent);color:var(--on-accent);box-shadow:none}
 .cin{flex:1;min-width:0;height:40px;border-radius:20px;border:0;background:var(--card);box-shadow:var(--shadow);padding:0 14px;font-size:15px;outline:none}
 .cin:focus{box-shadow:inset 0 0 0 2px var(--accent)}
@@ -278,26 +277,6 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 @keyframes wv{0%,100%{height:6px}50%{height:28px}}
 .vrec .vt{font-size:14px;line-height:1.5;min-height:21px;max-width:100%;overflow-wrap:anywhere}
 .vrec small{font-size:11.5px;opacity:.65}
-.callui{position:absolute;inset:0;z-index:45;background:linear-gradient(180deg,#3A2742,#140E19);color:#fff;display:flex;flex-direction:column;align-items:center;padding:28px 20px 34px;animation:fade .25s}
-.callui .c-top{display:flex;flex-direction:column;align-items:center;gap:4px}
-.callui .c-top b{font-size:22px;font-weight:600}
-.callui .c-top span{font-family:var(--f-mono);font-size:13px;opacity:.75}
-.c-demo{font-size:11px!important;font-family:var(--f-body)!important;background:rgba(255,255,255,.14);padding:3px 8px;border-radius:8px;margin-bottom:8px}
-.c-av{position:relative;width:132px;height:132px;margin:44px 0 30px;display:grid;place-items:center}
-.c-av .botav{width:112px;height:112px;border-radius:38px;position:relative;z-index:1}
-.c-av .botav svg{width:56px;height:56px}
-.c-av .ring{position:absolute;inset:0;border-radius:46px;border:2px solid rgba(255,143,177,.6);animation:ring 1.8s ease-out infinite}
-.c-av .ring.r2{animation-delay:.9s}
-@keyframes ring{from{transform:scale(.85);opacity:1}to{transform:scale(1.35);opacity:0}}
-.c-cap{flex:1;width:100%;display:flex;flex-direction:column;justify-content:flex-end;gap:10px;font-size:15px;line-height:1.55;overflow:hidden}
-.c-cap div{opacity:.55}
-.c-cap div:last-child{opacity:1}
-.c-cap b{font-weight:500;opacity:.7;margin-right:4px}
-.c-btns{display:flex;gap:56px;margin-top:22px}
-.c-b{display:flex;flex-direction:column;align-items:center;gap:8px;color:#fff;font-size:12px}
-.c-b>svg{width:62px;height:62px;padding:18px;border-radius:50%;background:rgba(255,255,255,.14)}
-.c-b.on>svg{background:#fff;color:#2A1F33}
-.c-b.end>svg{background:#E5484D}
 .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
 .calgrid .wh{font-size:11px;color:var(--mute);padding:4px 0}
 .cd{position:relative;height:40px;border-radius:12px;font-family:var(--f-display);font-size:15px;font-weight:500}
@@ -454,7 +433,6 @@ input[type=range]{width:100%;accent-color:var(--accent);margin:0}
       <div id="sheet" class="sheet" hidden></div>
       <div id="toast" class="toast" hidden></div>
       <div id="vrec" class="vrec" hidden></div>
-      <div id="call" hidden></div>
     </div>
     <nav id="tabbar" class="tabbar" aria-label="主导航"></nav>
   </div>
@@ -504,8 +482,6 @@ const I = (() => {
     mic: s('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>', 'width="20" height="20"'),
     keyboard: s('<rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M7 10h.01M11 10h.01M15 10h.01M7 14h10"/>', 'width="20" height="20"'),
     phone: s('<path d="M5 4h3.5l1.8 4.4-2.2 1.4a11 11 0 0 0 6.1 6.1l1.4-2.2L20 15.5V19a1.5 1.5 0 0 1-1.6 1.5C10.7 20 4 13.3 3.5 5.6A1.5 1.5 0 0 1 5 4Z"/>', 'width="20" height="20"'),
-    phoneDown: s('<path d="M3.3 13.6c4.8-4.3 12.6-4.3 17.4 0l-1.5 2.9-3.8-1-.4-2.6a10.4 10.4 0 0 0-6 0l-.4 2.6-3.8 1Z"/>'),
-    speaker: s('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4Z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>'),
     wave: s('<path d="M6 10v4M10 7v10M14 9v6M18 11v2"/>', 'width="16" height="16"'),
     send: s('<path d="M12 19V5M6 11l6-6 6 6"/>', 'width="20" height="20" stroke-width="2.2"'),
     cal: s('<rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M9 3v4M15 3v4"/>'),
@@ -1322,15 +1298,16 @@ function seedChats() {
       { id: id(), t: at(d3, 20, 13), role: 'bot', type: 'text', text: '好的，M 码。已经放进衣柜，编号 T-002，还顺手打上了「通勤」标签。' },
     ],
     [d1]: [
-      { id: id(), t: at(d1, 22, 40), role: 'sys', type: 'call', dur: 74, lines: [{ r: 'bot', t: '喂～我是小衣，今天想聊点什么？' }, { r: 'me', t: '明天要见客户，穿什么好？' }, { r: 'bot', t: '黑色西装外套配灰色西裤，再配棕色乐福鞋，干练又不会太严肃。' }, { r: 'me', t: '可以，就这套。' }] },
-      { id: id(), t: at(d1, 22, 42), role: 'bot', type: 'text', text: '通话里说的那套已经记下了，明天在「今天」页就能看到。' },
+      { id: id(), t: at(d1, 22, 40), role: 'me', type: 'voice', text: '明天要见客户，穿什么好？', dur: 3 },
+      { id: id(), t: at(d1, 22, 40), role: 'bot', type: 'text', text: '黑色西装外套配灰色西裤，再配棕色乐福鞋，干练又不会太严肃。' },
+      { id: id(), t: at(d1, 22, 41), role: 'me', type: 'text', text: '可以，就这套' },
+      { id: id(), t: at(d1, 22, 41), role: 'bot', type: 'text', text: '记下了，明天在「今天」页就能看到。' },
     ],
   };
 }
 const CH_LINK = { l: '导入一个淘宝链接（示例）', s: '帮我录一下这件 https://m.tb.cn/h.demo123' };
-const CH_CALL = { l: '打电话给小衣', call: 1 };
 const CH_PHOTO = { l: '拍一件衣服', photo: 1 };
-const CH_DEFAULT = [CH_LINK, CH_PHOTO, CH_CALL];
+const CH_DEFAULT = [CH_LINK, CH_PHOTO];
 const SIZE_CH = ['XS', 'S', 'M', 'L', 'XL', '均码'].map(x => ({ l: x }));
 const SHOE_CH = ['35', '36', '37', '38', '39', '40'].map(x => ({ l: x }));
 const TAG_GUESS = { 'T恤': ['百搭', '基础款'], '衬衫': ['通勤', '法式'], '卫衣': ['舒服', '休闲'], '针织': ['温柔', '通勤'], '外套': ['通勤', '正式'], '牛仔裤': ['百搭', '休闲'], '半身裙': ['约会', '温柔'], '短裤': ['度假', '休闲'], '西裤': ['通勤', '正式'], '运动鞋': ['运动', '百搭'], '乐福鞋': ['复古', '通勤'], '靴子': ['秋冬', '帅气'], '包': ['通勤', '百搭'], '帽子': ['度假', '休闲'], '耳饰': ['约会', '精致'] };
@@ -1455,15 +1432,14 @@ SCREENS.chat = p => {
     <button class="meav" data-act="goAvatar" aria-label="我的形象：等比和 Q 版">${figureSVG([], 'q', S.body, S.look, { bg: false, vb: '34 40 132 132' })}</button></div>`;
   const past = live ? '' : `<div class="pastbar"><span>${md(date)} ${wdOf(date)} 的聊天记录</span><button data-act="chatToday">回到今天</button></div>`;
   let msgs = '';
-  if (!list.length && live) msgs = `<div class="welcome">${botav()}<h3>我是小衣，你的衣橱助手</h3><p>发淘宝链接或照片给我，我来问你尺码、颜色，帮你录进衣柜、打好标签。<br>也可以按住说话，或者直接给我打电话。</p><div class="qchips">${CH_DEFAULT.map((c, i) => c.photo ? `<label class="chip"><input type="file" accept="image/*" hidden data-file="chat">${c.l}</label>` : `<button class="chip" data-act="qwel" data-i="${i}">${c.l}</button>`).join('')}</div></div>`;
+  if (!list.length && live) msgs = `<div class="welcome">${botav()}<h3>我是小衣，你的衣橱助手</h3><p>发淘宝链接或照片给我，我来问你尺码、颜色，帮你录进衣柜、打好标签。<br>不想打字的话，点左下角麦克风按住说话就行。</p><div class="qchips">${CH_DEFAULT.map((c, i) => c.photo ? `<label class="chip"><input type="file" accept="image/*" hidden data-file="chat">${c.l}</label>` : `<button class="chip" data-act="qwel" data-i="${i}">${c.l}</button>`).join('')}</div></div>`;
   else msgs = list.map((m, i) => msgHTML(m, i ? list[i - 1].t : 0, i === list.length - 1, live)).join('');
   if (UI.typing && live) msgs += `<div class="mrow">${botav()}<div class="bub typing"><i></i><i></i><i></i></div></div>`;
   const bar = live ? `<div class="ibar">
     <button class="ib-btn" data-act="vmode" aria-label="${UI.voice ? '切换到键盘' : '切换到语音'}">${UI.voice ? I.keyboard : I.mic}</button>
     ${UI.voice ? '<button class="hold" id="holdbtn">按住 说话</button>' : '<input id="chatin" class="cin" placeholder="发消息或粘贴链接…" data-inp="chatin" enterkeyhint="send" autocomplete="off" aria-label="给小衣发消息">'}
     <button class="ib-btn send" id="sendbtn" data-act="chatSend" aria-label="发送" hidden>${I.send}</button>
-    <label class="ib-btn" id="attbtn" aria-label="发照片"><input type="file" accept="image/*" hidden data-file="chat">${I.plus}</label>
-    <button class="ib-btn call" data-act="startCall" aria-label="给小衣打电话">${I.phone}</button></div>` : '';
+    <label class="ib-btn" id="attbtn" aria-label="发照片"><input type="file" accept="image/*" hidden data-file="chat">${I.plus}</label></div>` : '';
   return head + past + `<div class="msgs">${msgs}</div>` + bar;
 };
 AFTER.chat = p => {
@@ -1482,8 +1458,8 @@ AFTER.chat = p => {
 };
 INP.chatin = el => { const has = !!el.value.trim(); $('#sendbtn').hidden = !has; $('#attbtn').hidden = has; };
 ACT.chatSend = () => { const inp = $('#chatin'); if (!inp || !inp.value.trim()) return; const v = inp.value; UI.refocus = true; userSend(v); };
-ACT.qchip = el => { const list = chatOf(todayStr()), c = list[list.length - 1].chips[+el.dataset.i]; if (c.call) return startCall(); userSend(c.s || c.l); };
-ACT.qwel = el => { const c = CH_DEFAULT[+el.dataset.i]; if (c.call) return startCall(); userSend(c.s || c.l); };
+ACT.qchip = el => { const list = chatOf(todayStr()), c = list[list.length - 1].chips[+el.dataset.i]; userSend(c.s || c.l); };
+ACT.qwel = el => { const c = CH_DEFAULT[+el.dataset.i]; userSend(c.s || c.l); };
 ACT.vmode = () => { UI.voice = !UI.voice; render(); };
 ACT.goAvatar = () => go('avatar', {});
 ACT.chatToday = () => { cur().p.date = undefined; render(); };
@@ -1538,51 +1514,6 @@ function recStop(ok) {
     userSend(real || demoUtter(), 'voice', { dur: Math.max(1, dur), sim: !real });
   }, REC.rec ? 450 : 150);
 }
-
-/* 打电话模式：Demo 自动演示一段通话，挂断后记录留在当天的聊天里 */
-const CALL_SCRIPT = [['bot', '喂～我是小衣。今天想录衣服，还是聊聊穿搭？'], ['me', '我刚在淘宝买了件衬衫，帮我录进衣柜。'], ['bot', '好呀！什么颜色、什么尺码的？'], ['me', '米白色的，M 码，一百五十九块。'], ['bot', '记下了：米白色衬衫，M 码，159 元。要打什么标签吗？'], ['me', '就打通勤和法式吧。'], ['bot', '好嘞～挂断后我把单品卡发到聊天里，你点一下就能放进衣柜。']];
-let CALL = null;
-function speak(text) { try { if (!CALL || !CALL.spk || !window.speechSynthesis) return; const u = new SpeechSynthesisUtterance(text); u.lang = 'zh-CN'; u.rate = 1.05; speechSynthesis.speak(u); } catch (e) {} }
-function callUI() {
-  const c = $('#call'); c.hidden = false;
-  c.innerHTML = `<div class="callui" role="dialog" aria-label="和小衣通话中"><div class="c-top"><span class="c-demo">演示通话 · 自动播放示例对话</span><b>小衣</b><span id="ctime">正在接通…</span></div>
-    <div class="c-av"><span class="ring"></span><span class="ring r2"></span>${botav()}</div>
-    <div class="c-cap" id="ccap" aria-live="polite"></div>
-    <div class="c-btns"><button class="c-b${CALL.spk ? ' on' : ''}" data-act="callSpk" aria-pressed="${CALL.spk}">${I.speaker}<span>${CALL.spk ? '朗读开' : '朗读关'}</span></button><button class="c-b end" data-act="hangup">${I.phoneDown}<span>挂断</span></button></div></div>`;
-}
-function callCaps() { const el = $('#ccap'); if (el) el.innerHTML = CALL.lines.slice(-3).map(([r, t]) => `<div><b>${r === 'bot' ? '小衣' : '我'}</b>${esc(t)}</div>`).join(''); }
-function startCall() {
-  if (CALL) return;
-  closeSheet();
-  if (cur().n !== 'chat' || cur().p.date) { NAV = [{ n: 'chat', p: {} }]; render(); }
-  CALL = { t0: 0, i: 0, lines: [], spk: true, timers: [] };
-  callUI();
-  CALL.timers.push(setTimeout(() => {
-    CALL.t0 = Date.now();
-    CALL.tick = setInterval(() => { const el = $('#ctime'); if (el) el.textContent = mmss(Math.floor((Date.now() - CALL.t0) / 1000)); }, 500);
-    const next = () => {
-      if (!CALL || CALL.i >= CALL_SCRIPT.length) return;
-      const line = CALL_SCRIPT[CALL.i++]; CALL.lines.push(line); callCaps(); if (line[0] === 'bot') speak(line[1]);
-      CALL.timers.push(setTimeout(next, Math.max(1800, line[1].length * 190)));
-    };
-    next();
-  }, 1200));
-}
-ACT.startCall = startCall;
-ACT.callSpk = () => { CALL.spk = !CALL.spk; if (!CALL.spk) try { speechSynthesis.cancel(); } catch (e) {} callUI(); callCaps(); const el = $('#ctime'); if (el && CALL.t0) el.textContent = mmss(Math.floor((Date.now() - CALL.t0) / 1000)); };
-ACT.hangup = () => {
-  const c = CALL; if (!c) return;
-  c.timers.forEach(clearTimeout); clearInterval(c.tick); try { speechSynthesis.cancel(); } catch (e) {}
-  CALL = null; $('#call').hidden = true; $('#call').innerHTML = '';
-  pushMsg({ role: 'sys', type: 'call', dur: c.t0 ? Math.max(1, Math.round((Date.now() - c.t0) / 1000)) : 0, lines: c.lines.map(([r, t]) => ({ r, t })) });
-  if (c.i >= CALL_SCRIPT.length) {
-    S.flow = null;
-    const d = newDraft({ cat: 'top', sub: '衬衫', colorName: '米', name: '米白色衬衫' }, { size: 'M', price: '159', tags: ['通勤', '法式'], source: '淘宝', seasons: ['春', '夏'], note: '电话里和小衣说的' });
-    pushMsg({ role: 'bot', type: 'text', text: '刚才电话里说的那件衬衫，确认一下就能放进衣柜 👇' });
-    pushMsg({ role: 'bot', type: 'card', card: { k: 'item', d } });
-  }
-  render();
-};
 
 /* ---------- 3D 小人 ---------- */
 const T3 = { r: null, scene: null, cam: null, grp: null, drag: null, auto: true, raf: 0, w: 0, h: 0, mode: 'real' };
@@ -1790,7 +1721,7 @@ const PAGES = [['首次打开', [['0', 'onboard', '首次引导']]],
   ['今天', [['14', 'today', '今天穿什么'], ['15', 'week', '本周排期']]],
   ['衣柜', [['1', 'wardrobe', '衣柜首页'], ['2', 'add', '添加方式'], ['2b', 'taobao', '淘宝导入'], ['3', 'cutout', '抠图确认'], ['4', 'itemForm', '单品信息'], ['5', 'item', '单品详情'], ['6', 'rules', '编号规则']]],
   ['搭配', [['7', 'outfits', '搭配列表'], ['8', 'outfitEdit', '搭配画布'], ['9', 'tryon', 'AI 试穿']]],
-  ['对话', [['16', 'chat', '对话 · 小衣'], ['17', 'call', '打电话模式'], ['18', 'chatCal', '聊天记录日历']]],
+  ['对话', [['16', 'chat', '对话 · 小衣'], ['18', 'chatCal', '聊天记录日历']]],
   ['形象', [['10', 'avatar', '我的形象'], ['11', 'body', '身材编辑'], ['12', 'look', '外观设置']]],
   ['我的', [['13', 'me', '我的']]]];
 const pagesHTML = () => PAGES.map(([g, list]) => `<div class="grp">${g}</div>` + list.map(([no, k, n]) => `<button data-act="jump" data-k="${k}"><span class="no">${no}</span>${n}</button>`).join('')).join('');
@@ -1810,7 +1741,6 @@ ACT.jump = async el => {
   else if (k === 'week') NAV = [{ n: 'today', p: {} }, { n: 'week', p: {} }];
   else if (k === 'body' || k === 'look') NAV = [{ n: 'chat', p: {} }, { n: 'avatar', p: {} }, { n: k, p: {} }];
   else if (k === 'avatar') NAV = [{ n: 'chat', p: {} }, { n: 'avatar', p: {} }];
-  else if (k === 'call') { NAV = [{ n: 'chat', p: {} }]; render(); return startCall(); }
   else if (k === 'chatCal') { NAV = [{ n: 'chat', p: {} }]; render(); return ACT.chatCal(); }
   else if (k === 'onboard') NAV = [{ n: 'onboard', p: { step: 0 } }];
   else NAV = [{ n: k, p: {} }];

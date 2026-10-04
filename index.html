@@ -147,13 +147,20 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .kv div:first-child{border-top:0}
 .kv span{color:var(--mute);flex:none}
 .kv b{font-weight:500;text-align:right;min-width:0;overflow-wrap:anywhere}
-.hero-thumb{aspect-ratio:1;border-radius:26px;background:var(--card);display:grid;place-items:center;box-shadow:var(--shadow);margin-top:4px}
+.hero-thumb{aspect-ratio:3/2;border-radius:26px;background:var(--card);display:grid;place-items:center;box-shadow:var(--shadow);margin-top:4px}
 .hero-thumb>svg,.hero-thumb>img{width:72%;height:72%;object-fit:contain}
 .codebox{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--tile);border-radius:12px;padding:10px 12px}
 .codebox .code{font-size:18px}
 .codebox .rk{font-size:12px;color:var(--mute);text-align:right;line-height:1.4}
 .meta .cl{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
 .rank{font-family:var(--f-mono);font-size:10.5px;color:var(--mute)}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 11px;border-radius:14px;background:var(--card);box-shadow:inset 0 0 0 1px var(--line);font-size:13px;color:var(--ink2)}
+.itags{margin-top:10px;font-size:13px;color:var(--accent-2)}
+.istats{margin-top:12px;font-size:13px;color:var(--ink2)}
+.inote{margin-top:8px;font-size:12.5px;color:var(--mute);line-height:1.6}
+.ifoot{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-top:22px;padding-top:12px;border-top:1px solid var(--line);font-size:11.5px;color:var(--mute);line-height:1.6}
+.ifoot button{color:var(--mute);font-size:11.5px;text-decoration:underline;flex:none}
 .bigcode{font-family:var(--f-mono);font-size:22px;color:var(--accent-2);margin-top:16px;letter-spacing:.03em}
 .ititle{font-size:22px;font-weight:600;margin:2px 0 8px}
 .hscroll{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin:0 -14px;padding:0 14px}
@@ -1095,28 +1102,22 @@ function commitItem(d, editId) {
 SCREENS.item = p => {
   const it = itemById(p.id);
   if (!it) return hdr('单品') + '<div class="empty">这件单品已经删除了</div>';
-  const inO = S.outfits.filter(o => o.pieces.some(q => q.iid === it.id));
+  const inO = S.outfits.filter(o => o.pieces.some(q => q.iid === it.id)), [rk, tot] = rankOf(it);
+  // 关键属性压成一排小胶囊；没填的不显示
+  const pills = [`${CATS[it.cat].n} · ${it.sub}`, `<i class="sw" style="width:10px;height:10px;background:${it.color}"></i>${it.colorName}`, it.size, (it.seasons || []).join(''), it.price != null ? '¥' + it.price : '', it.brand ? esc(it.brand) : '']
+    .filter(Boolean).map(x => `<span class="pill">${x}</span>`).join('');
+  const stats = [`穿 ${it.worn} 次`, it.price && it.worn ? `每次 ¥${(it.price / it.worn).toFixed(1)}` : '', `搭配 ${inO.length} 套`].filter(Boolean).join(' · ');
   return hdr('', `<button class="ibtn" data-act="editItem" aria-label="编辑">${I.edit}</button>`) + `
   <div class="hero-thumb ${it.img ? 'checker' : ''}">${art(it)}</div>
-  <div class="sec"><div class="lab" style="font-size:15px;color:var(--ink);letter-spacing:0"><b style="font-weight:600">出现在 ${inO.length} 套搭配里</b>${inO.length ? `<button data-act="outfitsWith" data-code="${esc(it.code)}">在搭配页查看</button>` : ''}</div>
-    ${inO.length ? `<div class="hscroll">${inO.map(o => `<button style="width:110px;flex:none;text-align:left" data-act="openOutfit" data-id="${o.id}">${miniHTML(o)}<div class="name" style="font-size:13px;margin-top:6px">${esc(o.name)}</div></button>`).join('')}</div>` : '<div class="sub">还没有搭配用到它</div>'}</div>
-  <div class="bigcode">${esc(it.code)}</div><div class="ititle">${esc(it.name)}</div>
-  <div class="row"><button class="btn soft" data-act="worn">今天穿了 · 第 ${it.worn + 1} 次</button><button class="btn" data-act="newOutfitWith">${I.plus}用它搭一套</button></div>
-  <div class="sec"><div class="kv">
-    <div><span>编号</span><b>${esc(it.code)} <span class="sub">· 永久不变</span></b></div>
-    <div><span>排序</span><b>${CATS[it.cat].n}第 ${rankOf(it)[0]} 件 / 共 ${rankOf(it)[1]} 件</b></div>
-    <div><span>类别</span><b>${CATS[it.cat].n} · ${it.sub}</b></div>
-    <div><span>尺码</span><b>${esc(it.size) || '—'}</b></div>
-    <div><span>颜色</span><b><i class="sw" style="display:inline-block;width:12px;height:12px;vertical-align:-1px;background:${it.color};margin-right:6px"></i>${it.colorName}</b></div>
-    <div><span>季节</span><b>${(it.seasons || []).join(' / ') || '—'}</b></div>
-    <div><span>品牌</span><b>${esc(it.brand) || '—'}</b></div>
-    <div><span>价格</span><b>${it.price != null ? '¥' + it.price : '—'}</b></div>
-    <div><span>来源</span><b>${esc(it.source)}</b></div>
-    <div><span>穿着</span><b>${it.worn} 次${it.price && it.worn ? ` · 每次 ¥${(it.price / it.worn).toFixed(1)}` : ''}</b></div>
-    ${it.tags && it.tags.length ? `<div><span>标签</span><b>${it.tags.map(esc).join('、')}</b></div>` : ''}
-    ${it.note ? `<div><span>备注</span><b>${esc(it.note)}</b></div>` : ''}
-  </div></div>
-  <button class="btn danger block" style="margin-top:16px" data-act="delItem">${I.trash}删除这件单品</button>`;
+  ${inO.length ? `<div class="sec"><div class="lab" style="font-size:15px;color:var(--ink);letter-spacing:0"><b style="font-weight:600">出现在 ${inO.length} 套搭配里</b><button data-act="outfitsWith" data-code="${esc(it.code)}">在搭配页查看</button></div>
+    <div class="hscroll">${inO.map(o => `<button style="width:110px;flex:none;text-align:left" data-act="openOutfit" data-id="${o.id}">${miniHTML(o)}<div class="name" style="font-size:13px;margin-top:6px">${esc(o.name)}</div></button>`).join('')}</div></div>` : ''}
+  <div class="ititle" style="margin-top:16px">${esc(it.name)}</div>
+  <div class="pills">${pills}</div>
+  ${it.tags && it.tags.length ? `<div class="itags">${it.tags.map(t => '#' + esc(t)).join('　')}</div>` : ''}
+  <div class="istats">${stats}</div>
+  ${it.note ? `<div class="inote">${esc(it.note)}</div>` : ''}
+  <div class="row" style="margin-top:14px"><button class="btn soft" data-act="worn">今天穿了</button><button class="btn" data-act="newOutfitWith">${I.plus}用它搭一套</button></div>
+  <div class="ifoot"><span>${esc(it.code)} · ${CATS[it.cat].n}第 ${rk}/${tot} 件 · ${esc(it.source)}录入 · ${ymd(new Date(it.created))} 入库</span><button data-act="delItem">删除</button></div>`;
 };
 ACT.worn = () => { const it = itemById(cur().p.id); it.worn++; save(); rerender(); toast(`记下了，「${it.name}」穿了 ${it.worn} 次`); };
 ACT.editItem = () => { const it = itemById(cur().p.id); go('itemForm', { editId: it.id, d: { ...clone(it), tags: [...(it.tags || [])], price: it.price ?? '', ai: null } }); };

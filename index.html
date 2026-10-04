@@ -185,7 +185,7 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 
 /* 今天 */
 /* 今天页铺满一屏：小人区域自动伸缩，单品和三个按钮始终在屏幕内 */
-.screen.fitmode{padding-bottom:14px}
+.screen.fitmode{padding-bottom:0}
 .today{min-height:100%;display:flex;flex-direction:column}
 .drawcard{background:var(--card);border-radius:26px;box-shadow:var(--shadow);padding:12px;flex:1;min-height:0;display:flex;flex-direction:column}
 .drawcard .fig{position:relative;flex:1;min-height:150px;border-radius:20px;overflow:hidden;background:linear-gradient(180deg,#FDE4EE,#F1ECFF)}
@@ -205,6 +205,11 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .a3.main{color:var(--accent-2);font-weight:600}
 .a3.main .a3i{background:var(--accent);color:var(--on-accent);box-shadow:0 12px 24px -10px var(--accent)}
 .a3.main .a3i svg{width:22px;height:22px}
+/* 三个操作按钮永远浮在今天页底部，内容再长也压在内容上面 */
+.today .act3{position:sticky;bottom:0;z-index:5;margin:10px -16px 0;padding:14px 16px 12px;background:linear-gradient(to top,var(--app) 62%,transparent)}
+.a3[disabled]{opacity:.4;pointer-events:none}
+.emptyhint{position:absolute;left:12px;right:12px;bottom:14px;z-index:1;text-align:center;font-size:14px;font-weight:600;color:var(--ink2);background:color-mix(in srgb,var(--card) 85%,transparent);border-radius:14px;padding:10px 12px;line-height:1.5}
+.emptyhint small{font-weight:400;font-size:12px;color:var(--mute)}
 .a3.done{color:var(--mint-ink)}
 .a3.done .a3i{background:var(--mint);color:var(--mint-ink);box-shadow:none}
 .figmode{position:absolute;left:8px;top:8px;font-size:11.5px;font-weight:600;background:var(--card);color:var(--ink2);padding:4px 9px;border-radius:10px;box-shadow:var(--shadow)}
@@ -291,7 +296,8 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .okbtn svg{width:20px;height:20px}
 .card.pick .thumb{position:relative}
 .card.pick .ck{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center}
-.linkadd{display:block;margin:18px auto 4px;color:var(--accent-2);font-size:14px;font-weight:600;padding:8px 12px}
+.linkadd{display:block;margin:16px 0 4px;color:var(--mute);font-size:13px;font-weight:400;padding:6px 2px;text-align:left}
+.linkadd u{text-underline-offset:3px}
 .optcard .thumb{background:none;box-shadow:inset 0 0 0 1.5px var(--line);color:var(--accent-2)}
 .optcard .thumb svg{width:30px;height:30px}
 .ecard{width:300px;gap:12px}
@@ -1411,7 +1417,8 @@ function drawIds(prev = [], locks = []) {
 function planOf(date, create) {
   let e = S.plan[date];
   if (e) { e.ids = e.ids.filter(itemById); e.locks = (e.locks || []).filter(id => e.ids.includes(id)); }
-  if (!e && create) { e = S.plan[date] = { ids: drawIds(), locks: [], done: false }; save(); }
+  // 新建的日子默认是空的，由用户自己添加；只有「随机」「排满」才会自动抽
+  if (!e && create) { e = S.plan[date] = { ids: [], locks: [], done: false }; save(); }
   return e;
 }
 const piecesOf = ids => { const o = { pieces: ids.map(iid => ({ iid })) }; tidy(o); return o.pieces; };
@@ -1425,25 +1432,25 @@ function setIds(e, date, ids) {
 SCREENS.today = p => {
   const t = todayStr(), date = p.sel || t, isToday = date === t, past = date < t;
   // 周条跟着所选日期走：选到下周的某天，就显示下周
-  const e = planOf(date, !past), ws = weekStart(date);
+  const e = planOf(date, false) || { ids: [], locks: [], done: false }, ws = weekStart(date);
   const strip = `<div class="wkrow"><button class="wkarrow" data-act="wkShift" data-v="-7" aria-label="上一周">${I.back}</button><div class="weekstrip">${[0, 1, 2, 3, 4, 5, 6].map(n => {
     const d = addDays(ws, n), pe = planOf(d, false), first = pe && pe.ids.length && itemById(pe.ids[0]);
     return `<button class="wd${d === date ? ' on' : ''}" data-act="openDay" data-d="${d}" aria-pressed="${d === date}" aria-label="${md(d)}${pe && pe.done ? ' 已定' : ''}">${d === t ? '今天' : wdOf(d).slice(1)}<b>${parseYmd(d).getDate()}</b><span class="th">${first ? art(first) : ''}</span>${pe && pe.done ? `<i class="ok">${I.check}</i>` : ''}</button>`;
   }).join('')}</div><button class="wkarrow" data-act="wkShift" data-v="7" aria-label="下一周">${I.chev}</button></div>`;
   const head = `<div class="tblock"><div><div class="eyebrow">${isToday ? '今天' : past ? '已经过去' : '提前安排'} · ${wdOf(date)}${isToday ? '' : ' · <button class="backtoday" data-act="goToday">回到今天</button>'}</div><h1 class="big">${md(date)}</h1></div><div class="tbr"><button class="ibtn" data-act="goWeek" aria-label="穿搭排期">${I.cal}</button>${meBtn()}</div></div>` + strip;
-  if (!e) return `<div class="today">` + head + `<div class="empty">这天没有记录穿搭<br><button class="btn soft" style="margin-top:12px" data-act="makeDay">补记这天穿了什么</button></div></div>`;
-  if (!e.ids.length) return `<div class="today">` + head + '<div class="empty">衣柜里还没有衣服<br>先去添加几件吧</div></div>';
+  if (!S.items.length) return `<div class="today">` + head + '<div class="empty">衣柜里还没有衣服<br>先去添加几件吧</div></div>';
+  const empty = !e.ids.length;
   const its = e.ids.map(itemById), missing = CAT_KEYS.filter(k => !its.some(i => i.cat === k));
   const okText = isToday ? '就穿这套' : past ? '就是这套' : '定下这套';
   return `<div class="today">` + head + `
   <div class="drawcard" id="drawcard" style="margin-top:14px">
-    <div class="fig">${figureSVG(piecesOf(e.ids), UI.mode, S.body, S.look, { bg: 0, vb: '10 12 180 400' })}<button class="figmode" data-act="figmode">${UI.mode === 'q' ? 'Q 版' : '等比'} ⇄</button></div>
-    <div class="lab" style="margin-top:12px"><span>这套的单品</span><span>点一件可以单独换</span></div>
+    <div class="fig">${figureSVG(piecesOf(e.ids), UI.mode, S.body, S.look, { bg: 0, vb: '10 12 180 400' })}<button class="figmode" data-act="figmode">${UI.mode === 'q' ? 'Q 版' : '等比'} ⇄</button>${empty ? `<div class="emptyhint">${past ? '这天没有记录' : '这天还没安排'}<br><small>点下面的 ＋ 自己挑，或者「随机」「我来选」</small></div>` : ''}</div>
+    <div class="lab" style="margin-top:12px"><span>${empty ? '添加单品' : '这套的单品'}</span><span>${empty ? '' : '点一件可以单独换'}</span></div>
     <div class="swaprow">${its.map(i => `<button class="swit" data-act="swapItem" data-id="${i.id}" aria-label="换掉 ${esc(i.name)}"><span class="thumb">${art(i)}</span><span class="code">${esc(i.code)}</span><span class="nm">${esc(i.name)}</span></button>`).join('')}${missing.map(k => `<button class="swit add" data-act="swapItem" data-id="" data-cat="${k}" aria-label="加一件${CATS[k].n}"><span class="thumb">＋</span><span class="nm">加${CATS[k].n}</span></button>`).join('')}</div>
   </div>
   <div class="act3">
     <button class="a3" data-act="redraw"><span class="a3i">${I.dice}</span><span>随机</span></button>
-    ${e.done ? `<div class="a3 main done" role="status"><span class="a3i">${I.check}</span><span>已定下</span></div>` : `<button class="a3 main" data-act="confirmDay"><span class="a3i">${I.check}</span><span>${okText}</span></button>`}
+    ${e.done ? `<div class="a3 main done" role="status"><span class="a3i">${I.check}</span><span>已定下</span></div>` : `<button class="a3 main" data-act="confirmDay" ${empty ? 'disabled' : ''}><span class="a3i">${I.check}</span><span>${okText}</span></button>`}
     <button class="a3" data-act="pickOutfit"><span class="a3i">${I.shirt}</span><span>我来选</span></button>
   </div></div>`;
 };
@@ -1455,7 +1462,7 @@ ACT.goMe = () => go('me', {});
 ACT.openDay = el => { const d = el.dataset.d; if (cur().n === 'today') { cur().p.sel = d; return rerender(); } NAV = [{ n: 'today', p: { sel: d } }]; render(); };
 ACT.makeDay = () => { curPlan(); rerender(); };
 ACT.redraw = () => { const d = cur().p.sel || todayStr(), e = curPlan(); setIds(e, d, drawIds(e.ids)); rerender(); const c = $('#drawcard'); if (c) c.classList.add('flipin'); };
-ACT.confirmDay = () => { const d = cur().p.sel || todayStr(), e = curPlan(); e.done = true; if (counted(d)) e.ids.forEach(id => itemById(id).worn++); save(); rerender(); toast(d === todayStr() ? '好，今天就穿这套' : counted(d) ? '记下了' : `${md(d)} 就穿这套`); };
+ACT.confirmDay = () => { const d = cur().p.sel || todayStr(), e = curPlan(); if (!e.ids.length) return toast('先挑几件衣服'); e.done = true; if (counted(d)) e.ids.forEach(id => itemById(id).worn++); save(); rerender(); toast(d === todayStr() ? '好，今天就穿这套' : counted(d) ? '记下了' : `${md(d)} 就穿这套`); };
 // 换单品：同一类别可以多选，点右上角 ✓ 生效；全部取消再确认 = 这类什么都不穿
 const byCat = ids => ids.sort((a, b) => CAT_KEYS.indexOf(itemById(a).cat) - CAT_KEYS.indexOf(itemById(b).cat));
 function swapSheetHTML() {
@@ -1463,7 +1470,7 @@ function swapSheetHTML() {
   return `<div class="sheethd"><div><div class="sheet-title">选${n}</div><div class="sheet-sub" style="margin:0">${sel.length ? `已选 ${sel.length} 件，可多选` : `不穿${n}，或者点选几件`}</div></div>
     <button class="okbtn" data-act="swapApply" aria-label="确认">${I.check}</button></div>
     <div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:14px">${list.map(i => { const on = sel.includes(i.id); return `<button class="card pick${on ? ' cur' : ''}" data-act="swapToggle" data-id="${i.id}" aria-pressed="${on}"><div class="thumb">${art(i)}${on ? `<span class="ck">${I.check}</span>` : ''}</div><div class="meta"><span class="code">${esc(i.code)}</span><span class="name" style="font-size:12.5px">${esc(i.name)}</span></div></button>`; }).join('')}</div>
-    <button class="linkadd" data-act="swapNew">没有找到？添加新单品</button>`;
+    <button class="linkadd" data-act="swapNew">没有找到？<u>添加新单品</u></button>`;
 }
 ACT.swapItem = el => {
   const it = el.dataset.id && itemById(el.dataset.id), cat = it ? it.cat : (el.dataset.cat || 'acc');
@@ -1506,8 +1513,8 @@ SCREENS.week = p => {
 };
 const openDays = () => { const p = cur().p, t = todayStr(), ws = addDays(weekStart(t), (p.off || 0) * 7); return [0, 1, 2, 3, 4, 5, 6].map(n => addDays(ws, n)).filter(d => d >= t); };
 ACT.wk = el => { cur().p.off = (cur().p.off || 0) + +el.dataset.v; rerender(); };
-ACT.rerollDay = el => { const d = el.dataset.d, had = !!S.plan[d], e = planOf(d, true); if (had) e.ids = drawIds(e.ids, e.locks); save(); rerender(); };
-ACT.fillWeek = () => { let n = 0; openDays().forEach(d => { if (!S.plan[d]) { planOf(d, true); n++; } }); save(); rerender(); toast(n ? `排好了 ${n} 天` : '这周已经都排好了'); };
+ACT.rerollDay = el => { const d = el.dataset.d, e = planOf(d, true); e.ids = drawIds(e.ids, e.locks); save(); rerender(); };
+ACT.fillWeek = () => { let n = 0; openDays().forEach(d => { const e = planOf(d, true); if (!e.ids.length) { e.ids = drawIds(); n++; } }); save(); rerender(); toast(n ? `排好了 ${n} 天` : '这周已经都排好了'); };
 ACT.rerollWeek = () => { let n = 0; openDays().forEach(d => { const e = planOf(d, true); if (!e.done) { e.ids = drawIds(e.ids, e.locks); n++; } }); save(); rerender(); toast(`重新摇了 ${n} 天`); };
 
 /* ---------- 对话 · 小衣（Demo：按关键词走预设流程，数据操作真实生效） ---------- */
@@ -1565,7 +1572,7 @@ function respond(text) {
   if (f && !/https?:\/\/|tb\.cn/i.test(text)) return editByWords(f, text);
   if (/https?:\/\/|tb\.cn|淘宝|天猫/i.test(text)) return startLinkFlow();
   if (/旅游|旅行|出差|出去玩|度假/.test(text)) return botSay([{ text: '出行穿搭还在做～之后告诉我去哪、玩几天，我会按天气和行程排好每天穿什么，再给你一张行李清单。', chips: CH_DEFAULT }]);
-  if (/穿什么|今天穿|搭一套|搭配/.test(text)) { const e = planOf(todayStr(), true); return botSay([{ text: e.done ? '今天已经定下这套啦 👇' : '今天给你配了这套，不喜欢可以换 👇' }, { type: 'card', card: { k: 'outfit', date: todayStr() } }]); }
+  if (/穿什么|今天穿|搭一套|搭配/.test(text)) { const e = planOf(todayStr(), true); if (!e.ids.length) { e.ids = drawIds(); save(); } return botSay([{ text: e.done ? '今天已经定下这套啦 👇' : '今天给你配了这套，不喜欢可以换 👇' }, { type: 'card', card: { k: 'outfit', date: todayStr() } }]); }
   if (/录|添加|新买|买了/.test(text)) return botSay([{ text: '好呀！发一个商品链接给我，或者点下面的 ＋ 拍一张照片。', chips: [CH_LINK, CH_PHOTO] }]);
   if (/标签/.test(text)) return botSay([{ text: '批量整理标签还在做，下个版本就能用。现在录入单品时，我会顺便帮你打好标签。', chips: CH_DEFAULT }]);
   if (/博主/.test(text)) return botSay([{ text: '分析博主风格还在做，之后发几张截图给我就行。', chips: CH_DEFAULT }]);
@@ -1699,7 +1706,7 @@ ACT.ceTag = el => ceUpd(el, (d, v) => toggleIn(d.tags, v));
 document.addEventListener('input', e => { const el = e.target; if (!el.dataset || !el.dataset.cbind) return; const m = findMsg(el.dataset.m); if (m && !m.card.saved) { m.card.d[el.dataset.cbind] = el.value; save(); } });
 ACT.chatSave = el => { const m = findMsg(el.dataset.m); if (!m || m.card.saved) return; if (S.flow && S.flow.msgId === m.id) S.flow = null; m.card.saved = commitItem(m.card.d); save(); toast(`已放进衣柜，编号 ${itemById(m.card.saved).code}`); chatAfterSave(m.card.saved); chatRefresh(); };
 ACT.chatRedraw = () => { const t = todayStr(), e = planOf(t, true); setIds(e, t, drawIds(e.ids)); chatRefresh(); };
-ACT.chatWear = () => { const t = todayStr(), e = planOf(t, true); if (e.done) return; e.done = true; e.ids.forEach(id => itemById(id).worn++); save(); toast('好，今天就穿这套'); botSay([{ text: '定下啦～穿着次数已经记好，在「今天」页也能看到。', chips: CH_DEFAULT }], 500); chatRefresh(); };
+ACT.chatWear = () => { const t = todayStr(), e = planOf(t, true); if (e.done || !e.ids.length) return; e.done = true; e.ids.forEach(id => itemById(id).worn++); save(); toast('好，今天就穿这套'); botSay([{ text: '定下啦～穿着次数已经记好，在「今天」页也能看到。', chips: CH_DEFAULT }], 500); chatRefresh(); };
 ACT.chatEdit = el => { const m = findMsg(el.dataset.m); go('itemForm', { d: clone(m.card.d), fromChat: m.id }); };
 
 /* 聊天记录日历：当天只显示当天，切日期看历史 */

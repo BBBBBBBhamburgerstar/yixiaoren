@@ -67,7 +67,7 @@ svg{flex:none}
 .viewport{position:relative;flex:1;min-height:0}
 .screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:0 16px 28px;scrollbar-width:none}
 .screen::-webkit-scrollbar{display:none}
-.tabbar{flex:none;display:grid;grid-template-columns:repeat(5,1fr);padding:8px 4px 28px;background:var(--app);border-top:1px solid var(--line)}
+.tabbar{flex:none;display:grid;grid-template-columns:repeat(4,1fr);padding:8px 4px 28px;background:var(--app);border-top:1px solid var(--line)}
 .tabbar button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--mute);padding-top:2px}
 .tabbar button.on{color:var(--accent);font-weight:600}
 @media (max-width:900px){.side{display:none}}
@@ -213,6 +213,7 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .chathdr .who small{font-size:11.5px;color:var(--mute)}
 .botav{width:34px;height:34px;border-radius:12px;background:linear-gradient(140deg,var(--accent),#F7A3C0);color:#fff;display:grid;place-items:center;flex:none}
 .botav svg{width:19px;height:19px}
+.tbr{display:flex;align-items:center;gap:8px;flex:none}
 .meav{width:38px;height:38px;border-radius:50%;overflow:hidden;background:var(--accent-soft);box-shadow:0 0 0 2px var(--card),var(--shadow);flex:none}
 .meav svg{width:100%;height:100%;display:block}
 .pastbar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--butter);color:var(--butter-ink);border-radius:12px;padding:8px 12px;margin-top:10px;font-size:12.5px}
@@ -628,7 +629,9 @@ const miniHTML = o => `<div class="mini">${o.pieces.map((p, i) => pieceHTML(p, i
 
 /* ---------- 路由 ---------- */
 const UI = { mode: 'real', F: { cat: 'all', q: '', colors: [], seasons: [] }, occ: '全部', dcat: 'top' };
-const ROOTS = ['wardrobe', 'outfits', 'today', 'chat', 'me'];
+const ROOTS = ['wardrobe', 'outfits', 'today', 'chat'];
+// 四个主页面右上角的头像，点进「我的」
+const meBtn = () => `<button class="meav" data-act="goMe" aria-label="我的">${figureSVG([], 'q', S.body, S.look, { bg: false, vb: '34 40 132 132' })}</button>`;
 let NAV = [{ n: 'wardrobe', p: {} }];
 const cur = () => NAV[NAV.length - 1];
 function go(n, p = {}) { NAV.push({ n, p }); render(); }
@@ -685,7 +688,7 @@ SCREENS.wardrobe = () => {
   const cnt = k => k === 'all' ? S.items.length : S.items.filter(i => i.cat === k).length;
   const nf = UI.F.colors.length + UI.F.seasons.length;
   return `<div class="tblock"><div><div class="eyebrow">我的衣柜</div><h1 class="big"><span class="num">${S.items.length}</span> 件单品</h1></div>
-    <button class="ibtn" data-act="goRules" aria-label="编号规则">${I.hash}</button></div>
+    <div class="tbr"><button class="ibtn" data-act="goRules" aria-label="编号规则">${I.hash}</button>${meBtn()}</div></div>
   <div class="search">${I.search}<input id="q" type="search" placeholder="搜编号、名称、品牌、标签" value="${esc(UI.F.q)}" data-inp="q" aria-label="搜索单品">
     <button class="${nf ? 'act' : ''}" data-act="filter">${I.filter}${nf ? `筛选 ${nf}` : '筛选'}</button></div>
   <div class="chips">${[['all', '全部'], ...CAT_KEYS.map(k => [k, CATS[k].n])].map(([k, n]) => `<button class="chip${UI.F.cat === k ? ' on' : ''}" data-act="cat" data-v="${k}">${n}<span class="n">${cnt(k)}</span></button>`).join('')}</div>
@@ -1013,7 +1016,7 @@ ACT.saveRules = () => { const p = cur().p, e = rulesValid(p.r); if (e) return to
 /* 搭配列表 */
 SCREENS.outfits = () => {
   const list = S.outfits.filter(o => UI.occ === '全部' || o.occasion === UI.occ);
-  return `<div class="tblock"><div><div class="eyebrow">搭配</div><h1 class="big"><span class="num">${S.outfits.length}</span> 套搭配</h1></div></div>
+  return `<div class="tblock"><div><div class="eyebrow">搭配</div><h1 class="big"><span class="num">${S.outfits.length}</span> 套搭配</h1></div>${meBtn()}</div>
   <div class="chips">${['全部', ...OCCASIONS].map(o => `<button class="chip${UI.occ === o ? ' on' : ''}" data-act="occ" data-v="${o}">${o}</button>`).join('')}</div>
   ${list.length ? `<div class="grid">${list.map(o => `<button class="card" data-act="openOutfit" data-id="${o.id}">${miniHTML(o)}<div class="meta"><span class="name">${esc(o.name)}</span><span class="sub">${o.occasion} · ${o.pieces.length} 件</span></div></button>`).join('')}</div>`
     : `<div class="empty">这个场合还没有搭配<br>点右下角新建一套</div>`}<div style="height:70px"></div>`;
@@ -1212,7 +1215,7 @@ SCREENS.today = p => {
     const d = addDays(ws, n), pe = planOf(d, false), first = pe && pe.ids.length && itemById(pe.ids[0]);
     return `<button class="wd${d === date ? ' on' : ''}" data-act="openDay" data-d="${d}" aria-pressed="${d === date}" aria-label="${md(d)}${pe && pe.done ? ' 已定' : ''}">${d === t ? '今天' : wdOf(d).slice(1)}<b>${parseYmd(d).getDate()}</b><span class="th">${first ? art(first) : ''}</span>${pe && pe.done ? `<i class="ok">${I.check}</i>` : ''}</button>`;
   }).join('')}</div>`;
-  const head = `<div class="tblock"><div><div class="eyebrow">${isToday ? '今天' : past ? '已经过去' : '提前安排'} · ${wdOf(date)}</div><h1 class="big">${md(date)}</h1></div><button class="ibtn" data-act="goWeek" aria-label="穿搭排期">${I.cal}</button></div>` + strip;
+  const head = `<div class="tblock"><div><div class="eyebrow">${isToday ? '今天' : past ? '已经过去' : '提前安排'} · ${wdOf(date)}</div><h1 class="big">${md(date)}</h1></div><div class="tbr"><button class="ibtn" data-act="goWeek" aria-label="穿搭排期">${I.cal}</button>${meBtn()}</div></div>` + strip;
   if (!e) return head + `<div class="empty">这天没有记录穿搭<br><button class="btn soft" style="margin-top:12px" data-act="makeDay">补记这天穿了什么</button></div>`;
   if (!e.ids.length) return head + '<div class="empty">衣柜里还没有衣服<br>先去添加几件吧</div>';
   const its = e.ids.map(itemById), hasAcc = its.some(i => i.cat === 'acc') || !S.items.some(i => i.cat === 'acc');
@@ -1230,6 +1233,7 @@ SCREENS.today = p => {
 };
 ACT.figmode = () => { UI.mode = UI.mode === 'q' ? 'real' : 'q'; rerender(); };
 ACT.goWeek = () => go('week', {});
+ACT.goMe = () => go('me', {});
 ACT.openDay = el => { const d = el.dataset.d; if (cur().n === 'today') { cur().p.sel = d; return rerender(); } NAV = [{ n: 'today', p: { sel: d } }]; render(); };
 ACT.makeDay = () => { curPlan(); rerender(); };
 ACT.redraw = () => { const d = cur().p.sel || todayStr(), e = curPlan(); setIds(e, d, drawIds(e.ids)); rerender(); const c = $('#drawcard'); if (c) c.classList.add('flipin'); };
@@ -1428,7 +1432,7 @@ function msgHTML(m, prevT, isLast, live) {
 SCREENS.chat = p => {
   const t = todayStr(), date = p.date || t, live = date === t, list = S.chats[date] || [];
   const head = `<div class="chathdr"><div class="who">${botav()}<div><b>小衣</b><small>你的衣橱助手</small></div></div>
-    <button class="ibtn" data-act="chatCal" aria-label="聊天记录日历">${I.cal}</button></div>`;
+    <button class="ibtn" data-act="chatCal" aria-label="聊天记录日历">${I.cal}</button>${meBtn()}</div>`;
   const past = live ? '' : `<div class="pastbar"><span>${md(date)} ${wdOf(date)} 的聊天记录</span><button data-act="chatToday">回到今天</button></div>`;
   let msgs = '';
   if (!list.length && live) msgs = `<div class="welcome">${botav()}<h3>我是小衣，你的衣橱助手</h3><p>发淘宝链接或照片给我，我来问你尺码、颜色，帮你录进衣柜、打好标签。<br>不想打字的话，点左下角麦克风按住说话就行。</p><div class="qchips">${CH_DEFAULT.map((c, i) => c.photo ? `<label class="chip"><input type="file" accept="image/*" hidden data-file="chat">${c.l}</label>` : `<button class="chip" data-act="qwel" data-i="${i}">${c.l}</button>`).join('')}</div></div>`;
@@ -1678,7 +1682,7 @@ SCREENS.me = () => {
   const max = Math.max(1, ...CAT_KEYS.map(k => S.items.filter(i => i.cat === k).length));
   const top3 = S.items.slice().sort((a, b) => b.worn - a.worn).slice(0, 3);
   const mi = (act, ic, t, sm = '') => `<button class="mi" data-act="${act}"><span class="mic">${ic}</span><span>${t}</span><small>${sm}</small>${I.chev}</button>`;
-  return `<div class="tblock"><div><div class="eyebrow">我的形象</div><h1 class="big">${UI.mode === 'q' ? '可爱的我' : '等比的我'}</h1></div></div>
+  return hdr('我的') + `<div class="tblock" style="padding-top:2px"><div><div class="eyebrow">我的形象</div><h1 class="big">${UI.mode === 'q' ? '可爱的我' : '等比的我'}</h1></div></div>
   ${seg('mode', [['real', '等比'], ['q', 'Q 版']], UI.mode)}
   <div style="margin-top:12px">${t3host()}</div>
   <div class="statchips">${BODY_FIELDS.map(([k, l, u]) => `<span><b>${S.body[k]}</b>${l} ${u}</span>`).join('')}</div>
@@ -1692,7 +1696,7 @@ SCREENS.me = () => {
 };
 ACT.privacy = () => openSheet(`<div class="sheet-title">隐私与数据</div><div class="sheet-sub">身材数据和衣柜照片只保存在本机。正式版会在这里提供：导出全部数据、注销账号并删除云端数据（App Store 要求）。</div><button class="btn block danger" data-act="resetAsk">清空并恢复示例数据</button>`);
 ACT.resetAsk = () => setSheet(`<div class="sheet-title">确定清空？</div><div class="sheet-sub">你添加的单品、搭配和身材数据都会被删除，恢复成示例衣柜。</div><div class="row"><button class="btn" data-act="closeSheet">取消</button><button class="btn pri" style="background:var(--danger)" data-act="resetYes">清空</button></div>`);
-ACT.resetYes = () => { S = seed(); S.onboarded = true; save(); closeSheet(); toast('已恢复示例数据'); tabTo('me'); };
+ACT.resetYes = () => { S = seed(); S.onboarded = true; save(); closeSheet(); toast('已恢复示例数据'); NAV = [{ n: 'today', p: {} }, { n: 'me', p: {} }]; render(); };
 ACT.replay = () => { NAV = [{ n: 'onboard', p: { step: 0 } }]; render(); };
 
 /* 引导 */
@@ -1731,11 +1735,12 @@ ACT.jump = async el => {
   else if (k === 'itemForm') NAV = [{ n: 'wardrobe', p: {} }, { n: 'itemForm', p: { d: newDraft({ cat: 'top', sub: '衬衫', colorName: '浅蓝', name: '浅蓝色衬衫' }) } }];
   else if (k === 'item') NAV = [{ n: 'wardrobe', p: {} }, { n: 'item', p: { id: i0 && i0.id } }];
   else if (k === 'taobao') NAV = [{ n: 'wardrobe', p: {} }, { n: 'taobao', p: {} }];
-  else if (k === 'rules') NAV = [{ n: 'me', p: {} }, { n: 'rules', p: {} }];
+  else if (k === 'rules') NAV = [{ n: 'today', p: {} }, { n: 'me', p: {} }, { n: 'rules', p: {} }];
+  else if (k === 'me') NAV = [{ n: 'today', p: {} }, { n: 'me', p: {} }];
   else if (k === 'outfitEdit') NAV = [{ n: 'outfits', p: {} }, { n: 'outfitEdit', p: { d: o0 ? clone(o0) : { name: '', occasion: '休闲', pieces: [] }, sel: -1 } }];
   else if (k === 'tryon') NAV = [{ n: 'outfits', p: {} }, { n: 'tryon', p: { pieces: o0 ? clone(o0.pieces) : [] } }];
   else if (k === 'week') NAV = [{ n: 'today', p: {} }, { n: 'week', p: {} }];
-  else if (k === 'body' || k === 'look') NAV = [{ n: 'me', p: {} }, { n: k, p: {} }];
+  else if (k === 'body' || k === 'look') NAV = [{ n: 'today', p: {} }, { n: 'me', p: {} }, { n: k, p: {} }];
   else if (k === 'chatCal') { NAV = [{ n: 'chat', p: {} }]; render(); return ACT.chatCal(); }
   else if (k === 'onboard') NAV = [{ n: 'onboard', p: { step: 0 } }];
   else NAV = [{ n: k, p: {} }];
@@ -1758,7 +1763,7 @@ document.addEventListener('input', e => {
 });
 
 /* ---------- 启动 ---------- */
-$('#tabbar').innerHTML = [['wardrobe', I.hanger, '衣柜'], ['outfits', I.shirt, '搭配'], ['today', I.sun, '今天'], ['chat', I.chat, '对话'], ['me', I.smile, '我的']].map(([k, ic, n]) => k === 'today'
+$('#tabbar').innerHTML = [['wardrobe', I.hanger, '衣柜'], ['outfits', I.shirt, '搭配'], ['today', I.sun, '今天'], ['chat', I.chat, '对话']].map(([k, ic, n]) => k === 'today'
   ? `<button class="mid" data-act="tab" data-tab="${k}"><span class="tc">${ic}</span><span>${n}</span></button>`
   : `<button data-act="tab" data-tab="${k}">${ic}<span>${n}</span></button>`).join('');
 $('#pnav').innerHTML = pagesHTML();

@@ -256,6 +256,17 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .ccard .tags{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
 .ccard .tags .tag{height:22px;font-size:11.5px;padding:0 8px}
 .demo-tag{font-size:10.5px;color:var(--butter-ink);background:var(--butter);padding:2px 6px;border-radius:6px}
+.ecard{width:300px;gap:12px}
+.ecard .chd span{font-size:11px;max-width:60%;text-align:right}
+.ecard .lab em{font-style:normal;color:var(--accent-2);margin-left:6px}
+.ecard .inp{height:38px;font-size:14px}
+.ecard .seg button{height:30px;font-size:13px}
+.ecard .chip{height:28px;padding:0 10px;font-size:12.5px}
+.ecard .sws{gap:7px}
+.ecard .sw{width:22px;height:22px}
+.ecard .thumb{width:64px}
+.ecode{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;background:var(--tile);border-radius:10px;padding:8px 10px;font-size:11.5px;color:var(--mute)}
+.ecode .code{font-size:14px}
 .ofwrap{display:flex;gap:10px;align-items:stretch}
 .offig{width:84px;flex:none;border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#FDE4EE,#F1ECFF)}
 .offig svg{display:block;width:100%;height:auto}
@@ -1130,7 +1141,7 @@ function outfitGridHTML() {
 }
 SCREENS.outfits = () => `<div class="tblock"><div><div class="eyebrow">搭配</div><h1 class="big"><span class="num">${S.outfits.length}</span> 套搭配</h1></div>${meBtn()}</div>
   <div class="search">${I.search}<input id="oq" type="search" placeholder="搜单品名称或编号，看它能怎么搭" value="${esc(UI.oq)}" data-inp="oq" aria-label="按单品搜索搭配">${UI.oq ? `<button data-act="oqClear" aria-label="清除搜索">${I.x}</button>` : ''}</div>
-  <div class="chips">${['全部', ...S.occasions].map(o => `<button class="chip${UI.occ === o ? ' on' : ''}" data-act="occ" data-v="${esc(o)}">${esc(o)}</button>`).join('')}<button class="chip addocc" data-act="occNew" aria-label="新建场合">＋ 新建</button></div>
+  <div class="chips">${['全部', ...S.occasions].map(o => `<button class="chip${UI.occ === o ? ' on' : ''}" data-act="occ" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>
   <div id="ogrid">${outfitGridHTML()}</div><div style="height:70px"></div>`;
 // 选中的场合可能在横向滚动行的后面，自动滚到看得见的位置
 AFTER.outfits = () => { const on = $('.chips .chip.on'), row = on && on.parentNode; if (row) row.scrollLeft = on.offsetLeft - (row.clientWidth - on.offsetWidth) / 2; };
@@ -1204,7 +1215,7 @@ ACT.occAdd = () => {
   if (S.occasions.includes(v)) { err.textContent = `「${v}」已经有了`; err.hidden = false; return; }
   S.occasions.push(v); save(); closeSheet();
   if (cur().n === 'outfitEdit') { cur().p.d.occasions.push(v); toast(`已新建「${v}」，并选上了`); }
-  else { UI.occ = v; toast(`已新建「${v}」`); }
+  else toast(`已新建「${v}」`);
   rerender();
 };
 ACT.tryon = () => { const p = cur().p; if (!p.d.pieces.length) return toast('先放几件单品进画布'); go('tryon', { pieces: clone(p.d.pieces) }); };
@@ -1455,9 +1466,9 @@ function cnNum(str) {
   for (const c of m[0]) { if (c in D) n = D[c]; else { total += (n || 1) * U[c]; n = 0; } }
   return total + n || null;
 }
-function botSay(msgs, delay = 700) {
+function botSay(msgs, delay = 700, then) {
   UI.typing = true; chatRefresh();
-  setTimeout(() => { UI.typing = false; msgs.forEach(m => pushMsg({ role: 'bot', type: 'text', ...m })); chatRefresh(); }, delay);
+  setTimeout(() => { UI.typing = false; const out = msgs.map(m => pushMsg({ role: 'bot', type: 'text', ...m })); if (then) then(out); chatRefresh(); }, delay);
 }
 function chatRefresh() { if (cur().n === 'chat' && !cur().p.date && NAV.length === 1) render(); }
 function userSend(text, type = 'text', extra = {}) {
@@ -1467,7 +1478,7 @@ function userSend(text, type = 'text', extra = {}) {
 function respond(text) {
   const f = activeFlow();
   if (f && /取消|算了|不录了/.test(text)) { S.flow = null; save(); return botSay([{ text: '好，这件先不录了。还有别的需要吗？', chips: CH_DEFAULT }]); }
-  if (f) return flowStep(f, text);
+  if (f && !/https?:\/\/|tb\.cn/i.test(text)) return editByWords(f, text);
   if (/https?:\/\/|tb\.cn|淘宝|天猫/i.test(text)) return startLinkFlow();
   if (/旅游|旅行|出差|出去玩|度假/.test(text)) return botSay([{ text: '出行穿搭还在做～之后告诉我去哪、玩几天，我会按天气和行程排好每天穿什么，再给你一张行李清单。', chips: CH_DEFAULT }]);
   if (/穿什么|今天穿|搭一套|搭配/.test(text)) { const e = planOf(todayStr(), true); return botSay([{ text: e.done ? '今天已经定下这套啦 👇' : '今天给你配了这套，不喜欢可以换 👇' }, { type: 'card', card: { k: 'outfit', date: todayStr() } }]); }
@@ -1476,65 +1487,52 @@ function respond(text) {
   if (/博主/.test(text)) return botSay([{ text: '分析博主风格还在做，之后发几张截图给我就行。', chips: CH_DEFAULT }]);
   botSay([{ text: '我可以帮你添加衣服（发淘宝链接或照片，我来问尺码、颜色、价格），也可以帮你看看今天穿什么。', chips: CH_DEFAULT }]);
 }
+// 录入单品：一次性给出可编辑的信息卡（不再一个个问），也可以直接说一句话改卡片
+function startEdit(d, src, lead) {
+  S.flow = null; save();
+  botSay([{ text: lead }, { type: 'card', card: { k: 'edit', d, src } }], 1000, out => { S.flow = { date: todayStr(), kind: 'edit', msgId: out[1].id }; save(); });
+}
 function startLinkFlow() {
-  const d = newDraft({ cat: 'top', sub: '衬衫', colorName: '米', name: '法式方领泡泡袖衬衫' }, { source: '淘宝', note: '小衣从淘宝链接导入 · 示例女装店', seasons: ['春', '夏'] });
-  S.flow = { date: todayStr(), step: 'size', d, pagePrice: 159 }; save();
-  botSay([{ type: 'card', card: { k: 'link', name: '法式方领泡泡袖衬衫', shop: '示例女装店', price: 159, sub: '衬衫', colorName: '米' } },
-    { text: '找到了！这件是「法式方领泡泡袖衬衫」。你买的是什么尺码？', chips: SIZE_CH }], 1000);
+  const d = newDraft({ cat: 'top', sub: '衬衫', colorName: '米', name: '法式方领泡泡袖衬衫' }, { source: '淘宝', price: '159', note: '小衣从淘宝链接导入 · 示例女装店', seasons: ['春', '夏'], tags: (TAG_GUESS['衬衫'] || []).slice() });
+  startEdit(d, '淘宝 · 示例女装店 · ¥159（Demo 模拟解析）', '找到了！我先帮你填好了，看看对不对 👇\n还差尺码，点一下就行；也可以直接跟我说「M 码，春夏穿」。');
 }
 function chatPhoto(img, ai) {
-  pushMsg({ role: 'me', type: 'image', img, text: '[照片]' });
-  const d = newDraft(ai, { img, source: '拍照' });
-  S.flow = { date: todayStr(), step: 'sub', d }; save(); chatRefresh();
-  botSay([{ type: 'card', card: { k: 'photo', img, colorName: ai.colorName } },
-    { text: `看起来是一件${ai.colorName}色的衣服。它是哪一类？`, chips: [...CATS.top.subs, '下装', '鞋子', '饰品'].map(l => ({ l })) }], 1000);
+  pushMsg({ role: 'me', type: 'image', img, text: '[照片]' }); chatRefresh();
+  const d = newDraft(ai, { img, source: '拍照', tags: (TAG_GUESS[ai.sub] || []).slice() });
+  startEdit(d, `照片识别 · 主色${ai.colorName}（Demo 按主色估算）`, '收到照片！我先猜了一下，不对的直接在卡片里改 👇\n也可以跟我说「其实是卫衣，L 码，199 块」。');
 }
-function askNext(f, lead) {
-  const d = f.d, q = {
-    size: () => ({ text: `${lead}你买的是什么尺码？`, chips: d.cat === 'shoes' ? SHOE_CH : SIZE_CH }),
-    color: () => ({ text: `${lead}颜色是「${d.colorName}」对吗？`, chips: [{ l: '对' }, ...COLORS.filter(c => c[0] !== d.colorName).slice(0, 4).map(c => ({ l: c[0] }))] }),
-    price: () => ({ text: `${lead}实付多少钱？${f.pagePrice ? `页面价是 ¥${f.pagePrice}。` : ''}`, chips: [...(f.pagePrice ? [{ l: `就是 ${f.pagePrice}` }] : []), { l: '跳过' }] }),
-    tags: () => { const g = TAG_GUESS[d.sub] || ['百搭']; return { text: `${lead}要打标签吗？我猜可以是这些：`, chips: [{ l: g.join('，') }, { l: g[0] }, { l: '不用了' }] }; },
-  }[f.step]();
-  botSay([q]);
-}
-function flowStep(f, text) {
-  const d = f.d;
-  if (f.step === 'sub') {
-    const catHit = CAT_KEYS.find(k => text.includes(CATS[k].n) && k !== d.cat);
-    const subHit = CAT_KEYS.flatMap(k => CATS[k].subs.map(s => [k, s])).find(([, s]) => text.includes(s));
-    if (subHit) { d.cat = subHit[0]; d.sub = subHit[1]; d.name = d.colorName + d.sub; f.step = 'size'; save(); return askNext(f, `${d.sub}，好的。`); }
-    if (catHit) { d.cat = catHit; d.sub = CATS[catHit].subs[0]; save(); return botSay([{ text: `是${CATS[catHit].n}呀，具体是哪种？`, chips: CATS[catHit].subs.map(l => ({ l })) }]); }
-    return botSay([{ text: '没太听明白，选一个就好～', chips: [...CATS[d.cat].subs, '下装', '鞋子', '饰品'].map(l => ({ l })) }]);
-  }
-  if (f.step === 'size') {
-    const m = text.toUpperCase().match(/XXS|XXL|XS|XL|均码|\d{2,3}|\bS\b|\bM\b|\bL\b|S|M|L/);
-    if (!m) return botSay([{ text: '没听清尺码，选一个就好～', chips: d.cat === 'shoes' ? SHOE_CH : SIZE_CH }]);
-    d.size = m[0]; f.step = 'color'; save(); return askNext(f, `${d.size} 码，记下了。`);
-  }
-  if (f.step === 'color') {
-    if (!/^(对|是|没错|嗯|对的|是的)/.test(text)) {
-      const c = COLORS.map(c => c[0]).sort((a, b) => b.length - a.length).find(n => text.includes(n));
-      if (!c) return botSay([{ text: '没听出是什么颜色，选一个吧：', chips: COLORS.slice(0, 8).map(c => ({ l: c[0] })) }]);
-      d.colorName = c; if (!d.img && f.pagePrice == null) d.name = c + d.sub;
-    }
-    f.step = 'price'; save(); return askNext(f, `${d.colorName}色，好的。`);
-  }
-  if (f.step === 'price') {
-    if (/跳过|不记得|忘了|不知道/.test(text)) d.price = '';
-    else { const n = text.match(/\d+(\.\d+)?/); const v = n ? +n[0] : cnNum(text); if (v == null && /就是|对|是/.test(text) && f.pagePrice) d.price = String(f.pagePrice); else if (v != null) d.price = String(v); else return botSay([{ text: '多少钱呢？直接说数字就行，或者跳过。', chips: [{ l: '跳过' }] }]); }
-    f.step = 'tags'; save(); return askNext(f, d.price ? `¥${d.price}，记下了。` : '好，价格先空着。');
-  }
-  if (f.step === 'tags') {
-    d.tags = /不用|不要|没有|跳过|算了/.test(text) ? [] : splitTags(text.replace(/打上|打|就|吧|标签|这两个|这些|都/g, '').replace(/和|跟|还有/g, '，'));
-    S.flow = null; save();
-    return botSay([{ text: '信息齐了，确认一下 👇', }, { type: 'card', card: { k: 'item', d: clone(d) } }]);
-  }
+function editByWords(f, text) {
+  const m = findMsg(f.msgId);
+  if (!m || m.card.saved) { S.flow = null; save(); return respond(text); }
+  const { got, same } = parseFill(text, m.card.d), L = ks => ks.map(k => FILL_LABEL[k]).join('、');
+  save();
+  if (got.length) return botSay([{ text: `改好了：${L(got)}。看看卡片，没问题就点「放进衣柜」。` }], 500);
+  if (same.length) return botSay([{ text: `${L(same)}本来就是这样～没问题就点「放进衣柜」。` }], 500);
+  botSay([{ text: '没听出要改什么，可以直接在卡片里点，或者说「L 码，199 块，打通勤标签」。' }], 500);
 }
 function chatAfterSave(id) { const it = itemById(id); botSay([{ text: `放进衣柜啦，编号 ${it.code}。还要做点什么？`, chips: CH_DEFAULT }], 500); }
 
+function editCardHTML(m) {
+  const c = m.card, d = c.d, id = m.id, chip = (act, v, on, label = v) => `<button class="chip${on ? ' on' : ''}" data-act="${act}" data-m="${id}" data-v="${esc(v)}" aria-pressed="${on}">${esc(label)}</button>`;
+  const sizes = d.cat === 'shoes' ? ['35', '36', '37', '38', '39', '40'] : ['XS', 'S', 'M', 'L', 'XL', '均码'];
+  if (d.size && !sizes.includes(d.size)) sizes.push(d.size);
+  const tags = [...new Set([...(TAG_GUESS[d.sub] || []), ...d.tags, '百搭'])];
+  const n = S.items.filter(i => i.cat === d.cat).length;
+  return `<div class="ccard ecard"><div class="chd"><b>单品信息</b><span>${esc(c.src || '')}</span></div>
+    <div class="row1"><div class="thumb ${d.img ? 'checker' : ''}">${art({ ...d, color: colorHex(d.colorName), name: d.name || d.sub })}</div>
+      <div class="fl" style="flex:1"><label class="lab" for="cn-${id}">名称</label><input class="inp" id="cn-${id}" data-cbind="name" data-m="${id}" value="${esc(d.name)}" placeholder="${esc(d.colorName + d.sub)}"></div></div>
+    <div class="fl"><div class="lab">类别</div>${seg('ceCat', CAT_KEYS.map(k => [id + ':' + k, CATS[k].n]), id + ':' + d.cat)}<div class="chips wrapc">${CATS[d.cat].subs.map(x => chip('ceSub', x, d.sub === x)).join('')}</div></div>
+    <div class="ecode"><span>编号</span><b class="code">${esc(nextCode(d.cat))}</b><span>将是${CATS[d.cat].n}第 ${n + 1} 件 · 保存时分配</span></div>
+    <div class="fl"><div class="lab">尺码${d.size ? '' : '<em>还没选</em>'}</div><div class="chips wrapc">${sizes.map(x => chip('ceSize', x, d.size === x)).join('')}</div></div>
+    <div class="fl"><div class="lab">颜色 · ${d.colorName}</div><div class="sws">${COLORS.map(([nm, h]) => `<button class="sw${d.colorName === nm ? ' on' : ''}" style="background:${h}" data-act="ceColor" data-m="${id}" data-v="${nm}" aria-label="${nm}"></button>`).join('')}</div></div>
+    <div class="two"><div class="fl"><label class="lab" for="cp-${id}">价格（元）</label><input class="inp" id="cp-${id}" type="number" inputmode="decimal" data-cbind="price" data-m="${id}" value="${esc(d.price)}" placeholder="选填"></div>
+      <div class="fl"><div class="lab">季节</div><div class="chips wrapc">${SEASONS.map(x => chip('ceSeason', x, d.seasons.includes(x))).join('')}</div></div></div>
+    <div class="fl"><div class="lab">标签</div><div class="chips wrapc">${tags.map(x => chip('ceTag', x, d.tags.includes(x))).join('')}</div></div>
+    <div class="row"><button class="btn sm" data-act="chatEdit" data-m="${id}">更多信息</button><button class="btn sm pri" data-act="chatSave" data-m="${id}">放进衣柜</button></div></div>`;
+}
 function cardHTML(m) {
   const c = m.card;
+  if (c.k === 'edit') return c.saved ? cardHTML({ ...m, card: { ...c, k: 'item' } }) : editCardHTML(m);
   if (c.k === 'link') return `<div class="ccard"><div class="chd"><span>淘宝商品</span><span class="demo-tag">Demo 模拟解析</span></div><div class="row1"><div class="thumb">${art({ sub: c.sub, color: colorHex(c.colorName), name: c.name })}</div><div class="meta" style="padding:0"><span class="name" style="white-space:normal">${esc(c.name)}</span><span class="sub">${esc(c.shop)}</span><span class="price">¥${c.price}</span></div></div></div>`;
   if (c.k === 'photo') return `<div class="ccard"><div class="chd"><span>识别结果</span><span class="demo-tag">Demo 按主色估算</span></div><div class="row1"><div class="thumb"><img src="${c.img}" alt="上传的照片"></div><div class="meta" style="padding:0"><span class="name">主色：${c.colorName}</span><span class="sub">类别需要你确认一下</span></div></div></div>`;
   if (c.k === 'outfit') {
@@ -1608,7 +1606,15 @@ ACT.qchip = el => { const list = chatOf(todayStr()), c = list[list.length - 1].c
 ACT.qwel = el => { const c = CH_DEFAULT[+el.dataset.i]; userSend(c.s || c.l); };
 ACT.vmode = () => { UI.voice = !UI.voice; render(); };
 ACT.chatToday = () => { cur().p.date = undefined; render(); };
-ACT.chatSave = el => { const m = findMsg(el.dataset.m); if (!m || m.card.saved) return; m.card.saved = commitItem(m.card.d); save(); toast(`已放进衣柜，编号 ${itemById(m.card.saved).code}`); chatAfterSave(m.card.saved); chatRefresh(); };
+const ceUpd = (el, fn) => { const m = findMsg(el.dataset.m); if (!m || m.card.saved) return; fn(m.card.d, el.dataset.v); save(); const sc = $('#screen'), st = sc.scrollTop; render(); sc.scrollTop = st; };
+ACT.ceCat = el => { const [id, k] = el.dataset.v.split(':'); el.dataset.m = id; ceUpd(el, d => { if (d.cat === k) return; d.cat = k; d.sub = CATS[k].subs[0]; d.size = ''; }); };
+ACT.ceSub = el => ceUpd(el, (d, v) => { d.sub = v; });
+ACT.ceSize = el => ceUpd(el, (d, v) => { d.size = d.size === v ? '' : v; });
+ACT.ceColor = el => ceUpd(el, (d, v) => { d.colorName = v; });
+ACT.ceSeason = el => ceUpd(el, (d, v) => toggleIn(d.seasons, v));
+ACT.ceTag = el => ceUpd(el, (d, v) => toggleIn(d.tags, v));
+document.addEventListener('input', e => { const el = e.target; if (!el.dataset || !el.dataset.cbind) return; const m = findMsg(el.dataset.m); if (m && !m.card.saved) { m.card.d[el.dataset.cbind] = el.value; save(); } });
+ACT.chatSave = el => { const m = findMsg(el.dataset.m); if (!m || m.card.saved) return; if (S.flow && S.flow.msgId === m.id) S.flow = null; m.card.saved = commitItem(m.card.d); save(); toast(`已放进衣柜，编号 ${itemById(m.card.saved).code}`); chatAfterSave(m.card.saved); chatRefresh(); };
 ACT.chatRedraw = () => { const t = todayStr(), e = planOf(t, true); setIds(e, t, drawIds(e.ids)); chatRefresh(); };
 ACT.chatWear = () => { const t = todayStr(), e = planOf(t, true); if (e.done) return; e.done = true; e.ids.forEach(id => itemById(id).worn++); save(); toast('好，今天就穿这套'); botSay([{ text: '定下啦～穿着次数已经记好，在「今天」页也能看到。', chips: CH_DEFAULT }], 500); chatRefresh(); };
 ACT.chatEdit = el => { const m = findMsg(el.dataset.m); go('itemForm', { d: clone(m.card.d), fromChat: m.id }); };
@@ -1635,7 +1641,7 @@ const REC = {};
 function demoUtter() {
   const f = activeFlow();
   if (!f) return '我在淘宝买了件法式衬衫，帮我录一下';
-  return { sub: '衬衫', size: 'M 码', color: '对', price: '一百五十九', tags: '打通勤和法式吧' }[f.step];
+  return 'M 码，一百五十九块，春夏穿';
 }
 // done(text, dur, sim)：录完后怎么处理；demo()：浏览器不支持识别时用的示例话术
 function recStart(done, demo) {

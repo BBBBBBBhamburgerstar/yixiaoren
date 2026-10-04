@@ -1428,8 +1428,7 @@ function msgHTML(m, prevT, isLast, live) {
 SCREENS.chat = p => {
   const t = todayStr(), date = p.date || t, live = date === t, list = S.chats[date] || [];
   const head = `<div class="chathdr"><div class="who">${botav()}<div><b>小衣</b><small>你的衣橱助手</small></div></div>
-    <button class="ibtn" data-act="chatCal" aria-label="聊天记录日历">${I.cal}</button>
-    <button class="meav" data-act="goAvatar" aria-label="我的形象：等比和 Q 版">${figureSVG([], 'q', S.body, S.look, { bg: false, vb: '34 40 132 132' })}</button></div>`;
+    <button class="ibtn" data-act="chatCal" aria-label="聊天记录日历">${I.cal}</button></div>`;
   const past = live ? '' : `<div class="pastbar"><span>${md(date)} ${wdOf(date)} 的聊天记录</span><button data-act="chatToday">回到今天</button></div>`;
   let msgs = '';
   if (!list.length && live) msgs = `<div class="welcome">${botav()}<h3>我是小衣，你的衣橱助手</h3><p>发淘宝链接或照片给我，我来问你尺码、颜色，帮你录进衣柜、打好标签。<br>不想打字的话，点左下角麦克风按住说话就行。</p><div class="qchips">${CH_DEFAULT.map((c, i) => c.photo ? `<label class="chip"><input type="file" accept="image/*" hidden data-file="chat">${c.l}</label>` : `<button class="chip" data-act="qwel" data-i="${i}">${c.l}</button>`).join('')}</div></div>`;
@@ -1461,7 +1460,6 @@ ACT.chatSend = () => { const inp = $('#chatin'); if (!inp || !inp.value.trim()) 
 ACT.qchip = el => { const list = chatOf(todayStr()), c = list[list.length - 1].chips[+el.dataset.i]; userSend(c.s || c.l); };
 ACT.qwel = el => { const c = CH_DEFAULT[+el.dataset.i]; userSend(c.s || c.l); };
 ACT.vmode = () => { UI.voice = !UI.voice; render(); };
-ACT.goAvatar = () => go('avatar', {});
 ACT.chatToday = () => { cur().p.date = undefined; render(); };
 ACT.chatSave = el => { const m = findMsg(el.dataset.m); if (!m || m.card.saved) return; m.card.saved = commitItem(m.card.d); save(); toast(`已放进衣柜，编号 ${itemById(m.card.saved).code}`); chatAfterSave(m.card.saved); chatRefresh(); };
 ACT.chatEdit = el => { const m = findMsg(el.dataset.m); go('itemForm', { d: clone(m.card.d), fromChat: m.id }); };
@@ -1651,14 +1649,8 @@ function t3build(body, look, mode) {
 
 /* 形象 */
 const t3host = (cls = '') => `<div class="t3 ${cls}" id="t3"><span class="hint3">${I.rotate}左右拖动旋转</span></div>`;
-SCREENS.avatar = () => hdr('我的形象') + `<div class="tblock" style="padding-top:2px"><div><div class="eyebrow">我的形象</div><h1 class="big">${UI.mode === 'q' ? '可爱的我' : '等比的我'}</h1></div></div>
-  ${seg('mode', [['real', '等比'], ['q', 'Q 版']], UI.mode)}
-  <div style="margin-top:12px">${t3host()}</div>
-  <div class="statchips">${BODY_FIELDS.map(([k, l, u]) => `<span><b>${S.body[k]}</b>${l} ${u}</span>`).join('')}</div>
-  <div class="row" style="margin-top:14px"><button class="btn" data-act="goBody">${I.ruler}编辑身材</button><button class="btn" data-act="goLook">${I.palette}外观</button></div>
-  <button class="sec" style="width:100%;text-align:left;flex-direction:row;align-items:center" data-act="tab" data-tab="outfits"><span class="oi" style="width:40px;height:40px;border-radius:12px;background:var(--accent-soft);color:var(--accent-2);display:grid;place-items:center">${I.spark}</span><span style="flex:1"><b style="display:block">让小人穿上你的衣服</b><span class="sub">在任意一套搭配里点「AI 试穿」</span></span>${I.chev}</button>`;
-AFTER.avatar = () => t3mount($('#t3'), S.body, S.look, UI.mode);
-ACT.mode = el => { UI.mode = el.dataset.v; const p = cur().p; if (['avatar', 'today'].includes(cur().n)) return rerender(); el.parentNode.querySelectorAll('button').forEach(b => { b.classList.toggle('on', b === el); b.setAttribute('aria-selected', b === el); }); t3build(p.b || S.body, p.l || S.look, UI.mode); };
+AFTER.me = () => t3mount($('#t3'), S.body, S.look, UI.mode);
+ACT.mode = el => { UI.mode = el.dataset.v; const p = cur().p; if (['today', 'me'].includes(cur().n)) return rerender(); el.parentNode.querySelectorAll('button').forEach(b => { b.classList.toggle('on', b === el); b.setAttribute('aria-selected', b === el); }); t3build(p.b || S.body, p.l || S.look, UI.mode); };
 ACT.goBody = () => go('body', {});
 ACT.goLook = () => go('look', {});
 SCREENS.body = p => { p.b = p.b || { ...S.body }; return hdr('编辑身材', '<button class="tbtn" data-act="bsave">保存</button>') + seg('mode', [['real', '等比'], ['q', 'Q 版']], UI.mode) + `<div style="margin-top:12px">${t3host('sm')}</div><div class="sec">${slidersHTML(p.b)}</div><p class="sub" style="line-height:1.6;margin-top:12px">身材数据只保存在你的手机里。正式版的等比小人会用更精细的人体模型。</p>`; };
@@ -1686,11 +1678,15 @@ SCREENS.me = () => {
   const max = Math.max(1, ...CAT_KEYS.map(k => S.items.filter(i => i.cat === k).length));
   const top3 = S.items.slice().sort((a, b) => b.worn - a.worn).slice(0, 3);
   const mi = (act, ic, t, sm = '') => `<button class="mi" data-act="${act}"><span class="mic">${ic}</span><span>${t}</span><small>${sm}</small>${I.chev}</button>`;
-  return `<div class="profile"><div class="av">${figureSVG([], 'q', S.body, S.look, { bg: false, vb: '34 40 132 132' })}</div><div><div class="eyebrow">我的</div><h1 class="big" style="font-size:24px">衣柜主人</h1></div></div>
+  return `<div class="tblock"><div><div class="eyebrow">我的形象</div><h1 class="big">${UI.mode === 'q' ? '可爱的我' : '等比的我'}</h1></div></div>
+  ${seg('mode', [['real', '等比'], ['q', 'Q 版']], UI.mode)}
+  <div style="margin-top:12px">${t3host()}</div>
+  <div class="statchips">${BODY_FIELDS.map(([k, l, u]) => `<span><b>${S.body[k]}</b>${l} ${u}</span>`).join('')}</div>
+  <div class="row" style="margin-top:14px"><button class="btn" data-act="goBody">${I.ruler}编辑身材</button><button class="btn" data-act="goLook">${I.palette}外观</button></div>
   <div class="stats"><div class="stat"><b>${S.items.length}</b><span>件单品</span></div><div class="stat"><b>${S.outfits.length}</b><span>套搭配</span></div><div class="stat"><b>¥${total.toLocaleString()}</b><span>衣柜总价</span></div><div class="stat"><b>${worn}</b><span>累计穿着次数</span></div></div>
   <div class="sec"><h3>分类占比</h3><div class="bars">${CAT_KEYS.map(k => { const n = S.items.filter(i => i.cat === k).length; return `<div class="br"><span>${CATS[k].n}</span><div class="tr"><i style="width:${n / max * 100}%"></i></div><em>${n}</em></div>`; }).join('')}</div></div>
   <div class="sec"><h3>最常穿</h3><div>${top3.map(i => `<button class="toprow" style="width:100%;text-align:left" data-act="openItem" data-id="${i.id}"><div class="thumb">${art(i)}</div><div class="meta"><span class="code">${esc(i.code)}</span><span class="name">${esc(i.name)}</span></div><span class="sub">${i.worn} 次</span></button>`).join('')}</div></div>
-  <div class="menu">${mi('goRules', I.hash, '编号规则', `${S.rules.top.p}${S.rules.sep}${'0'.repeat(S.rules.top.d - 1)}1`)}${mi('goBody', I.ruler, '身材数据', `${S.body.h}cm · ${S.body.w}kg`)}${mi('goLook', I.palette, '外观')}${mi('privacy', I.shield, '隐私与数据')}</div>
+  <div class="menu">${mi('goRules', I.hash, '编号规则', `${S.rules.top.p}${S.rules.sep}${'0'.repeat(S.rules.top.d - 1)}1`)}${mi('privacy', I.shield, '隐私与数据')}</div>
   <div class="menu">${mi('replay', I.replay, '重新体验首次引导')}${mi('pagesSheet', I.pages, '原型页面导航')}</div>
   <p class="sub" style="text-align:center;margin-top:18px">衣小人 · 可点击原型 v0.1</p>`;
 };
@@ -1722,8 +1718,8 @@ const PAGES = [['首次打开', [['0', 'onboard', '首次引导']]],
   ['衣柜', [['1', 'wardrobe', '衣柜首页'], ['2', 'add', '添加方式'], ['2b', 'taobao', '淘宝导入'], ['3', 'cutout', '抠图确认'], ['4', 'itemForm', '单品信息'], ['5', 'item', '单品详情'], ['6', 'rules', '编号规则']]],
   ['搭配', [['7', 'outfits', '搭配列表'], ['8', 'outfitEdit', '搭配画布'], ['9', 'tryon', 'AI 试穿']]],
   ['对话', [['16', 'chat', '对话 · 小衣'], ['18', 'chatCal', '聊天记录日历']]],
-  ['形象', [['10', 'avatar', '我的形象'], ['11', 'body', '身材编辑'], ['12', 'look', '外观设置']]],
-  ['我的', [['13', 'me', '我的']]]];
+
+  ['我的', [['13', 'me', '我的 · 形象'], ['11', 'body', '身材编辑'], ['12', 'look', '外观设置']]]];
 const pagesHTML = () => PAGES.map(([g, list]) => `<div class="grp">${g}</div>` + list.map(([no, k, n]) => `<button data-act="jump" data-k="${k}"><span class="no">${no}</span>${n}</button>`).join('')).join('');
 function markNav() { const n = cur().n; document.querySelectorAll('#pnav [data-k]').forEach(b => b.classList.toggle('on', b.dataset.k === n)); }
 ACT.pagesSheet = () => openSheet(`<div class="sheet-title">原型页面导航</div><div class="sheet-sub">直接跳到任意一页</div><nav class="pnav">${pagesHTML()}</nav>`);
@@ -1739,8 +1735,7 @@ ACT.jump = async el => {
   else if (k === 'outfitEdit') NAV = [{ n: 'outfits', p: {} }, { n: 'outfitEdit', p: { d: o0 ? clone(o0) : { name: '', occasion: '休闲', pieces: [] }, sel: -1 } }];
   else if (k === 'tryon') NAV = [{ n: 'outfits', p: {} }, { n: 'tryon', p: { pieces: o0 ? clone(o0.pieces) : [] } }];
   else if (k === 'week') NAV = [{ n: 'today', p: {} }, { n: 'week', p: {} }];
-  else if (k === 'body' || k === 'look') NAV = [{ n: 'chat', p: {} }, { n: 'avatar', p: {} }, { n: k, p: {} }];
-  else if (k === 'avatar') NAV = [{ n: 'chat', p: {} }, { n: 'avatar', p: {} }];
+  else if (k === 'body' || k === 'look') NAV = [{ n: 'me', p: {} }, { n: k, p: {} }];
   else if (k === 'chatCal') { NAV = [{ n: 'chat', p: {} }]; render(); return ACT.chatCal(); }
   else if (k === 'onboard') NAV = [{ n: 'onboard', p: { step: 0 } }];
   else NAV = [{ n: k, p: {} }];

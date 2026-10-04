@@ -274,6 +274,7 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .ecard .sws{gap:7px}
 .ecard .sw{width:22px;height:22px}
 .ecard .thumb{width:64px}
+.codetag{font-family:var(--f-mono);font-size:11px;color:var(--mute);opacity:.8;letter-spacing:0}
 .codeline{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:2px 4px 8px;font-size:12px;color:var(--mute)}
 .codeline .code{font-size:12.5px;color:var(--ink2);font-weight:500}
 .codeline button{color:var(--mute);font-size:12px;text-decoration:underline;flex:none}
@@ -923,10 +924,9 @@ SCREENS.itemForm = p => {
   const preview = art({ ...d, color: colorHex(d.colorName), name: d.name || d.sub });
   return hdr(p.editId ? '编辑单品' : '单品信息', `<button class="tbtn" data-act="saveItem">${p.editId ? '保存' : '入库'}</button>`) + `
   ${UI.pendingSwap && !p.editId ? `<div class="tip" style="margin-top:4px">保存后会直接换进 ${md(UI.pendingSwap.date)} 的穿搭</div>` : ''}
-  ${codeLine(p)}
   <div class="sec" style="margin-top:4px">
     <div class="fl"><label class="lab" for="f-name">名称</label><input class="inp" id="f-name" data-bind="name" value="${esc(d.name)}" placeholder="比如：${esc(d.colorName + d.sub)}"></div>
-    <div class="fl"><div class="lab">类别</div>${seg('fcat', CAT_KEYS.map(k => [k, CATS[k].n]), d.cat)}
+    <div class="fl"><div class="lab"><span>类别</span>${codeTag(p)}</div>${seg('fcat', CAT_KEYS.map(k => [k, CATS[k].n]), d.cat)}
       <div class="chips wrapc">${CATS[d.cat].subs.map(s => `<button class="chip${d.sub === s ? ' on' : ''}" data-act="fsub" data-v="${s}">${s}</button>`).join('')}</div></div>
   </div>
   <div class="sec">
@@ -1051,14 +1051,11 @@ function applyFill(text) {
 }
 ACT.fillSend = () => { const el = $('#fillin'); if (!el.value.trim()) return toast('先说一句，比如「M 码，199 块，春秋穿」'); applyFill(el.value); };
 ACT.fillUndo = () => { const p = cur().p; if (!p.undo) return; p.d = p.undo; p.undo = null; p.fillMsg = { ok: 1, text: '已撤销刚才的填写' }; rerender(); };
-// 编号自动分配、不能改，只用一行小字放在表单最上面
-function codeLine(p) {
+// 编号自动分配、不能改：只在「类别」右侧放一个浅灰小字
+function codeTag(p) {
   const d = p.d, it = p.editId && itemById(p.editId);
-  let txt;
-  if (it && it.cat === d.cat) { const [k, t] = rankOf(it); txt = `编号 <b class="code">${esc(it.code)}</b> · ${CATS[d.cat].n}第 ${k} / ${t} 件`; }
-  else if (it) txt = `改了类别，保存后换成新编号 <b class="code">${esc(nextCode(d.cat))}</b>，原编号 ${esc(it.code)} 作废`;
-  else txt = `编号 <b class="code">${esc(nextCode(d.cat))}</b> · 将是${CATS[d.cat].n}第 ${S.items.filter(i => i.cat === d.cat).length + 1} 件 · 自动分配`;
-  return `<div class="codeline"><span>${txt}</span><button data-act="goRules">编号规则</button></div>`;
+  const txt = it && it.cat === d.cat ? `编号 ${esc(it.code)}` : it ? `新编号 ${esc(nextCode(d.cat))}` : `编号 ${esc(nextCode(d.cat))}`;
+  return `<span class="codetag">${txt}</span>`;
 }
 ACT.fcat = el => { const d = cur().p.d, v = el.dataset.v; if (d.cat === v) return; d.cat = v; d.sub = CATS[v].subs[0]; rerender(); };
 ACT.fsub = el => { cur().p.d.sub = el.dataset.v; rerender(); };
@@ -1563,13 +1560,12 @@ function editCardHTML(m) {
   return `<div class="ccard ecard"><div class="chd"><b>单品信息</b><span>${esc(c.src || '')}</span></div>
     <div class="row1"><div class="thumb ${d.img ? 'checker' : ''}">${art({ ...d, color: colorHex(d.colorName), name: d.name || d.sub })}</div>
       <div class="fl" style="flex:1"><label class="lab" for="cn-${id}">名称</label><input class="inp" id="cn-${id}" data-cbind="name" data-m="${id}" value="${esc(d.name)}" placeholder="${esc(d.colorName + d.sub)}"></div></div>
-    <div class="fl"><div class="lab">类别</div>${seg('ceCat', CAT_KEYS.map(k => [id + ':' + k, CATS[k].n]), id + ':' + d.cat)}<div class="chips wrapc">${CATS[d.cat].subs.map(x => chip('ceSub', x, d.sub === x)).join('')}</div></div>
+    <div class="fl"><div class="lab"><span>类别</span><span class="codetag">编号 ${esc(nextCode(d.cat))}</span></div>${seg('ceCat', CAT_KEYS.map(k => [id + ':' + k, CATS[k].n]), id + ':' + d.cat)}<div class="chips wrapc">${CATS[d.cat].subs.map(x => chip('ceSub', x, d.sub === x)).join('')}</div></div>
     <div class="fl"><div class="lab">尺码${d.size ? '' : '<em>还没选</em>'}</div><div class="chips wrapc">${sizes.map(x => chip('ceSize', x, d.size === x)).join('')}</div></div>
     <div class="fl"><div class="lab">颜色 · ${d.colorName}</div><div class="sws">${COLORS.map(([nm, h]) => `<button class="sw${d.colorName === nm ? ' on' : ''}" style="background:${h}" data-act="ceColor" data-m="${id}" data-v="${nm}" aria-label="${nm}"></button>`).join('')}</div></div>
     <div class="two"><div class="fl"><label class="lab" for="cp-${id}">价格（元）</label><input class="inp" id="cp-${id}" type="number" inputmode="decimal" data-cbind="price" data-m="${id}" value="${esc(d.price)}" placeholder="选填"></div>
       <div class="fl"><div class="lab">季节</div><div class="chips wrapc">${SEASONS.map(x => chip('ceSeason', x, d.seasons.includes(x))).join('')}</div></div></div>
     <div class="fl"><div class="lab">标签</div><div class="chips wrapc">${tags.map(x => chip('ceTag', x, d.tags.includes(x))).join('')}</div></div>
-    <div class="codeline" style="padding:0"><span>编号 <b class="code">${esc(nextCode(d.cat))}</b> · ${CATS[d.cat].n}第 ${n + 1} 件 · 自动分配</span></div>
     <div class="row"><button class="btn sm" data-act="chatEdit" data-m="${id}">更多信息</button><button class="btn sm pri" data-act="chatSave" data-m="${id}">放进衣柜</button></div></div>`;
 }
 function cardHTML(m) {

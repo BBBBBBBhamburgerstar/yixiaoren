@@ -1768,7 +1768,8 @@ function cardHTML(m) {
 }
 function msgHTML(m, prevT, isLast, live) {
   let h = !prevT || m.t - prevT > 10 * 60000 ? `<div class="tsep">${hm(m.t)}</div>` : '';
-  if (m.type === 'call') return h + `<details class="callrec"><summary>${I.phone}<b>语音通话</b> ${mmss(m.dur)}<span>查看记录</span></summary><div class="clines">${m.lines.map(l => `<div><b>${l.r === 'bot' ? '小衣' : '我'}</b>${esc(l.t)}</div>`).join('') || '<div class="sub">没有说话内容</div>'}</div></details>`;
+  // 通话不单独显示成卡片：和豆包一样，聊天记录里只保留一来一回的文字
+  if (m.type === 'call') return h + (m.lines || []).map(l => `<div class="mrow ${l.r === 'bot' ? '' : 'me'}">${l.r === 'bot' ? botav() : ''}<div class="mcol"><div class="bub">${esc(l.t)}</div></div></div>`).join('');
   const me = m.role === 'me';
   let body;
   if (m.type === 'voice') body = `<div class="bub voice">${m.dur}"${I.wave}</div><div class="vtext">${esc(m.text)}${m.sim ? '<em>示例语音</em>' : ''}</div>`;

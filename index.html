@@ -164,6 +164,9 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .newof .mini{display:grid;place-items:center;background:none;border:1.5px dashed var(--accent);color:var(--accent-2)}
 .newof .mini svg{width:28px;height:28px}
 .newof .name{font-size:13px;color:var(--accent-2)}
+.ititle-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px;margin-bottom:2px}
+.infobtn{width:34px;height:34px;flex:none;border-radius:50%;display:grid;place-items:center;color:var(--mute)}
+.infobtn:hover{background:var(--tile)}
 .pills{display:flex;flex-wrap:wrap;gap:6px}
 .pill{display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 11px;border-radius:14px;background:var(--card);box-shadow:inset 0 0 0 1px var(--line);font-size:13px;color:var(--ink2)}
 .itags{margin-top:10px;font-size:13px;color:var(--accent-2)}
@@ -559,6 +562,7 @@ const I = (() => {
     phone: s('<path d="M5 4h3.5l1.8 4.4-2.2 1.4a11 11 0 0 0 6.1 6.1l1.4-2.2L20 15.5V19a1.5 1.5 0 0 1-1.6 1.5C10.7 20 4 13.3 3.5 5.6A1.5 1.5 0 0 1 5 4Z"/>', 'width="20" height="20"'),
     wave: s('<path d="M6 10v4M10 7v10M14 9v6M18 11v2"/>', 'width="16" height="16"'),
     send: s('<path d="M12 19V5M6 11l6-6 6 6"/>', 'width="20" height="20" stroke-width="2.2"'),
+    info: s('<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6h.01"/>', 'width="20" height="20"'),
     cal: s('<rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M9 3v4M15 3v4"/>'),
     dice: s('<rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1.2" fill="currentColor"/><circle cx="15" cy="15" r="1.2" fill="currentColor"/><circle cx="15" cy="9" r="1.2" fill="currentColor"/><circle cx="9" cy="15" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>', 'width="20" height="20"'),
     lock: s('<rect x="6" y="11" width="12" height="9" rx="2"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/>', 'width="16" height="16"'),
@@ -1123,12 +1127,25 @@ SCREENS.item = p => {
       <span class="sechd-acts"><button class="miniact" data-act="newOutfitWith" aria-label="用它新增一套搭配">${I.plus}<span>新增</span></button>${inO.length ? `<button class="miniact" data-act="outfitsWith" data-code="${esc(it.code)}" aria-label="在搭配页查看">${I.pages}<span>查看</span></button>` : ''}</span></div>
     ${inO.length ? '' : '<div class="sub">点右上角「新增」，用它搭第一套</div>'}
     <div class="hscroll"${inO.length ? '' : ' hidden'}>${inO.map(o => `<button style="width:110px;flex:none;text-align:left" data-act="openOutfit" data-id="${o.id}">${miniHTML(o)}<div class="name" style="font-size:13px;margin-top:6px">${esc(o.name)}</div></button>`).join('')}</div></div>
-  <div class="ititle" style="margin-top:16px;margin-bottom:2px">${esc(it.name)}</div>
+  <div class="ititle-row"><div class="ititle" style="margin:0">${esc(it.name)}</div><button class="infobtn" data-act="itemInfo" aria-label="查看详细信息">${I.info}</button></div>
   <div class="istats" style="margin:0 0 10px">${stats}</div>
   <div class="pills">${pills}</div>
   ${it.tags && it.tags.length ? `<div class="itags">${it.tags.map(t => '#' + esc(t)).join('　')}</div>` : ''}
   ${it.note ? `<div class="inote">${esc(it.note)}</div>` : ''}
-  <div class="ifoot"><span>${esc(it.code)} · ${CATS[it.cat].n}第 ${rk}/${tot} 件 · ${esc(it.source)}录入 · ${ymd(new Date(it.created))} 入库</span><button data-act="delItem">删除</button></div>`;
+`;
+};
+// 次要信息放进半浮层：编号、排序、来源、入库时间，以及删除
+ACT.itemInfo = () => {
+  const it = itemById(cur().p.id), [rk, tot] = rankOf(it);
+  openSheet(`<div class="sheet-title">详细信息</div>
+    <div class="kv" style="margin-top:8px">
+      <div><span>编号</span><b>${esc(it.code)}</b></div>
+      <div><span>排序</span><b>${CATS[it.cat].n}第 ${rk} 件 / 共 ${tot} 件</b></div>
+      <div><span>来源</span><b>${esc(it.source)}录入</b></div>
+      <div><span>入库时间</span><b>${ymd(new Date(it.created))}</b></div>
+      ${it.brand ? `<div><span>品牌</span><b>${esc(it.brand)}</b></div>` : ''}
+    </div>
+    <button class="btn block danger" style="margin-top:18px" data-act="delItem">${I.trash}删除这件单品</button>`);
 };
 ACT.worn = () => { const it = itemById(cur().p.id); it.worn++; save(); rerender(); toast(`记下了，「${it.name}」穿了 ${it.worn} 次`); };
 ACT.editItem = () => { const it = itemById(cur().p.id); go('itemForm', { editId: it.id, d: { ...clone(it), tags: [...(it.tags || [])], price: it.price ?? '', ai: null } }); };

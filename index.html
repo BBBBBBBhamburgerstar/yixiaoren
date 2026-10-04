@@ -214,6 +214,11 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .flipin{animation:flipin .55s cubic-bezier(.2,.8,.2,1)}
 @keyframes flipin{from{transform:perspective(900px) rotateY(-100deg) scale(.95);opacity:.2}}
 .donebadge{margin-top:10px;display:flex;gap:6px;align-items:center;justify-content:center;background:var(--mint);color:var(--mint-ink);border-radius:12px;padding:9px;font-size:12.5px}
+.wkrow{display:flex;align-items:center;gap:2px;margin:0 -10px}
+.wkrow .weekstrip{flex:1;min-width:0;margin-top:0}
+.wkarrow{width:22px;height:56px;flex:none;display:grid;place-items:center;color:var(--mute)}
+.wkarrow svg{width:16px;height:16px}
+.backtoday{color:var(--accent-2);font-size:12px;letter-spacing:0;text-decoration:underline}
 .weekstrip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:8px}
 .wd{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 3px 8px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);font-size:11px;color:var(--mute);position:relative}
 .wd b{font-family:var(--f-display);font-size:15px;color:var(--ink);font-weight:600}
@@ -1419,12 +1424,13 @@ function setIds(e, date, ids) {
 
 SCREENS.today = p => {
   const t = todayStr(), date = p.sel || t, isToday = date === t, past = date < t;
-  const e = planOf(date, !past), ws = weekStart(t);
-  const strip = `<div class="weekstrip">${[0, 1, 2, 3, 4, 5, 6].map(n => {
+  // 周条跟着所选日期走：选到下周的某天，就显示下周
+  const e = planOf(date, !past), ws = weekStart(date);
+  const strip = `<div class="wkrow"><button class="wkarrow" data-act="wkShift" data-v="-7" aria-label="上一周">${I.back}</button><div class="weekstrip">${[0, 1, 2, 3, 4, 5, 6].map(n => {
     const d = addDays(ws, n), pe = planOf(d, false), first = pe && pe.ids.length && itemById(pe.ids[0]);
     return `<button class="wd${d === date ? ' on' : ''}" data-act="openDay" data-d="${d}" aria-pressed="${d === date}" aria-label="${md(d)}${pe && pe.done ? ' 已定' : ''}">${d === t ? '今天' : wdOf(d).slice(1)}<b>${parseYmd(d).getDate()}</b><span class="th">${first ? art(first) : ''}</span>${pe && pe.done ? `<i class="ok">${I.check}</i>` : ''}</button>`;
-  }).join('')}</div>`;
-  const head = `<div class="tblock"><div><div class="eyebrow">${isToday ? '今天' : past ? '已经过去' : '提前安排'} · ${wdOf(date)}</div><h1 class="big">${md(date)}</h1></div><div class="tbr"><button class="ibtn" data-act="goWeek" aria-label="穿搭排期">${I.cal}</button>${meBtn()}</div></div>` + strip;
+  }).join('')}</div><button class="wkarrow" data-act="wkShift" data-v="7" aria-label="下一周">${I.chev}</button></div>`;
+  const head = `<div class="tblock"><div><div class="eyebrow">${isToday ? '今天' : past ? '已经过去' : '提前安排'} · ${wdOf(date)}${isToday ? '' : ' · <button class="backtoday" data-act="goToday">回到今天</button>'}</div><h1 class="big">${md(date)}</h1></div><div class="tbr"><button class="ibtn" data-act="goWeek" aria-label="穿搭排期">${I.cal}</button>${meBtn()}</div></div>` + strip;
   if (!e) return `<div class="today">` + head + `<div class="empty">这天没有记录穿搭<br><button class="btn soft" style="margin-top:12px" data-act="makeDay">补记这天穿了什么</button></div></div>`;
   if (!e.ids.length) return `<div class="today">` + head + '<div class="empty">衣柜里还没有衣服<br>先去添加几件吧</div></div>';
   const its = e.ids.map(itemById), missing = CAT_KEYS.filter(k => !its.some(i => i.cat === k));
@@ -1441,6 +1447,8 @@ SCREENS.today = p => {
     <button class="a3" data-act="pickOutfit"><span class="a3i">${I.shirt}</span><span>我来选</span></button>
   </div></div>`;
 };
+ACT.wkShift = el => { const p = cur().p; p.sel = addDays(p.sel || todayStr(), +el.dataset.v); if (p.sel === todayStr()) p.sel = undefined; rerender(); };
+ACT.goToday = () => { cur().p.sel = undefined; rerender(); };
 ACT.figmode = () => { UI.mode = UI.mode === 'q' ? 'real' : 'q'; rerender(); };
 ACT.goWeek = () => go('week', {});
 ACT.goMe = () => go('me', {});

@@ -157,11 +157,6 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .hscroll{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin:0 -14px;padding:0 14px}
 .hscroll::-webkit-scrollbar{display:none}
 
-/* 底部中间的「今天」 */
-.tabbar button.mid .tc{width:48px;height:48px;border-radius:17px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;margin-top:-20px;box-shadow:0 10px 20px -8px var(--accent),0 0 0 5px var(--app)}
-.tabbar button.mid{color:var(--ink2)}
-.tabbar button.mid.on{color:var(--accent)}
-
 /* 今天 */
 .drawcard{background:var(--card);border-radius:26px;box-shadow:var(--shadow);padding:12px;display:grid;grid-template-columns:44% minmax(0,1fr);gap:12px;align-items:center}
 .drawcard .fig{border-radius:20px;overflow:hidden;background:var(--accent-soft)}
@@ -1763,9 +1758,7 @@ document.addEventListener('input', e => {
 });
 
 /* ---------- 启动 ---------- */
-$('#tabbar').innerHTML = [['wardrobe', I.hanger, '衣柜'], ['outfits', I.shirt, '搭配'], ['today', I.sun, '今天'], ['chat', I.chat, '对话']].map(([k, ic, n]) => k === 'today'
-  ? `<button class="mid" data-act="tab" data-tab="${k}"><span class="tc">${ic}</span><span>${n}</span></button>`
-  : `<button data-act="tab" data-tab="${k}">${ic}<span>${n}</span></button>`).join('');
+$('#tabbar').innerHTML = [['wardrobe', I.hanger, '衣柜'], ['outfits', I.shirt, '搭配'], ['today', I.sun, '今天'], ['chat', I.chat, '对话']].map(([k, ic, n]) => `<button data-act="tab" data-tab="${k}">${ic}<span>${n}</span></button>`).join('');
 $('#pnav').innerHTML = pagesHTML();
 loadState();
 NAV = S.onboarded ? [{ n: 'today', p: {} }] : [{ n: 'onboard', p: { step: 0 } }];

@@ -155,6 +155,11 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .codebox .rk{font-size:12px;color:var(--mute);text-align:right;line-height:1.4}
 .meta .cl{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
 .rank{font-family:var(--f-mono);font-size:10.5px;color:var(--mute)}
+.sechd{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:15px}
+.sechd b{font-weight:600}
+.sechd-acts{display:flex;gap:6px;flex:none}
+.miniact{display:inline-flex;align-items:center;gap:3px;height:30px;padding:0 10px 0 8px;border-radius:15px;background:var(--accent-soft);color:var(--accent-2);font-size:12.5px;font-weight:600}
+.miniact svg{width:15px;height:15px}
 .newof{width:110px;flex:none;text-align:left;display:flex;flex-direction:column;gap:6px}
 .newof .mini{display:grid;place-items:center;background:none;border:1.5px dashed var(--accent);color:var(--accent-2)}
 .newof .mini svg{width:28px;height:28px}
@@ -1114,8 +1119,10 @@ SCREENS.item = p => {
   const stats = [`穿 ${it.worn} 次`, it.price && it.worn ? `每次 ¥${(it.price / it.worn).toFixed(1)}` : '', `搭配 ${inO.length} 套`].filter(Boolean).join(' · ');
   return hdr('', `<button class="ibtn" data-act="editItem" aria-label="编辑">${I.edit}</button>`) + `
   <div class="hero-thumb ${it.img ? 'checker' : ''}">${art(it)}</div>
-  <div class="sec"><div class="lab" style="font-size:15px;color:var(--ink);letter-spacing:0"><b style="font-weight:600">${inO.length ? `出现在 ${inO.length} 套搭配里` : '还没有搭配用到它'}</b>${inO.length ? `<button data-act="outfitsWith" data-code="${esc(it.code)}">在搭配页查看</button>` : ''}</div>
-    <div class="hscroll"><button class="newof" data-act="newOutfitWith"><span class="mini">${I.plus}</span><span class="name">用它搭一套</span></button>${inO.map(o => `<button style="width:110px;flex:none;text-align:left" data-act="openOutfit" data-id="${o.id}">${miniHTML(o)}<div class="name" style="font-size:13px;margin-top:6px">${esc(o.name)}</div></button>`).join('')}</div></div>
+  <div class="sec"><div class="sechd"><b>${inO.length ? `出现在 ${inO.length} 套搭配里` : '还没有搭配用到它'}</b>
+      <span class="sechd-acts"><button class="miniact" data-act="newOutfitWith" aria-label="用它新增一套搭配">${I.plus}<span>新增</span></button>${inO.length ? `<button class="miniact" data-act="outfitsWith" data-code="${esc(it.code)}" aria-label="在搭配页查看">${I.pages}<span>查看</span></button>` : ''}</span></div>
+    ${inO.length ? '' : '<div class="sub">点右上角「新增」，用它搭第一套</div>'}
+    <div class="hscroll"${inO.length ? '' : ' hidden'}>${inO.map(o => `<button style="width:110px;flex:none;text-align:left" data-act="openOutfit" data-id="${o.id}">${miniHTML(o)}<div class="name" style="font-size:13px;margin-top:6px">${esc(o.name)}</div></button>`).join('')}</div></div>
   <div class="ititle" style="margin-top:16px;margin-bottom:2px">${esc(it.name)}</div>
   <div class="istats" style="margin:0 0 10px">${stats}</div>
   <div class="pills">${pills}</div>

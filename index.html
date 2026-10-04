@@ -216,6 +216,21 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .a3.main .a3i svg{width:22px;height:22px}
 /* 三个操作按钮永远浮在今天页底部，内容再长也压在内容上面 */
 .today .act3{position:sticky;bottom:0;z-index:5;margin:10px -16px 0;padding:14px 16px 12px;background:linear-gradient(to top,var(--app) 62%,transparent)}
+.immbtn{position:absolute;right:8px;top:8px;z-index:2;width:34px;height:34px;border-radius:11px;background:var(--card);color:var(--ink2);display:grid;place-items:center;box-shadow:var(--shadow)}
+.imm{height:100%;display:flex;flex-direction:column}
+.imm-hd{padding:12px 0 10px}
+.icarousel{flex:1;min-height:0;display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:4px 23% 22px;scrollbar-width:none}
+.icarousel::-webkit-scrollbar{display:none}
+.icard{position:relative;flex:0 0 100%;scroll-snap-align:center;border-radius:28px;overflow:hidden;background:linear-gradient(180deg,#FDE4EE,#F1ECFF);box-shadow:var(--shadow);transform:scale(.92);opacity:.55;transition:transform .25s ease,opacity .25s ease}
+.icard.on{transform:none;opacity:1}
+.ifig{position:absolute;inset:44px 0 40px}
+.ifig svg{position:absolute;inset:0;margin:auto;height:100%;width:auto;max-width:100%}
+.itop{position:absolute;left:12px;top:12px;right:56px;display:flex;align-items:center;gap:8px;z-index:1}
+.idate{display:inline-flex;align-items:baseline;gap:6px;background:var(--card);border-radius:12px;padding:6px 10px;font-size:12px;color:var(--mute);box-shadow:var(--shadow)}
+.idate b{font-family:var(--f-display);font-size:16px;color:var(--ink)}
+.idone{display:inline-flex;align-items:center;gap:3px;font-size:12px;color:var(--mint-ink);background:var(--mint);border-radius:10px;padding:4px 8px}
+.idone svg{width:12px;height:12px}
+.ibot{position:absolute;left:0;right:0;bottom:12px;text-align:center;font-size:12.5px;color:var(--ink2)}
 .a3[disabled]{opacity:.4;pointer-events:none}
 .emptyhint{position:absolute;left:12px;right:12px;bottom:14px;z-index:1;text-align:center;font-size:14px;font-weight:600;color:var(--ink2);background:color-mix(in srgb,var(--card) 85%,transparent);border-radius:14px;padding:10px 12px;line-height:1.5}
 .emptyhint small{font-weight:400;font-size:12px;color:var(--mute)}
@@ -592,6 +607,8 @@ const I = (() => {
     wave: s('<path d="M6 10v4M10 7v10M14 9v6M18 11v2"/>', 'width="16" height="16"'),
     send: s('<path d="M12 19V5M6 11l6-6 6 6"/>', 'width="20" height="20" stroke-width="2.2"'),
     info: s('<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6h.01"/>', 'width="20" height="20"'),
+    expand: s('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>', 'width="18" height="18"'),
+    collapse: s('<path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/>', 'width="18" height="18"'),
     cal: s('<rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M9 3v4M15 3v4"/>'),
     dice: s('<rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1.2" fill="currentColor"/><circle cx="15" cy="15" r="1.2" fill="currentColor"/><circle cx="15" cy="9" r="1.2" fill="currentColor"/><circle cx="9" cy="15" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>', 'width="20" height="20"'),
     lock: s('<rect x="6" y="11" width="12" height="9" rx="2"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/>', 'width="16" height="16"'),
@@ -770,7 +787,7 @@ let NAV = [{ n: 'wardrobe', p: {} }];
 const cur = () => NAV[NAV.length - 1];
 function go(n, p = {}) { NAV.push({ n, p }); render(); }
 function back() { if (NAV.length > 1) NAV.pop(); render(); }
-function tabTo(n) { UI.pendingSwap = null; NAV = [{ n, p: {} }]; render(); }
+function tabTo(n) { UI.pendingSwap = null; if (n !== 'today') UI.immersive = false; NAV = [{ n, p: {} }]; render(); }
 const rerender = () => render(true);
 function render(keep) {
   const sc = $('#screen'), st = keep ? sc.scrollTop : 0, c = cur();
@@ -780,7 +797,7 @@ function render(keep) {
   sc.innerHTML = SCREENS[c.n](c.p);
   sc.scrollTop = st;
   const root = ROOTS.includes(c.n) && NAV.length === 1;
-  $('#tabbar').hidden = !root;
+  $('#tabbar').hidden = !root || (c.n === 'today' && UI.immersive);
   document.querySelectorAll('#tabbar [data-tab]').forEach(b => { const on = b.dataset.tab === c.n; b.classList.toggle('on', on); on ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'); });
   const fab = $('#fab'); fab.classList.remove('away');
   if (c.n === 'wardrobe') { fab.hidden = false; fab.dataset.act = 'add'; fab.innerHTML = I.plus + '添加单品'; }
@@ -1487,7 +1504,25 @@ function setIds(e, date, ids) {
   e.ids = ids; save();
 }
 
+// 沉浸模式：全屏大图卡片，左右滑动切换日期，两侧露出前后一天的预览
+function immersiveHTML(p) {
+  const t = todayStr(), date = p.sel || t, ws = weekStart(date);
+  const days = Array.from({ length: 21 }, (_, n) => addDays(ws, n - 7));
+  const cards = days.map(d => {
+    const e = planOf(d, false), ids = e ? e.ids : [], n = ids.length;
+    const tag = d === t ? '今天' : wdOf(d);
+    return `<div class="icard${d === date ? ' on' : ''}" data-d="${d}">
+      <div class="ifig">${figureSVG(piecesOf(ids), UI.mode, S.body, S.look, { bg: 0, vb: '10 12 180 400' })}</div>
+      <div class="itop"><span class="idate"><b>${parseYmd(d).getMonth() + 1}/${parseYmd(d).getDate()}</b>${tag}</span>${e && e.done ? `<span class="idone">${I.check}已定</span>` : ''}</div>
+      <button class="immbtn" data-act="immOff" aria-label="退出全屏，回到编辑">${I.collapse}</button>
+      <div class="ibot">${n ? `${n} 件单品` : d < t ? '这天没有记录' : '还没安排'}</div>
+    </div>`;
+  }).join('');
+  return `<div class="imm"><div class="imm-hd"><div><div class="eyebrow" id="immEyebrow">${date === t ? '今天' : date < t ? '已经过去' : '提前安排'} · ${wdOf(date)}</div><h1 class="big" id="immTitle">${md(date)}</h1></div></div>
+    <div class="icarousel" id="icar">${cards}</div></div>`;
+}
 SCREENS.today = p => {
+  if (UI.immersive) return immersiveHTML(p);
   const t = todayStr(), date = p.sel || t, isToday = date === t, past = date < t;
   // 周条跟着所选日期走：选到下周的某天，就显示下周
   const e = planOf(date, false) || { ids: [], locks: [], done: false }, ws = weekStart(date);
@@ -1503,7 +1538,7 @@ SCREENS.today = p => {
   const okText = isToday ? '就穿这套' : past ? '就是这套' : '定下这套';
   return `<div class="today">` + head + `
   <div class="drawcard" id="drawcard" style="margin-top:14px">
-    <div class="fig">${figureSVG(piecesOf(e.ids), UI.mode, S.body, S.look, { bg: 0, vb: '10 12 180 400' })}<button class="figmode" data-act="figmode">${UI.mode === 'q' ? 'Q 版' : '等比'} ⇄</button>${empty ? `<div class="emptyhint">${past ? '这天没有记录' : '这天还没安排'}<br><small>点下面的 ＋ 自己挑，或者「随机」「我来选」</small></div>` : ''}</div>
+    <div class="fig">${figureSVG(piecesOf(e.ids), UI.mode, S.body, S.look, { bg: 0, vb: '10 12 180 400' })}<button class="figmode" data-act="figmode">${UI.mode === 'q' ? 'Q 版' : '等比'} ⇄</button><button class="immbtn" data-act="immOn" aria-label="全屏浏览">${I.expand}</button>${empty ? `<div class="emptyhint">${past ? '这天没有记录' : '这天还没安排'}<br><small>点下面的 ＋ 自己挑，或者「随机」「我来选」</small></div>` : ''}</div>
     <div class="lab" style="margin-top:12px"><span>${empty ? '添加单品' : '这套的单品'}</span><span>${empty ? '' : '点一件可以单独换'}</span></div>
     <div class="swaprow">${its.map(i => `<button class="swit" data-act="swapItem" data-id="${i.id}" aria-label="换掉 ${esc(i.name)}"><span class="thumb">${art(i)}</span><span class="code">${esc(i.code)}</span><span class="nm">${esc(i.name)}</span></button>`).join('')}${missing.map(k => `<button class="swit add" data-act="swapItem" data-id="" data-cat="${k}" aria-label="加一件${CATS[k].n}"><span class="thumb">＋</span><span class="nm">加${CATS[k].n}</span></button>`).join('')}</div>
   </div>
@@ -1513,6 +1548,26 @@ SCREENS.today = p => {
     <button class="a3" data-act="pickOutfit"><span class="a3i">${I.shirt}</span><span>我来选</span></button>
   </div></div>`;
 };
+AFTER.today = p => {
+  if (!UI.immersive) return;
+  const car = $('#icar'), t = todayStr();
+  const center = el => { car.scrollLeft = el.offsetLeft - (car.clientWidth - el.offsetWidth) / 2; };
+  const cur0 = car.querySelector('.icard.on'); if (cur0) center(cur0);
+  let tm;
+  car.addEventListener('scroll', () => { clearTimeout(tm); tm = setTimeout(() => {
+    const mid = car.scrollLeft + car.clientWidth / 2;
+    let best = null, bd = 1e9;
+    car.querySelectorAll('.icard').forEach(c => { const dd = Math.abs(c.offsetLeft + c.offsetWidth / 2 - mid); if (dd < bd) { bd = dd; best = c; } });
+    if (!best) return;
+    const d = best.dataset.d; p.sel = d === t ? undefined : d;
+    car.querySelectorAll('.icard').forEach(c => c.classList.toggle('on', c === best));
+    $('#immTitle').textContent = md(d);
+    $('#immEyebrow').textContent = `${d === t ? '今天' : d < t ? '已经过去' : '提前安排'} · ${wdOf(d)}`;
+  }, 90); }, { passive: true });
+  car.addEventListener('click', e => { const c = e.target.closest('.icard'); if (c && !c.classList.contains('on') && !e.target.closest('[data-act]')) car.scrollTo({ left: c.offsetLeft - (car.clientWidth - c.offsetWidth) / 2, behavior: 'smooth' }); });
+};
+ACT.immOn = () => { UI.immersive = true; render(); };
+ACT.immOff = () => { UI.immersive = false; render(); };
 ACT.wkShift = el => { const p = cur().p; p.sel = addDays(p.sel || todayStr(), +el.dataset.v); if (p.sel === todayStr()) p.sel = undefined; rerender(); };
 ACT.goToday = () => { cur().p.sel = undefined; rerender(); };
 ACT.figmode = () => { UI.mode = UI.mode === 'q' ? 'real' : 'q'; rerender(); };

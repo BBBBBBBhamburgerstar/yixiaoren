@@ -256,6 +256,12 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .ccard .tags{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
 .ccard .tags .tag{height:22px;font-size:11.5px;padding:0 8px}
 .demo-tag{font-size:10.5px;color:var(--butter-ink);background:var(--butter);padding:2px 6px;border-radius:6px}
+.sheethd{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.okbtn{width:42px;height:42px;flex:none;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;box-shadow:0 8px 18px -8px var(--accent)}
+.okbtn svg{width:20px;height:20px}
+.card.pick .thumb{position:relative}
+.card.pick .ck{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center}
+.linkadd{display:block;margin:18px auto 4px;color:var(--accent-2);font-size:14px;font-weight:600;padding:8px 12px}
 .optcard .thumb{background:none;box-shadow:inset 0 0 0 1.5px var(--line);color:var(--accent-2)}
 .optcard .thumb svg{width:30px;height:30px}
 .ecard{width:300px;gap:12px}
@@ -1060,7 +1066,8 @@ ACT.saveItem = () => {
   toast(p.editId ? '修改已保存' : `已放进衣柜，编号 ${code}`);
   if (UI.pendingSwap && !p.editId) {
     const ps = UI.pendingSwap, e = planOf(ps.date, true), it = itemById(id); UI.pendingSwap = null;
-    const ids = [...e.ids.filter(x => itemById(x).cat !== it.cat), id].sort((a, b) => CAT_KEYS.indexOf(itemById(a).cat) - CAT_KEYS.indexOf(itemById(b).cat));
+    const keep = it.cat === ps.cat ? (ps.keep || []).filter(itemById) : [];
+    const ids = byCat([...e.ids.filter(x => itemById(x).cat !== it.cat), ...keep, id]);
     setIds(e, ps.date, ids); toast(`已放进衣柜 ${code}，并换上了`);
     NAV = [{ n: 'today', p: { sel: ps.date } }]; return render();
   }
@@ -1401,22 +1408,27 @@ ACT.openDay = el => { const d = el.dataset.d; if (cur().n === 'today') { cur().p
 ACT.makeDay = () => { curPlan(); rerender(); };
 ACT.redraw = () => { const d = cur().p.sel || todayStr(), e = curPlan(); setIds(e, d, drawIds(e.ids)); rerender(); const c = $('#drawcard'); if (c) c.classList.add('flipin'); };
 ACT.confirmDay = () => { const d = cur().p.sel || todayStr(), e = curPlan(); e.done = true; if (counted(d)) e.ids.forEach(id => itemById(id).worn++); save(); rerender(); toast(d === todayStr() ? '好，今天就穿这套' : counted(d) ? '记下了' : `${md(d)} 就穿这套`); };
+// 换单品：同一类别可以多选，点右上角 ✓ 生效；全部取消再确认 = 这类什么都不穿
+const byCat = ids => ids.sort((a, b) => CAT_KEYS.indexOf(itemById(a).cat) - CAT_KEYS.indexOf(itemById(b).cat));
+function swapSheetHTML() {
+  const { cat, sel } = UI.swapSel, n = CATS[cat].n, list = S.items.filter(i => i.cat === cat);
+  return `<div class="sheethd"><div><div class="sheet-title">选${n}</div><div class="sheet-sub" style="margin:0">${sel.length ? `已选 ${sel.length} 件，可多选` : `不穿${n}，或者点选几件`}</div></div>
+    <button class="okbtn" data-act="swapApply" aria-label="确认">${I.check}</button></div>
+    <div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:14px">${list.map(i => { const on = sel.includes(i.id); return `<button class="card pick${on ? ' cur' : ''}" data-act="swapToggle" data-id="${i.id}" aria-pressed="${on}"><div class="thumb">${art(i)}${on ? `<span class="ck">${I.check}</span>` : ''}</div><div class="meta"><span class="code">${esc(i.code)}</span><span class="name" style="font-size:12.5px">${esc(i.name)}</span></div></button>`; }).join('')}</div>
+    <button class="linkadd" data-act="swapNew">没有找到？添加新单品</button>`;
+}
 ACT.swapItem = el => {
-  const from = el.dataset.id, it = from && itemById(from), cat = it ? it.cat : (el.dataset.cat || 'acc'), ids = curPlan().ids;
-  const list = S.items.filter(i => i.cat === cat), n = CATS[cat].n;
-  const opt = (act, icon, label, extra = '') => `<button class="card optcard" data-act="${act}" ${extra}><div class="thumb">${icon}</div><div class="meta"><span class="name">${label}</span></div></button>`;
-  openSheet(`<div class="sheet-title">${it ? `换一件${n}` : `加一件${n}`}</div><div class="sheet-sub">${it ? `现在是「${esc(it.name)}」` : '从衣柜里选一件'}</div>
-    <div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:0">${it ? opt('swapTo', I.x, '什么都不选', `data-from="${from}" data-to=""`) : ''}${opt('swapNew', I.plus, '添加新单品', `data-cat="${cat}" data-from="${from || ''}"`)}${list.map(i => `<button class="card${i.id === from ? ' cur' : ''}" data-act="swapTo" data-from="${from}" data-to="${i.id}" ${ids.includes(i.id) && i.id !== from ? 'disabled' : ''}><div class="thumb">${art(i)}</div><div class="meta"><span class="code">${esc(i.code)}</span><span class="name" style="font-size:12.5px">${esc(i.name)}</span></div></button>`).join('')}</div>
-`);
+  const it = el.dataset.id && itemById(el.dataset.id), cat = it ? it.cat : (el.dataset.cat || 'acc');
+  UI.swapSel = { cat, sel: curPlan().ids.filter(id => itemById(id).cat === cat) };
+  openSheet(swapSheetHTML());
 };
-// 添加新单品：走正常的录入流程，保存后自动换进这天的穿搭
-ACT.swapNew = el => { UI.pendingSwap = { date: cur().p.sel || todayStr(), cat: el.dataset.cat }; closeSheet(); openSheet(addSheet()); };
-ACT.swapTo = el => {
-  const d = cur().p.sel || todayStr(), e = curPlan(), from = el.dataset.from, to = el.dataset.to;
-  let ids = from ? e.ids.map(x => x === from ? to : x).filter(Boolean) : [...e.ids, to];
-  ids = ids.sort((a, b) => CAT_KEYS.indexOf(itemById(a).cat) - CAT_KEYS.indexOf(itemById(b).cat));
-  setIds(e, d, ids); closeSheet(); rerender();
+ACT.swapToggle = el => { toggleIn(UI.swapSel.sel, el.dataset.id); setSheet(swapSheetHTML()); };
+ACT.swapApply = () => {
+  const d = cur().p.sel || todayStr(), e = curPlan(), { cat, sel } = UI.swapSel;
+  setIds(e, d, byCat([...e.ids.filter(x => itemById(x).cat !== cat), ...sel])); closeSheet(); rerender();
 };
+// 添加新单品：走正常的录入流程，保存后连同当前已选的一起换进这天的穿搭
+ACT.swapNew = () => { UI.pendingSwap = { date: cur().p.sel || todayStr(), cat: UI.swapSel.cat, keep: UI.swapSel.sel.slice() }; closeSheet(); openSheet(addSheet()); };
 ACT.pickOutfit = () => {
   if (!S.outfits.length) return toast('还没有保存的搭配');
   openSheet(`<div class="sheet-title">从我的搭配里选</div><div class="sheet-sub">选中后会替换这天的穿搭</div>

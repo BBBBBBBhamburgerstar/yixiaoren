@@ -97,6 +97,9 @@ h1.big .num{font-variant-numeric:tabular-nums}
 .chip.on{background:var(--ink);color:var(--app);box-shadow:none}
 .chip .n{font-family:var(--f-mono);font-size:11px;opacity:.6}
 .chip.addocc{color:var(--accent-2);border:1.5px dashed var(--accent);box-shadow:none;background:none}
+.chips.sub2{margin-top:8px}
+.chips.sub2 .chip{height:28px;padding:0 11px;font-size:12px;background:none;box-shadow:inset 0 0 0 1px var(--line)}
+.chips.sub2 .chip.on{background:var(--accent-soft);color:var(--accent-2);box-shadow:none}
 .chip.dot::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent)}
 .search{display:flex;align-items:center;gap:8px;height:44px;border-radius:14px;background:var(--card);padding:0 12px;box-shadow:var(--shadow);color:var(--mute);margin-bottom:12px}
 .search input::-webkit-search-cancel-button,.search input::-webkit-search-decoration{-webkit-appearance:none;appearance:none;display:none}
@@ -597,12 +600,15 @@ const I = (() => {
 
 /* ---------- 基础数据 ---------- */
 const CATS = {
-  top: { n: '上衣', subs: ['T恤', '衬衫', '卫衣', '针织', '外套'] },
-  bottom: { n: '下装', subs: ['牛仔裤', '半身裙', '短裤', '西裤'] },
-  shoes: { n: '鞋子', subs: ['运动鞋', '乐福鞋', '靴子'] },
-  acc: { n: '饰品', subs: ['包', '帽子', '耳饰'] },
+  top: { n: '上衣', subs: ['T恤', '衬衫', '卫衣', '针织', '外套', '背心吊带', 'Polo'] },
+  bottom: { n: '下装', subs: ['牛仔裤', '休闲裤', '西裤', '短裤', '半身裙'] },
+  dress: { n: '套装', subs: ['连衣裙', '连体裤', '西装套装', '运动套装'] },
+  shoes: { n: '鞋子', subs: ['运动鞋', '乐福鞋', '靴子', '凉鞋', '高跟鞋', '帆布鞋'] },
+  acc: { n: '饰品', subs: ['包', '帽子', '耳饰', '项链', '围巾', '腰带'] },
 };
-const CAT_KEYS = ['top', 'bottom', 'shoes', 'acc'];
+const CAT_KEYS = ['top', 'bottom', 'dress', 'shoes', 'acc'];
+// 款式 = 预设 + 用户自己新建的（只属于对应大类）
+const subsOf = cat => [...CATS[cat].subs, ...((S && S.customSubs && S.customSubs[cat]) || [])];
 const COLORS = [['白','#F5F4F1'],['黑','#2A2930'],['灰','#A3A1AA'],['米','#E9DEC8'],['卡其','#C9B48B'],['棕','#7C4E31'],['粉','#F5BFCD'],['红','#D8475F'],['橙','#F09A52'],['黄','#F3D46C'],['绿','#8DBE8B'],['蓝','#5A7DB3'],['浅蓝','#BCD3F0'],['紫','#A78BD6'],['藏青','#2F3B5E']];
 const colorHex = n => (COLORS.find(c => c[0] === n) || COLORS[0])[1];
 const SEASONS = ['春', '夏', '秋', '冬'];
@@ -642,10 +648,26 @@ const ART = {
   '帽子': (c, d) => P('M20 62 Q20 26 50 26 Q80 26 80 62 Z', c, d) + L('M50 26 L50 62 M36 30 Q41 45 38 62 M64 30 Q59 45 62 62', d, 'opacity=".6"') + P('M58 61 Q86 56 95 66 Q82 72 58 67 Z', c, d) + `<circle cx="50" cy="26" r="3" fill="${d}"/>`,
   '耳饰': (c, d) => L('M36 18 Q36 9 42 11 L42 32 M60 18 Q60 9 66 11 L66 32', '#C9A45C') + P('M42 33 m-11 11 a11 11 0 1 0 22 0 a11 11 0 1 0 -22 0', c, d) + P('M66 33 m-11 11 a11 11 0 1 0 22 0 a11 11 0 1 0 -22 0', c, d) + '<circle cx="38" cy="40" r="3" fill="#fff" opacity=".85"/><circle cx="62" cy="40" r="3" fill="#fff" opacity=".85"/>',
 };
-const artInner = (sub, color) => (ART[sub] || ART['T恤'])(color, strokeOf(color));
+Object.assign(ART, {
+  '背心吊带': (c, d) => P('M37 12 L40 12 Q42 28 50 30 Q58 28 60 12 L63 12 L65 30 L69 38 L69 86 L31 86 L31 38 L35 30 Z', c, d) + L('M31 80 L69 80', d, 'opacity=".5"'),
+  'Polo': (c, d) => ART['T恤'](c, d) + P('M42 13 L50 22 L58 13 L56 11 L50 17 L44 11 Z', c, d) + L('M50 22 L50 34', d) + `<circle cx="52" cy="27" r="1.2" fill="${d}"/><circle cx="52" cy="32" r="1.2" fill="${d}"/>`,
+  '休闲裤': (c, d) => ART['西裤'](c, d),
+  '凉鞋': (c, d) => P('M8 70 Q10 64 20 64 L84 64 Q93 64 93 70 L93 74 L8 74 Z', c, d) + L('M30 64 Q38 48 48 64 M54 64 Q62 46 72 64', d, 'stroke-width="3"'),
+  '高跟鞋': (c, d) => P('M10 72 Q12 60 26 58 Q46 56 64 46 L72 42 Q82 40 86 48 L86 56 L80 56 Q60 62 30 72 Z', c, d) + P('M80 56 L86 56 L84 80 L80 80 Z', d, d),
+  '帆布鞋': (c, d) => ART['运动鞋'](c, d) + L('M14 66 L88 66', d, 'opacity=".5"'),
+  '项链': (c, d) => L('M24 18 Q50 70 76 18', '#C9A45C', 'stroke-width="2"') + P('M50 50 m-7 0 a7 7 0 1 0 14 0 a7 7 0 1 0 -14 0', c, d),
+  '围巾': (c, d) => P('M24 22 Q50 34 76 22 L76 34 Q50 46 24 34 Z', c, d) + P('M58 36 L70 36 L66 88 L54 88 Z', c, d) + L('M56 82 L68 82 M57 86 L67 86', d, 'opacity=".6"'),
+  '腰带': (c, d) => P('M8 44 L92 44 L92 56 L8 56 Z', c, d) + P('M40 40 L56 40 L56 60 L40 60 Z', 'none', '#C9A45C', 'stroke-width="3"') + L('M48 50 L60 50', '#C9A45C', 'stroke-width="2.4"'),
+  '连衣裙': (c, d) => P('M38 10 L44 10 Q50 18 56 10 L62 10 L64 30 L60 40 L80 90 L20 90 L40 40 L36 30 Z', c, d) + L('M40 40 L60 40', d) + L('M44 40 L36 90 M56 40 L64 90', d, 'opacity=".45"'),
+  '连体裤': (c, d) => P('M34 10 L41 10 Q50 18 59 10 L66 10 L68 44 L72 90 L56 90 L50 56 L44 90 L28 90 L32 44 Z', c, d) + L('M32 44 L68 44', d),
+  '西装套装': (c, d) => ART['外套'](c, d),
+  '运动套装': (c, d) => ART['卫衣'](c, d),
+});
+const ART_FALLBACK = { top: 'T恤', bottom: '西裤', dress: '连衣裙', shoes: '运动鞋', acc: '包' };
+const artInner = (sub, color, cat) => (ART[sub] || ART[ART_FALLBACK[cat]] || ART['T恤'])(color, strokeOf(color));
 function art(it) {
   if (it.img) return `<img src="${it.img}" alt="${esc(it.name)}">`;
-  return `<svg viewBox="0 0 100 100" role="img" aria-label="${esc(it.name || it.sub)}">${artInner(it.sub, it.color || colorHex(it.colorName))}</svg>`;
+  return `<svg viewBox="0 0 100 100" role="img" aria-label="${esc(it.name || it.sub)}">${artInner(it.sub, it.color || colorHex(it.colorName), it.cat)}</svg>`;
 }
 
 /* ---------- 状态 ---------- */
@@ -670,12 +692,13 @@ function seed() {
     mk('A-001', '帆布托特包', 'acc', '包', '米', ['春', '夏', '秋', '冬'], '', 99, 26),
     mk('A-002', '粉色棒球帽', 'acc', '帽子', '粉', ['春', '夏'], '', 69, 6),
     mk('A-003', '珍珠耳环', 'acc', '耳饰', '白', ['春', '夏', '秋', '冬'], '', 159, 10),
+    mk('D-001', '碎花连衣裙', 'dress', '连衣裙', '浅蓝', ['春', '夏'], '', 269, 4, ['约会']),
   ];
   const by = c => items.find(i => i.code === c).id;
   const st = { items, plan: {}, outfits: [], body: { h: 163, w: 50, bust: 83, waist: 64, hip: 89 },
     look: { skin: SKINS[0], hair: 'long', hairColor: HAIR_COLORS[0] },
-    rules: { top: { p: 'T', d: 3 }, bottom: { p: 'B', d: 3 }, shoes: { p: 'S', d: 3 }, acc: { p: 'A', d: 3 }, sep: '-' },
-    seq: { top: 5, bottom: 4, shoes: 3, acc: 3 }, onboarded: false };
+    rules: { top: { p: 'T', d: 3 }, bottom: { p: 'B', d: 3 }, dress: { p: 'D', d: 3 }, shoes: { p: 'S', d: 3 }, acc: { p: 'A', d: 3 }, sep: '-' },
+    seq: { top: 5, bottom: 4, dress: 1, shoes: 3, acc: 3 }, onboarded: false };
   const mkO = (name, occasion, codes) => { const o = { id: uid(), name, occasions: [occasion], pieces: [] }; codes.forEach(c => o.pieces.push({ iid: by(c) })); tidy(o, items); return o; };
   st.outfits = [
     mkO('周一通勤', '通勤', ['T-001', 'T-004', 'B-004', 'S-002', 'A-001']),
@@ -691,6 +714,10 @@ function loadState() {
   S.plan = S.plan || {};
   // 场合 = 搭配的收藏夹：可多选、可自己新建
   S.occasions = S.occasions || OCCASIONS.slice();
+  // 新增「套装」大类：老数据补上编号规则（前缀避开已用的）和自定义款式
+  if (!S.rules.dress) { const used = Object.values(S.rules).map(r => r && r.p); S.rules.dress = { p: ['D', 'Z', 'Q', 'U'].find(x => !used.includes(x)) || 'DR', d: 3 }; }
+  S.seq.dress = S.seq.dress || 0;
+  S.customSubs = S.customSubs || {};
   S.outfits.forEach(o => { if (!o.occasions) o.occasions = o.occasion ? [o.occasion] : []; delete o.occasion; });
   if (!S.chats) S.chats = seedChats();
   // 旧数据迁移：没有永久序号的单品，从编号末尾的数字取
@@ -711,7 +738,7 @@ const itemById = id => S.items.find(i => i.id === id);
 const nextCode = cat => fmtCode(cat, (S.seq[cat] || 0) + 1);
 
 /* ---------- 搭配排版 ---------- */
-const SLOT = { top: { x: 50, y: 30, w: 52 }, bottom: { x: 50, y: 64, w: 44 }, shoes: { x: 50, y: 89, w: 30 }, acc: { x: 80, y: 17, w: 26 } };
+const SLOT = { top: { x: 50, y: 30, w: 52 }, bottom: { x: 50, y: 64, w: 44 }, dress: { x: 50, y: 46, w: 56 }, shoes: { x: 50, y: 89, w: 30 }, acc: { x: 80, y: 17, w: 26 } };
 function placeFor(it, o, items) {
   const find = id => (items || S.items).find(i => i.id === id);
   const same = o.pieces.filter(q => q.iid !== it.id && find(q.iid)?.cat === it.cat).length;
@@ -719,7 +746,7 @@ function placeFor(it, o, items) {
   let x = s.x, y = s.y;
   if (it.cat === 'acc') y += same * 24;
   else if (same) { x += same * 16; y += same * 3; }
-  const z = it.cat === 'acc' ? 40 + same : it.cat === 'top' ? 20 + same : it.cat === 'bottom' ? 10 + same : 30;
+  const z = it.cat === 'acc' ? 40 + same : it.cat === 'top' ? 20 + same : it.cat === 'dress' ? 15 + same : it.cat === 'bottom' ? 10 + same : 30;
   return { iid: it.id, x, y, w: s.w, z };
 }
 function tidy(o, items) {
@@ -779,6 +806,7 @@ const SCREENS = {}, AFTER = {}, ACT = {}, INP = {};
 function filtered() {
   const F = UI.F, q = F.q.trim().toLowerCase();
   return S.items.filter(i => (F.cat === 'all' || i.cat === F.cat)
+    && (!F.sub || i.sub === F.sub)
     && (!q || [i.code, i.name, i.brand, i.sub, ...(i.tags || [])].join(' ').toLowerCase().includes(q))
     && (!F.colors.length || F.colors.includes(i.colorName))
     && (!F.seasons.length || (i.seasons || []).some(s => F.seasons.includes(s))))
@@ -797,10 +825,13 @@ SCREENS.wardrobe = () => {
   <div class="search">${I.search}<input id="q" type="search" placeholder="搜编号、名称、品牌、标签" value="${esc(UI.F.q)}" data-inp="q" aria-label="搜索单品">
     <button class="${nf ? 'act' : ''}" data-act="filter">${I.filter}${nf ? `筛选 ${nf}` : '筛选'}</button></div>
   <div class="chips">${[['all', '全部'], ...CAT_KEYS.map(k => [k, CATS[k].n])].map(([k, n]) => `<button class="chip${UI.F.cat === k ? ' on' : ''}" data-act="cat" data-v="${k}">${n}<span class="n">${cnt(k)}</span></button>`).join('')}</div>
+  ${UI.F.cat !== 'all' ? (() => { const n = sb => S.items.filter(i => i.cat === UI.F.cat && i.sub === sb).length, list = subsOf(UI.F.cat).filter(sb => n(sb));
+    return list.length > 1 ? `<div class="chips sub2">${list.map(sb => `<button class="chip${UI.F.sub === sb ? ' on' : ''}" data-act="subf" data-v="${esc(sb)}">${esc(sb)}<span class="n">${n(sb)}</span></button>`).join('')}</div>` : ''; })() : ''}
   <div class="grid" id="grid">${gridHTML()}</div><div style="height:70px"></div>`;
 };
 INP.q = el => { UI.F.q = el.value; $('#grid').innerHTML = gridHTML(); };
-ACT.cat = el => { UI.F.cat = el.dataset.v; rerender(); };
+ACT.cat = el => { UI.F.cat = el.dataset.v; UI.F.sub = ''; rerender(); };
+ACT.subf = el => { UI.F.sub = UI.F.sub === el.dataset.v ? '' : el.dataset.v; rerender(); };
 ACT.openItem = el => go('item', { id: el.dataset.id });
 ACT.goRules = () => go('rules', {});
 
@@ -959,7 +990,7 @@ ACT.cutNext = () => {
 /* 单品信息 */
 function newDraft(ai = {}, extra = {}) {
   const pc = UI.pendingSwap && UI.pendingSwap.cat, cat = pc || ai.cat || 'top';
-  return { cat, sub: (ai.cat === cat && ai.sub) || CATS[cat].subs[0], name: (ai.cat === cat && ai.name) || '', size: '', colorName: ai.colorName || '白',
+  return { cat, sub: (ai.cat === cat && ai.sub) || subsOf(cat)[0], name: (ai.cat === cat && ai.name) || '', size: '', colorName: ai.colorName || '白',
     seasons: [], brand: '', price: '', source: '拍照', tags: [], note: '', img: null, ai: ai.sub ? ai : null, ...extra };
 }
 SCREENS.itemForm = p => {
@@ -970,7 +1001,7 @@ SCREENS.itemForm = p => {
   <div class="sec" style="margin-top:4px">
     <div class="fl"><label class="lab" for="f-name">名称</label><input class="inp" id="f-name" data-bind="name" value="${esc(d.name)}" placeholder="比如：${esc(d.colorName + d.sub)}"></div>
     <div class="fl"><div class="lab"><span>类别</span>${codeTag(p)}</div>${seg('fcat', CAT_KEYS.map(k => [k, CATS[k].n]), d.cat)}
-      <div class="chips wrapc">${CATS[d.cat].subs.map(s => `<button class="chip${d.sub === s ? ' on' : ''}" data-act="fsub" data-v="${s}">${s}</button>`).join('')}</div></div>
+      <div class="chips wrapc">${subsOf(d.cat).map(s => `<button class="chip${d.sub === s ? ' on' : ''}" data-act="fsub" data-v="${esc(s)}">${esc(s)}</button>`).join('')}<button class="chip addocc" data-act="subNew" aria-label="新建款式">＋ 新建</button></div></div>
   </div>
   <div class="sec">
     <div class="fl"><div class="lab">颜色 · ${d.colorName}</div><div class="sws">${COLORS.map(([n, h]) => `<button class="sw${d.colorName === n ? ' on' : ''}" style="background:${h}" data-act="fcolor2" data-v="${n}" aria-label="${n}" title="${n}"></button>`).join('')}</div></div>
@@ -980,7 +1011,6 @@ SCREENS.itemForm = p => {
     <div class="fl"><label class="lab" for="f-size">尺码</label><input class="inp" id="f-size" data-bind="size" value="${esc(d.size || '')}" placeholder="比如 M、38、均码"></div>
     <div class="two"><div class="fl"><label class="lab" for="f-brand">品牌</label><input class="inp" id="f-brand" data-bind="brand" value="${esc(d.brand)}" placeholder="选填"></div>
       <div class="fl"><label class="lab" for="f-price">价格（元）</label><input class="inp" id="f-price" type="number" inputmode="decimal" data-bind="price" value="${esc(d.price)}" placeholder="选填"></div></div>
-    <div class="fl"><div class="lab">来源</div><div class="chips wrapc">${SOURCES.map(s => `<button class="chip${d.source === s ? ' on' : ''}" data-act="fsource" data-v="${s}">${s}</button>`).join('')}</div></div>
     <div class="fl"><label class="lab" for="f-tag">标签</label><div id="tagbox"><div class="tagin" id="tagin">${tagInner(d)}</div><div class="tagdd" id="tagdd" hidden></div></div></div>
     <div class="fl"><label class="lab" for="f-note">备注</label><textarea class="inp" id="f-note" data-bind="note" placeholder="尺码、洗涤方式、搭配心得…">${esc(d.note)}</textarea></div>
   </div>
@@ -1041,7 +1071,7 @@ AFTER.itemForm = () => {
 
 /* AI 帮填（Demo：关键词规则解析；正式版换成大模型） */
 const BRANDS = [['优衣库', 'UNIQLO'], ['UNIQLO', 'UNIQLO'], ['无印良品', 'MUJI'], ['MUJI', 'MUJI'], ['ZARA', 'ZARA'], ['H&M', 'H&M'], ['耐克', 'Nike'], ['NIKE', 'Nike'], ['阿迪达斯', 'adidas'], ['阿迪', 'adidas'], ['ADIDAS', 'adidas'], ['李维斯', "Levi's"], ["LEVI'S", "Levi's"], ['LEVIS', "Levi's"], ['COS', 'COS'], ['GAP', 'GAP'], ['太平鸟', '太平鸟'], ['李宁', '李宁'], ['安踏', '安踏'], ['波司登', '波司登'], ['URBAN REVIVO', 'UR'], ['ONLY', 'ONLY'], ['MO&CO', 'MO&Co']];
-const SUB_SYN = [['短袖', 'top', 'T恤'], ['T恤', 'top', 'T恤'], ['衬衫', 'top', '衬衫'], ['卫衣', 'top', '卫衣'], ['帽衫', 'top', '卫衣'], ['毛衣', 'top', '针织'], ['开衫', 'top', '针织'], ['针织', 'top', '针织'], ['西装', 'top', '外套'], ['外套', 'top', '外套'], ['夹克', 'top', '外套'], ['大衣', 'top', '外套'], ['牛仔裤', 'bottom', '牛仔裤'], ['半身裙', 'bottom', '半身裙'], ['裙', 'bottom', '半身裙'], ['短裤', 'bottom', '短裤'], ['西裤', 'bottom', '西裤'], ['裤', 'bottom', '西裤'], ['运动鞋', 'shoes', '运动鞋'], ['球鞋', 'shoes', '运动鞋'], ['乐福', 'shoes', '乐福鞋'], ['靴', 'shoes', '靴子'], ['鞋', 'shoes', '运动鞋'], ['耳环', 'acc', '耳饰'], ['耳钉', 'acc', '耳饰'], ['耳饰', 'acc', '耳饰'], ['帽', 'acc', '帽子'], ['包', 'acc', '包']];
+const SUB_SYN = [['连衣裙', 'dress', '连衣裙'], ['连体裤', 'dress', '连体裤'], ['套装', 'dress', '西装套装'], ['背心', 'top', '背心吊带'], ['吊带', 'top', '背心吊带'], ['Polo', 'top', 'Polo'], ['休闲裤', 'bottom', '休闲裤'], ['凉鞋', 'shoes', '凉鞋'], ['高跟', 'shoes', '高跟鞋'], ['帆布鞋', 'shoes', '帆布鞋'], ['项链', 'acc', '项链'], ['围巾', 'acc', '围巾'], ['腰带', 'acc', '腰带'], ['短袖', 'top', 'T恤'], ['T恤', 'top', 'T恤'], ['衬衫', 'top', '衬衫'], ['卫衣', 'top', '卫衣'], ['帽衫', 'top', '卫衣'], ['毛衣', 'top', '针织'], ['开衫', 'top', '针织'], ['针织', 'top', '针织'], ['西装', 'top', '外套'], ['外套', 'top', '外套'], ['夹克', 'top', '外套'], ['大衣', 'top', '外套'], ['牛仔裤', 'bottom', '牛仔裤'], ['半身裙', 'bottom', '半身裙'], ['裙', 'bottom', '半身裙'], ['短裤', 'bottom', '短裤'], ['西裤', 'bottom', '西裤'], ['裤', 'bottom', '西裤'], ['运动鞋', 'shoes', '运动鞋'], ['球鞋', 'shoes', '运动鞋'], ['乐福', 'shoes', '乐福鞋'], ['靴', 'shoes', '靴子'], ['鞋', 'shoes', '运动鞋'], ['耳环', 'acc', '耳饰'], ['耳钉', 'acc', '耳饰'], ['耳饰', 'acc', '耳饰'], ['帽', 'acc', '帽子'], ['包', 'acc', '包']];
 const FILL_LABEL = { name: '名称', cat: '类别', size: '尺码', color: '颜色', seasons: '季节', brand: '品牌', price: '价格', source: '来源', tags: '标签', note: '备注' };
 function parseFill(text, d) {
   let t = ' ' + String(text).replace(/[，。；;！!？?]/g, '，') + ' ';
@@ -1100,7 +1130,17 @@ function codeTag(p) {
   const txt = it && it.cat === d.cat ? `编号 ${esc(it.code)}` : it ? `新编号 ${esc(nextCode(d.cat))}` : `编号 ${esc(nextCode(d.cat))}`;
   return `<span class="codetag">${txt}</span>`;
 }
-ACT.fcat = el => { const d = cur().p.d, v = el.dataset.v; if (d.cat === v) return; d.cat = v; d.sub = CATS[v].subs[0]; rerender(); };
+ACT.subNew = () => openSheet(`<div class="sheet-title">新建${CATS[cur().p.d.cat].n}款式</div><div class="sheet-sub">比如「马甲」「阔腿裤」。新建后只出现在「${CATS[cur().p.d.cat].n}」下面。</div>
+  <input class="inp" id="subname" maxlength="6" placeholder="最多 6 个字" autocomplete="off" aria-label="款式名称">
+  <div class="err" id="suberr" style="margin-top:8px" hidden></div>
+  <div class="row" style="margin-top:16px"><button class="btn" data-act="closeSheet">取消</button><button class="btn pri" data-act="subAdd">添加</button></div>`) || setTimeout(() => { const i = $('#subname'); if (i) { i.focus(); i.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) ACT.subAdd(); }); } }, 50);
+ACT.subAdd = () => {
+  const d = cur().p.d, v = ($('#subname').value || '').trim(), err = $('#suberr');
+  if (!v) { err.textContent = '先输入款式名称'; err.hidden = false; return; }
+  if (subsOf(d.cat).includes(v)) { err.textContent = `「${v}」已经有了`; err.hidden = false; return; }
+  (S.customSubs[d.cat] = S.customSubs[d.cat] || []).push(v); d.sub = v; save(); closeSheet(); toast(`已新建「${v}」`); rerender();
+};
+ACT.fcat = el => { const d = cur().p.d, v = el.dataset.v; if (d.cat === v) return; d.cat = v; d.sub = subsOf(v)[0]; rerender(); };
 ACT.fsub = el => { cur().p.d.sub = el.dataset.v; rerender(); };
 ACT.fcolor2 = el => { cur().p.d.colorName = el.dataset.v; rerender(); };
 ACT.fseason2 = el => { toggleIn(cur().p.d.seasons, el.dataset.v); rerender(); };
@@ -1328,7 +1368,7 @@ function figureSVG(pieces, mode, body, look, opt = {}) {
   const Sh = G.sw * wf, Wa = G.sw * 0.74 * wf * Math.sqrt(wwf), Hp = G.sw * 0.98 * wf;
   const skin = look.skin, hc = look.hairColor, R = G.hr;
   const nest = (it, x, y, w, h, flip) => {
-    const inner = it.img ? `<image href="${it.img}" x="0" y="0" width="100" height="100" preserveAspectRatio="xMidYMid meet"/>` : artInner(it.sub, it.color);
+    const inner = it.img ? `<image href="${it.img}" x="0" y="0" width="100" height="100" preserveAspectRatio="xMidYMid meet"/>` : artInner(it.sub, it.color, it.cat);
     const sv = `<svg x="${flip ? 0 : x}" y="${flip ? 0 : y}" width="${w}" height="${h}" viewBox="0 0 100 100" preserveAspectRatio="none" overflow="visible">${inner}</svg>`;
     return flip ? `<g transform="translate(${x + w} ${y}) scale(-1 1)">${sv}</g>` : sv;
   };
@@ -1342,8 +1382,8 @@ function figureSVG(pieces, mode, body, look, opt = {}) {
   [-1, 1].forEach(g => { s += `<path d="M${cx + g * Hp * 0.5} ${G.hi - 10} L${cx + g * G.lx * wf} ${G.le - 6}" stroke="${skin}" stroke-width="${G.lw * Math.sqrt(wf)}" stroke-linecap="round"/>`; });
   const torso = `M${cx - Sh} ${G.sh} Q${cx - Sh} ${G.sh - 8} ${cx - 8} ${G.sh - 8} L${cx + 8} ${G.sh - 8} Q${cx + Sh} ${G.sh - 8} ${cx + Sh} ${G.sh} Q${cx + Wa + 3} ${(G.sh + G.wa) / 2} ${cx + Wa} ${G.wa} Q${cx + Hp + 2} ${(G.wa + G.hi) / 2} ${cx + Hp} ${G.hi} L${cx - Hp} ${G.hi} Q${cx - Hp - 2} ${(G.wa + G.hi) / 2} ${cx - Wa} ${G.wa} Q${cx - Wa - 3} ${(G.sh + G.wa) / 2} ${cx - Sh} ${G.sh} Z`;
   const has = c => its.some(x => x.it.cat === c);
-  s += `<path d="${torso}" fill="${has('top') ? skin : '#E9E3F1'}"/>`;
-  if (!has('bottom')) s += `<path d="M${cx - Hp} ${G.wa + 8} L${cx + Hp} ${G.wa + 8} L${cx + Hp + 2} ${G.hi + 16} L${cx + 2} ${G.hi + 16} L${cx} ${G.hi} L${cx - 2} ${G.hi + 16} L${cx - Hp - 2} ${G.hi + 16} Z" fill="#6B6480"/>`;
+  s += `<path d="${torso}" fill="${has('top') || has('dress') ? skin : '#E9E3F1'}"/>`;
+  if (!has('bottom') && !has('dress')) s += `<path d="M${cx - Hp} ${G.wa + 8} L${cx + Hp} ${G.wa + 8} L${cx + Hp + 2} ${G.hi + 16} L${cx + 2} ${G.hi + 16} L${cx} ${G.hi} L${cx - 2} ${G.hi + 16} L${cx - Hp - 2} ${G.hi + 16} Z" fill="#6B6480"/>`;
   s += `<rect x="${cx - R * 0.32}" y="${G.hy + R * 0.7}" width="${R * 0.64}" height="${G.sh - G.hy - R * 0.7}" fill="${skin}"/>`;
   const RATIO = { 'T恤': .40, '衬衫': .44, '卫衣': .44, '针织': .44, '外套': .46 };
   its.filter(x => x.it.cat === 'bottom').forEach(({ it }) => {
@@ -1351,6 +1391,10 @@ function figureSVG(pieces, mode, body, look, opt = {}) {
     if (it.sub === '半身裙') { const w = 2 * Wa / 0.32 * 1.05, h = Q ? 118 : 190; s += nest(it, cx - w / 2, G.wa - 0.12 * h, w, h); }
     else if (it.sub === '短裤') { const w = hipW / 0.44, h = Q ? 100 : 160; s += nest(it, cx - w / 2, low - 0.16 * h, w, h); }
     else { const ratio = it.sub === '西裤' ? .36 : .40, w = hipW / ratio * 1.02, h = (G.le - low + 4) / 0.84; s += nest(it, cx - w / 2, low - 0.10 * h, w, h); }
+  });
+  its.filter(x => x.it.cat === 'dress').forEach(({ it }) => {
+    const full = it.sub === '连体裤', w = 2 * Sh / (full ? .34 : .30) * 0.92, h = full ? (G.le - G.sh + 10) / 0.82 : ((G.hi - G.sh) + (Q ? 70 : 120)) / 0.8;
+    s += nest(it, cx - w / 2, G.sh - 0.10 * h, w, h);
   });
   its.filter(x => x.it.cat === 'top').forEach(({ it }) => {
     const long = it.sub === '外套', w = 2 * Sh / (RATIO[it.sub] || .44) * 0.86, h = ((G.hi - G.sh) + (long ? (Q ? 26 : 44) : (Q ? 8 : 14))) / 0.76;
@@ -1410,8 +1454,11 @@ const wdOf = s => WD[parseYmd(s).getDay()];
 const pick = a => a[Math.floor(Math.random() * a.length)];
 // 每个大类随机抽一件；饰品有 40% 概率不戴；锁定的单品保持不变
 function drawIds(prev = [], locks = []) {
-  const ids = [];
+  const ids = [], L = locks.map(itemById).filter(Boolean);
+  const dressPool = S.items.filter(i => i.cat === 'dress');
+  const useDress = L.some(i => i.cat === 'dress') || (dressPool.length && !L.some(i => i.cat === 'bottom') && Math.random() < 0.25);
   CAT_KEYS.forEach(cat => {
+    if (cat === 'dress' ? !useDress : (useDress && (cat === 'top' || cat === 'bottom'))) return;
     const pool = S.items.filter(i => i.cat === cat); if (!pool.length) return;
     const locked = locks.map(itemById).find(i => i && i.cat === cat);
     if (locked) return ids.push(locked.id);
@@ -1447,7 +1494,8 @@ SCREENS.today = p => {
   const head = `<div class="tblock"><div><div class="eyebrow">${isToday ? '今天' : past ? '已经过去' : '提前安排'} · ${wdOf(date)}${isToday ? '' : ' · <button class="backtoday" data-act="goToday">回到今天</button>'}</div><h1 class="big">${md(date)}</h1></div><div class="tbr"><button class="ibtn" data-act="goWeek" aria-label="穿搭排期">${I.cal}</button>${meBtn()}</div></div>` + strip;
   if (!S.items.length) return `<div class="today">` + head + '<div class="empty">衣柜里还没有衣服<br>先去添加几件吧</div></div>';
   const empty = !e.ids.length;
-  const its = e.ids.map(itemById), missing = CAT_KEYS.filter(k => !its.some(i => i.cat === k));
+  const its = e.ids.map(itemById), hasDress = its.some(i => i.cat === 'dress');
+  const missing = (hasDress ? ['top', 'shoes', 'acc'] : ['top', 'bottom', 'shoes', 'acc', ...(its.length ? [] : ['dress'])]).filter(k => !its.some(i => i.cat === k));
   const okText = isToday ? '就穿这套' : past ? '就是这套' : '定下这套';
   return `<div class="today">` + head + `
   <div class="drawcard" id="drawcard" style="margin-top:14px">
@@ -1624,7 +1672,7 @@ function editCardHTML(m) {
   return `<div class="ccard ecard"><div class="chd"><b>单品信息</b><span>${esc(c.src || '')}</span></div>
     <div class="row1"><div class="thumb ${d.img ? 'checker' : ''}">${art({ ...d, color: colorHex(d.colorName), name: d.name || d.sub })}</div>
       <div class="fl" style="flex:1"><label class="lab" for="cn-${id}">名称</label><input class="inp" id="cn-${id}" data-cbind="name" data-m="${id}" value="${esc(d.name)}" placeholder="${esc(d.colorName + d.sub)}"></div></div>
-    <div class="fl"><div class="lab"><span>类别</span><span class="codetag">编号 ${esc(nextCode(d.cat))}</span></div>${seg('ceCat', CAT_KEYS.map(k => [id + ':' + k, CATS[k].n]), id + ':' + d.cat)}<div class="chips wrapc">${CATS[d.cat].subs.map(x => chip('ceSub', x, d.sub === x)).join('')}</div></div>
+    <div class="fl"><div class="lab"><span>类别</span><span class="codetag">编号 ${esc(nextCode(d.cat))}</span></div>${seg('ceCat', CAT_KEYS.map(k => [id + ':' + k, CATS[k].n]), id + ':' + d.cat)}<div class="chips wrapc">${subsOf(d.cat).map(x => chip('ceSub', x, d.sub === x)).join('')}</div></div>
     <div class="fl"><div class="lab">尺码${d.size ? '' : '<em>还没选</em>'}</div><div class="chips wrapc">${sizes.map(x => chip('ceSize', x, d.size === x)).join('')}</div></div>
     <div class="fl"><div class="lab">颜色 · ${d.colorName}</div><div class="sws">${COLORS.map(([nm, h]) => `<button class="sw${d.colorName === nm ? ' on' : ''}" style="background:${h}" data-act="ceColor" data-m="${id}" data-v="${nm}" aria-label="${nm}"></button>`).join('')}</div></div>
     <div class="two"><div class="fl"><label class="lab" for="cp-${id}">价格（元）</label><input class="inp" id="cp-${id}" type="number" inputmode="decimal" data-cbind="price" data-m="${id}" value="${esc(d.price)}" placeholder="选填"></div>
@@ -1709,7 +1757,7 @@ ACT.qwel = el => { const c = CH_DEFAULT[+el.dataset.i]; userSend(c.s || c.l); };
 ACT.vmode = () => { UI.voice = !UI.voice; render(); };
 ACT.chatToday = () => { cur().p.date = undefined; render(); };
 const ceUpd = (el, fn) => { const m = findMsg(el.dataset.m); if (!m || m.card.saved) return; fn(m.card.d, el.dataset.v); save(); const sc = $('#screen'), st = sc.scrollTop; render(); sc.scrollTop = st; };
-ACT.ceCat = el => { const [id, k] = el.dataset.v.split(':'); el.dataset.m = id; ceUpd(el, d => { if (d.cat === k) return; d.cat = k; d.sub = CATS[k].subs[0]; d.size = ''; }); };
+ACT.ceCat = el => { const [id, k] = el.dataset.v.split(':'); el.dataset.m = id; ceUpd(el, d => { if (d.cat === k) return; d.cat = k; d.sub = subsOf(k)[0]; d.size = ''; }); };
 ACT.ceSub = el => ceUpd(el, (d, v) => { d.sub = v; });
 ACT.ceSize = el => ceUpd(el, (d, v) => { d.size = d.size === v ? '' : v; });
 ACT.ceColor = el => ceUpd(el, (d, v) => { d.colorName = v; });

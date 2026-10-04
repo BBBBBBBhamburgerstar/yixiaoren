@@ -1200,11 +1200,14 @@ function outfitGridHTML() {
   return head + `<div class="grid">${list.map(o => `<button class="card" data-act="openOutfit" data-id="${o.id}">${miniHTML(o)}<div class="meta"><span class="name">${esc(o.name)}</span><span class="sub">${(o.occasions.length ? o.occasions.join('、') : '未分类')} · ${o.pieces.length} 件</span></div></button>`).join('')}</div>`;
 }
 SCREENS.outfits = () => {
+  // 筛选行只显示有搭配的场合；当前选中的场合被清空后回到「全部」
   const hasUncat = S.outfits.some(o => !o.occasions.length);
-  if (UI.occ === UNCAT && !hasUncat) UI.occ = '全部';
+  const used = S.occasions.filter(x => S.outfits.some(o => o.occasions.includes(x)));
+  const row = [...used, ...(hasUncat ? [UNCAT] : [])];
+  if (UI.occ !== '全部' && !row.includes(UI.occ)) UI.occ = '全部';
   return `<div class="tblock"><div><div class="eyebrow">搭配</div><h1 class="big"><span class="num">${S.outfits.length}</span> 套搭配</h1></div>${meBtn()}</div>
   <div class="search">${I.search}<input id="oq" type="search" placeholder="搜单品名称或编号，看它能怎么搭" value="${esc(UI.oq)}" data-inp="oq" aria-label="按单品搜索搭配">${UI.oq ? `<button data-act="oqClear" aria-label="清除搜索">${I.x}</button>` : ''}</div>
-  <div class="chips">${['全部', ...S.occasions, ...(hasUncat ? [UNCAT] : [])].map(o => `<button class="chip${UI.occ === o ? ' on' : ''}" data-act="occ" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>
+  <div class="chips">${['全部', ...row].map(o => `<button class="chip${UI.occ === o ? ' on' : ''}" data-act="occ" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>
   <div id="ogrid">${outfitGridHTML()}</div><div style="height:70px"></div>`;
 };
 // 选中的场合可能在横向滚动行的后面，自动滚到看得见的位置

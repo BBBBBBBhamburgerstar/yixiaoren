@@ -99,6 +99,7 @@ h1.big .num{font-variant-numeric:tabular-nums}
 .chip.addocc{color:var(--accent-2);border:1.5px dashed var(--accent);box-shadow:none;background:none}
 .chip.dot::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent)}
 .search{display:flex;align-items:center;gap:8px;height:44px;border-radius:14px;background:var(--card);padding:0 12px;box-shadow:var(--shadow);color:var(--mute);margin-bottom:12px}
+.search input::-webkit-search-cancel-button,.search input::-webkit-search-decoration{-webkit-appearance:none;appearance:none;display:none}
 .search input{flex:1;min-width:0;border:0;background:none;height:100%;font-size:15px;outline:none;color:var(--ink)}
 .search button{color:var(--ink2);display:flex;align-items:center;gap:4px;font-size:13px}
 .search button.act{color:var(--accent)}
@@ -1116,7 +1117,7 @@ SCREENS.item = p => {
   ${it.tags && it.tags.length ? `<div class="itags">${it.tags.map(t => '#' + esc(t)).join('　')}</div>` : ''}
   <div class="istats">${stats}</div>
   ${it.note ? `<div class="inote">${esc(it.note)}</div>` : ''}
-  <div class="row" style="margin-top:14px"><button class="btn soft" data-act="worn">今天穿了</button><button class="btn" data-act="newOutfitWith">${I.plus}用它搭一套</button></div>
+  <button class="btn block" style="margin-top:14px" data-act="newOutfitWith">${I.plus}用它搭一套</button>
   <div class="ifoot"><span>${esc(it.code)} · ${CATS[it.cat].n}第 ${rk}/${tot} 件 · ${esc(it.source)}录入 · ${ymd(new Date(it.created))} 入库</span><button data-act="delItem">删除</button></div>`;
 };
 ACT.worn = () => { const it = itemById(cur().p.id); it.worn++; save(); rerender(); toast(`记下了，「${it.name}」穿了 ${it.worn} 次`); };

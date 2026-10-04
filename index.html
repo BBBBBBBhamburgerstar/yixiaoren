@@ -167,6 +167,10 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .ititle-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px;margin-bottom:2px}
 .infobtn{width:34px;height:34px;flex:none;border-radius:50%;display:grid;place-items:center;color:var(--mute)}
 .infobtn:hover{background:var(--tile)}
+.infocard{gap:0}
+.infocard .ititle-row{margin:0 0 2px}
+.infocard .istats{margin:0 0 12px}
+.infocard .itags{margin-top:10px}
 .pills{display:flex;flex-wrap:wrap;gap:6px}
 .pill{display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 11px;border-radius:14px;background:var(--card);box-shadow:inset 0 0 0 1px var(--line);font-size:13px;color:var(--ink2)}
 .itags{margin-top:10px;font-size:13px;color:var(--accent-2)}
@@ -1127,12 +1131,13 @@ SCREENS.item = p => {
       <span class="sechd-acts"><button class="miniact" data-act="newOutfitWith" aria-label="用它新增一套搭配">${I.plus}<span>新增</span></button>${inO.length ? `<button class="miniact" data-act="outfitsWith" data-code="${esc(it.code)}" aria-label="在搭配页查看">${I.pages}<span>查看</span></button>` : ''}</span></div>
     ${inO.length ? '' : '<div class="sub">点右上角「新增」，用它搭第一套</div>'}
     <div class="hscroll"${inO.length ? '' : ' hidden'}>${inO.map(o => `<button style="width:110px;flex:none;text-align:left" data-act="openOutfit" data-id="${o.id}">${miniHTML(o)}<div class="name" style="font-size:13px;margin-top:6px">${esc(o.name)}</div></button>`).join('')}</div></div>
-  <div class="ititle-row"><div class="ititle" style="margin:0">${esc(it.name)}</div><button class="infobtn" data-act="itemInfo" aria-label="查看详细信息">${I.info}</button></div>
-  <div class="istats" style="margin:0 0 10px">${stats}</div>
-  <div class="pills">${pills}</div>
-  ${it.tags && it.tags.length ? `<div class="itags">${it.tags.map(t => '#' + esc(t)).join('　')}</div>` : ''}
-  ${it.note ? `<div class="inote">${esc(it.note)}</div>` : ''}
-`;
+  <div class="sec infocard">
+    <div class="ititle-row"><div class="ititle" style="margin:0">${esc(it.name)}</div><button class="infobtn" data-act="itemInfo" aria-label="查看详细信息">${I.info}</button></div>
+    <div class="istats">${stats}</div>
+    <div class="pills">${pills}</div>
+    ${it.tags && it.tags.length ? `<div class="itags">${it.tags.map(t => '#' + esc(t)).join('　')}</div>` : ''}
+    ${it.note ? `<div class="inote">${esc(it.note)}</div>` : ''}
+  </div><div style="height:12px"></div>`;
 };
 // 次要信息放进半浮层：编号、排序、来源、入库时间，以及删除
 ACT.itemInfo = () => {

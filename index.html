@@ -270,7 +270,18 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .welcome p{margin:0;color:var(--ink2);line-height:1.6;font-size:13.5px}
 .welcome .qchips{padding:8px 0 0;justify-content:center}
 .ibar{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;gap:8px;margin:0 -16px;padding:10px 12px 12px;background:var(--app);border-top:1px solid var(--line)}
-.screen.chatmode{padding-bottom:0}
+.screen.chatmode,.screen.formmode{padding-bottom:0}
+.fillbar{flex-direction:column;align-items:stretch;gap:8px}
+.fillrow{display:flex;align-items:center;gap:8px}
+.fillres{display:flex;align-items:center;gap:8px;background:var(--mint);color:var(--mint-ink);border-radius:12px;padding:8px 10px;font-size:12.5px;line-height:1.45}
+.fillres.warn{background:var(--butter);color:var(--butter-ink)}
+.fillres span{flex:1;min-width:0}
+.fillres button{font-weight:600;text-decoration:underline;color:inherit;flex:none}
+.fillres svg{width:16px;height:16px}
+.ib-btn.mic{touch-action:none;user-select:none;-webkit-user-select:none}
+.ib-btn.mic.on{background:var(--accent);color:var(--on-accent)}
+.flash{animation:flash 1.8s ease-out;border-radius:12px}
+@keyframes flash{0%,35%{box-shadow:0 0 0 6px var(--accent-soft);background:var(--accent-soft)}100%{box-shadow:0 0 0 6px transparent;background:transparent}}
 .ib-btn{width:38px;height:38px;flex:none;border-radius:50%;display:grid;place-items:center;color:var(--ink2);background:var(--card);box-shadow:var(--shadow);cursor:pointer}
 .ib-btn.send{background:var(--accent);color:var(--on-accent);box-shadow:none}
 .cin{flex:1;min-width:0;height:40px;border-radius:20px;border:0;background:var(--card);box-shadow:var(--shadow);padding:0 14px;font-size:15px;outline:none}
@@ -648,6 +659,7 @@ function render(keep) {
   const sc = $('#screen'), st = keep ? sc.scrollTop : 0, c = cur();
   sc.classList.toggle('chatmode', c.n === 'chat');
   sc.classList.toggle('fitmode', c.n === 'today');
+  sc.classList.toggle('formmode', c.n === 'itemForm');
   sc.innerHTML = SCREENS[c.n](c.p);
   sc.scrollTop = st;
   const root = ROOTS.includes(c.n) && NAV.length === 1;
@@ -891,7 +903,13 @@ SCREENS.itemForm = p => {
     <div class="fl"><label class="lab" for="f-tag">标签</label><div id="tagbox"><div class="tagin" id="tagin">${tagInner(d)}</div><div class="tagdd" id="tagdd" hidden></div></div></div>
     <div class="fl"><label class="lab" for="f-note">备注</label><textarea class="inp" id="f-note" data-bind="note" placeholder="尺码、洗涤方式、搭配心得…">${esc(d.note)}</textarea></div>
   </div>
-  <button class="btn pri block" style="margin-top:16px" data-act="saveItem">${p.editId ? '保存修改' : '放进衣柜'}</button>`;
+  <button class="btn pri block" style="margin:16px 0" data-act="saveItem">${p.editId ? '保存修改' : '放进衣柜'}</button>
+  <div class="ibar fillbar">
+    ${p.fillMsg ? `<div class="fillres${p.fillMsg.ok ? '' : ' warn'}" role="status">${I.spark}<span>${esc(p.fillMsg.text)}</span>${p.undo ? '<button data-act="fillUndo">撤销</button>' : ''}</div>` : ''}
+    <div class="fillrow"><button class="ib-btn mic" id="fillmic" aria-label="按住说话，让 AI 帮你填">${I.mic}</button>
+      <input id="fillin" class="cin" placeholder="一句话告诉 AI：M 码，199 块，春秋穿…" enterkeyhint="send" autocomplete="off" aria-label="用一句话描述这件衣服，AI 帮你填">
+      <button class="ib-btn send" data-act="fillSend" aria-label="让 AI 填写">${I.send}</button></div>
+  </div>`;
 };
 const TAG_PRESETS = ['通勤', '百搭', '显瘦', '舒服', '约会', '度假', '正式', '运动', '复古', '基础款'];
 function tagPool() { const m = new Map(); TAG_PRESETS.forEach(t => m.set(t, 0)); S.items.forEach(i => (i.tags || []).forEach(t => m.set(t, (m.get(t) || 0) + 1))); return [...m].sort((a, b) => b[1] - a[1]); }
@@ -923,7 +941,74 @@ AFTER.itemForm = () => {
     if (e.key === 'Enter') { e.preventDefault(); if (e.target.value.trim()) addTags(e.target.value); }
     else if (e.key === 'Backspace' && !e.target.value) { const d = cur().p.d; if (d.tags.length) { d.tags.pop(); refreshTags(); } }
   });
+  // AI 帮填：文字回车发送；麦克风按住说话
+  $('#fillin').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); ACT.fillSend(); } });
+  const mic = $('#fillmic');
+  mic.addEventListener('pointerdown', e => { e.preventDefault(); mic.setPointerCapture(e.pointerId); mic.classList.add('on'); recStart(text => applyFill(text), () => '优衣库的，M 码，一百九十九块，春秋穿，打通勤和百搭标签'); });
+  const end = ok => () => { mic.classList.remove('on'); recStop(ok); };
+  mic.addEventListener('pointerup', end(true)); mic.addEventListener('pointercancel', end(false));
+  // 刚被 AI 填过的格子闪一下
+  const p = cur().p;
+  if (p.flash) {
+    const SEL = { name: '#f-name', size: '#f-size', brand: '#f-brand', price: '#f-price', tags: '#tagbox', note: '#f-note', seasons: '[data-act=fseason2]', color: '[data-act=fcolor2]', cat: '[data-act=fsub]', source: '[data-act=fsource]' };
+    p.flash.forEach(k => { const el = $(SEL[k]); const fl = el && el.closest('.fl'); if (fl) fl.classList.add('flash'); });
+    p.flash = null;
+  }
 };
+
+/* AI 帮填（Demo：关键词规则解析；正式版换成大模型） */
+const BRANDS = [['优衣库', 'UNIQLO'], ['UNIQLO', 'UNIQLO'], ['无印良品', 'MUJI'], ['MUJI', 'MUJI'], ['ZARA', 'ZARA'], ['H&M', 'H&M'], ['耐克', 'Nike'], ['NIKE', 'Nike'], ['阿迪达斯', 'adidas'], ['阿迪', 'adidas'], ['ADIDAS', 'adidas'], ['李维斯', "Levi's"], ["LEVI'S", "Levi's"], ['LEVIS', "Levi's"], ['COS', 'COS'], ['GAP', 'GAP'], ['太平鸟', '太平鸟'], ['李宁', '李宁'], ['安踏', '安踏'], ['波司登', '波司登'], ['URBAN REVIVO', 'UR'], ['ONLY', 'ONLY'], ['MO&CO', 'MO&Co']];
+const SUB_SYN = [['短袖', 'top', 'T恤'], ['T恤', 'top', 'T恤'], ['衬衫', 'top', '衬衫'], ['卫衣', 'top', '卫衣'], ['帽衫', 'top', '卫衣'], ['毛衣', 'top', '针织'], ['开衫', 'top', '针织'], ['针织', 'top', '针织'], ['西装', 'top', '外套'], ['外套', 'top', '外套'], ['夹克', 'top', '外套'], ['大衣', 'top', '外套'], ['牛仔裤', 'bottom', '牛仔裤'], ['半身裙', 'bottom', '半身裙'], ['裙', 'bottom', '半身裙'], ['短裤', 'bottom', '短裤'], ['西裤', 'bottom', '西裤'], ['裤', 'bottom', '西裤'], ['运动鞋', 'shoes', '运动鞋'], ['球鞋', 'shoes', '运动鞋'], ['乐福', 'shoes', '乐福鞋'], ['靴', 'shoes', '靴子'], ['鞋', 'shoes', '运动鞋'], ['耳环', 'acc', '耳饰'], ['耳钉', 'acc', '耳饰'], ['耳饰', 'acc', '耳饰'], ['帽', 'acc', '帽子'], ['包', 'acc', '包']];
+const FILL_LABEL = { name: '名称', cat: '类别', size: '尺码', color: '颜色', seasons: '季节', brand: '品牌', price: '价格', source: '来源', tags: '标签', note: '备注' };
+function parseFill(text, d) {
+  let t = ' ' + String(text).replace(/[，。；;！!？?]/g, '，') + ' ';
+  const got = [], set = (k, ok) => { if (ok && !got.includes(k)) got.push(k); };
+  const cut = m => { t = t.replace(m, '，'); };
+  // 标签：「打通勤和百搭标签」「标签是通勤、法式」
+  let m = t.match(/(?:打上?|加上?)([^，]+?)(?:的)?标签/) || t.match(/标签(?:是|为|:|：)?([^，]+)/);
+  if (m) { const add = splitTags(m[1].replace(/和|跟|还有|、|\s/g, '，')).filter(x => !d.tags.includes(x)); d.tags.push(...add); set('tags', add.length); cut(m[0]); }
+  // 备注：洗涤、起球、偏大偏小这类句子
+  const notes = t.split('，').filter(c => /洗|起球|偏大|偏小|掉色|缩水|备注|记得|注意/.test(c)).map(c => c.trim()).filter(Boolean);
+  if (notes.length) { d.note = [d.note, ...notes].filter(Boolean).join('；'); set('note', 1); notes.forEach(c => cut(c)); }
+  // 名称
+  if ((m = t.match(/(?:叫|名字是|名称是)「?([^，」]+)」?/))) { d.name = m[1].trim(); set('name', 1); cut(m[0]); }
+  // 品牌
+  const up = t.toUpperCase(), b = BRANDS.find(([k]) => up.includes(k.toUpperCase()));
+  if (b) { set('brand', d.brand !== b[1]); d.brand = b[1]; t = t.replace(new RegExp(b[0].replace(/[.*+?^${}()|[\]\\&]/g, '\\$&'), 'i'), '，'); }
+  else if ((m = t.match(/品牌(?:是|:|：)?([^，]+)/))) { d.brand = m[1].trim(); set('brand', 1); cut(m[0]); }
+  // 价格：「199 块」「¥199」「一百九十九块」「花了 199」
+  m = t.match(/[¥￥]\s*(\d+(?:\.\d+)?)/) || t.match(/(\d+(?:\.\d+)?)\s*(?:块|元|rmb)/i) || t.match(/花了\s*(\d+(?:\.\d+)?)/);
+  let price = m ? m[1] : null;
+  if (!m && (m = t.match(/([零一二两三四五六七八九十百千]+)\s*(?:块|元)/))) price = String(cnNum(m[1]));
+  if (price) { set('price', d.price !== price); d.price = price; cut(m[0]); }
+  // 尺码
+  const T = t.toUpperCase();
+  m = T.match(/XXS|XXL|XS|XL/) || T.match(/均码/) || T.match(/(\d{2,3})\s*[码号]/) || T.match(/([SML])\s*[码号]/) || T.match(/(?:^|[^A-Z])([SML])(?:[^A-Z]|$)/);
+  if (m) { const v = (m[1] || m[0]).replace(/\s/g, ''); set('size', d.size !== v); d.size = v; }
+  // 季节
+  const ss = /四季|一年四季|全年/.test(t) ? SEASONS.slice() : SEASONS.filter(x => t.includes(x));
+  if (ss.length) { set('seasons', ss.join() !== d.seasons.join()); d.seasons = ss; }
+  // 颜色
+  const c = COLORS.map(x => x[0]).sort((a, b2) => b2.length - a.length).find(n => t.includes(n));
+  if (c) { set('color', d.colorName !== c); d.colorName = c; }
+  // 类别和款式
+  const sub = SUB_SYN.find(([k]) => t.includes(k));
+  if (sub) { set('cat', d.cat !== sub[1] || d.sub !== sub[2]); d.cat = sub[1]; d.sub = sub[2]; }
+  // 来源
+  if (/淘宝|天猫/.test(t)) { set('source', d.source !== '淘宝'); d.source = '淘宝'; }
+  else if (/商场|实体店|门店|专柜/.test(t)) { set('source', d.source !== '其他'); d.source = '其他'; }
+  return got;
+}
+function applyFill(text) {
+  text = String(text || '').trim(); if (!text) return;
+  const p = cur().p; if (cur().n !== 'itemForm') return;
+  const before = clone(p.d), got = parseFill(text, p.d);
+  if (got.length) { p.undo = before; p.flash = got; p.fillMsg = { ok: 1, text: `「${text}」→ 已填好 ${got.length} 项：${got.map(k => FILL_LABEL[k]).join('、')}` }; }
+  else { p.undo = null; p.fillMsg = { ok: 0, text: `「${text}」里没听出能填的信息，试试说「M 码，199 块，春秋穿，打通勤标签」` }; }
+  rerender();
+}
+ACT.fillSend = () => { const el = $('#fillin'); if (!el.value.trim()) return toast('先说一句，比如「M 码，199 块，春秋穿」'); applyFill(el.value); };
+ACT.fillUndo = () => { const p = cur().p; if (!p.undo) return; p.d = p.undo; p.undo = null; p.fillMsg = { ok: 1, text: '已撤销刚才的填写' }; rerender(); };
 function codeBox(p) {
   const d = p.d, it = p.editId && itemById(p.editId), n = S.items.filter(i => i.cat === d.cat).length;
   if (it && it.cat === d.cat) { const [k, t] = rankOf(it); return `<div class="codebox"><span class="code">${esc(it.code)}</span><span class="rk">${CATS[d.cat].n}第 ${k} 件 / 共 ${t} 件</span></div><div class="sub">编号自动生成，入库后不会变</div>`; }
@@ -1500,8 +1585,9 @@ function demoUtter() {
   if (!f) return '我在淘宝买了件法式衬衫，帮我录一下';
   return { sub: '衬衫', size: 'M 码', color: '对', price: '一百五十九', tags: '打通勤和法式吧' }[f.step];
 }
-function recStart() {
-  Object.assign(REC, { t0: Date.now(), text: '', rec: null });
+// done(text, dur, sim)：录完后怎么处理；demo()：浏览器不支持识别时用的示例话术
+function recStart(done, demo) {
+  Object.assign(REC, { t0: Date.now(), text: '', rec: null, done, demo });
   const v = $('#vrec'); v.hidden = false;
   v.innerHTML = `<div class="wave">${'<i></i>'.repeat(9)}</div><div class="vt" id="vt">正在听…</div><small>松开发送</small>`;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1519,9 +1605,10 @@ function recStop(ok) {
   setTimeout(() => {
     $('#vrec').hidden = true;
     if (!ok) return;
-    if (Date.now() - REC.t0 < 500) return toast('说话时间太短了');
-    const real = REC.text.trim();
-    userSend(real || demoUtter(), 'voice', { dur: Math.max(1, dur), sim: !real });
+    if (Date.now() - REC.t0 < 500) return toast('按住麦克风说话，说完再松开');
+    const real = REC.text.trim(), text = real || (REC.demo || demoUtter)();
+    if (REC.done) return REC.done(text, Math.max(1, dur), !real);
+    userSend(text, 'voice', { dur: Math.max(1, dur), sim: !real });
   }, REC.rec ? 450 : 150);
 }
 

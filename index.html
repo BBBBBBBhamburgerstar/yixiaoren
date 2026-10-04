@@ -390,6 +390,11 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .t3.sm{height:290px}
 .t3 canvas{display:block;width:100%!important;height:100%!important;touch-action:pan-y;cursor:grab}
 .t3 .hint3{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);font-size:12px;color:var(--ink2);background:var(--card);padding:5px 10px;border-radius:10px;display:flex;gap:5px;align-items:center;white-space:nowrap;pointer-events:none;opacity:.9}
+.segmini .seg{padding:3px;border-radius:12px}
+.segmini .seg button{height:30px;padding:0 12px;font-size:13px;border-radius:9px}
+.bstats{position:absolute;right:10px;top:12px;bottom:12px;z-index:1;display:flex;flex-direction:column;justify-content:center;gap:8px;pointer-events:none}
+.bstats span{background:var(--card);opacity:.92;border-radius:12px;padding:6px 8px;min-width:56px;text-align:center;font-size:10.5px;color:var(--mute);box-shadow:var(--shadow);white-space:nowrap}
+.bstats b{display:block;font-family:var(--f-display);font-size:16px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
 .t3fail{position:absolute;inset:0;display:grid;place-items:center;color:var(--mute);padding:20px;text-align:center}
 .statchips{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:12px}
 .statchips span{background:var(--card);border-radius:12px;padding:8px 6px;font-size:11px;color:var(--mute);box-shadow:var(--shadow);text-align:center;white-space:nowrap}
@@ -1811,7 +1816,7 @@ function t3build(body, look, mode) {
 }
 
 /* 形象 */
-const t3host = (cls = '') => `<div class="t3 ${cls}" id="t3"><span class="hint3">${I.rotate}左右拖动旋转</span></div>`;
+const t3host = (cls = '', extra = '') => `<div class="t3 ${cls}" id="t3">${extra}<span class="hint3">${I.rotate}左右拖动旋转</span></div>`;
 AFTER.me = () => t3mount($('#t3'), S.body, S.look, UI.mode);
 ACT.mode = el => { UI.mode = el.dataset.v; const p = cur().p; if (['today', 'me'].includes(cur().n)) return rerender(); el.parentNode.querySelectorAll('button').forEach(b => { b.classList.toggle('on', b === el); b.setAttribute('aria-selected', b === el); }); t3build(p.b || S.body, p.l || S.look, UI.mode); };
 ACT.goBody = () => go('body', {});
@@ -1841,10 +1846,9 @@ SCREENS.me = () => {
   const max = Math.max(1, ...CAT_KEYS.map(k => S.items.filter(i => i.cat === k).length));
   const top3 = S.items.slice().sort((a, b) => b.worn - a.worn).slice(0, 3);
   const mi = (act, ic, t, sm = '') => `<button class="mi" data-act="${act}"><span class="mic">${ic}</span><span>${t}</span><small>${sm}</small>${I.chev}</button>`;
-  return hdr('我的') + `<div class="tblock" style="padding-top:2px"><div><div class="eyebrow">我的形象</div><h1 class="big">${UI.mode === 'q' ? '可爱的我' : '等比的我'}</h1></div></div>
-  ${seg('mode', [['real', '等比'], ['q', 'Q 版']], UI.mode)}
-  <div style="margin-top:12px">${t3host()}</div>
-  <div class="statchips">${BODY_FIELDS.map(([k, l, u]) => `<span><b>${S.body[k]}</b>${l} ${u}</span>`).join('')}</div>
+  return hdr('我的') + `<div class="tblock" style="padding-top:2px"><div><div class="eyebrow">我的形象</div><h1 class="big">${UI.mode === 'q' ? '可爱的我' : '等比的我'}</h1></div>
+    <div class="segmini">${seg('mode', [['real', '等比'], ['q', 'Q 版']], UI.mode)}</div></div>
+  ${t3host('', `<div class="bstats" aria-label="身材数据">${BODY_FIELDS.map(([k, l, u]) => `<span><b>${S.body[k]}</b>${l} ${u}</span>`).join('')}</div>`)}
   <div class="row" style="margin-top:14px"><button class="btn" data-act="goBody">${I.ruler}编辑身材</button><button class="btn" data-act="goLook">${I.palette}外观</button></div>
   <div class="stats"><div class="stat"><b>${S.items.length}</b><span>件单品</span></div><div class="stat"><b>${S.outfits.length}</b><span>套搭配</span></div><div class="stat"><b>¥${total.toLocaleString()}</b><span>衣柜总价</span></div><div class="stat"><b>${worn}</b><span>累计穿着次数</span></div></div>
   <div class="sec"><h3>分类占比</h3><div class="bars">${CAT_KEYS.map(k => { const n = S.items.filter(i => i.cat === k).length; return `<div class="br"><span>${CATS[k].n}</span><div class="tr"><i style="width:${n / max * 100}%"></i></div><em>${n}</em></div>`; }).join('')}</div></div>

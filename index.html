@@ -744,7 +744,7 @@ function filtered() {
 function gridHTML() {
   const list = filtered();
   if (!list.length) return `<div class="empty" style="grid-column:1/-1">没有符合条件的单品<br>换个关键词，或者清除筛选试试</div>`;
-  return list.map(i => `<button class="card" data-act="openItem" data-id="${i.id}"><div class="thumb">${art(i)}${i.worn ? `<span class="badge">穿 ${i.worn} 次</span>` : ''}</div><div class="meta"><span class="cl"><span class="code">${esc(i.code)}</span><span class="rank">${CATS[i.cat].n} #${rankOf(i)[0]}</span></span><span class="name">${esc(i.name)}</span></div></button>`).join('');
+  return list.map(i => `<button class="card" data-act="openItem" data-id="${i.id}"><div class="thumb">${art(i)}${(n => n ? `<span class="badge">搭配 ${n} 次</span>` : '')(S.outfits.filter(o => o.pieces.some(q => q.iid === i.id)).length)}</div><div class="meta"><span class="cl"><span class="code">${esc(i.code)}</span><span class="rank">${CATS[i.cat].n} #${rankOf(i)[0]}</span></span><span class="name">${esc(i.name)}</span></div></button>`).join('');
 }
 SCREENS.wardrobe = () => {
   const cnt = k => k === 'all' ? S.items.length : S.items.filter(i => i.cat === k).length;

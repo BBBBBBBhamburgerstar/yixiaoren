@@ -225,11 +225,16 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .icard.on{transform:none;opacity:1}
 .ifig{position:absolute;inset:44px 0 40px}
 .ifig svg{position:absolute;inset:0;margin:auto;height:100%;width:auto;max-width:100%}
-.itop{position:absolute;left:12px;top:12px;right:56px;display:flex;align-items:center;gap:8px;z-index:1}
-.idate{display:inline-flex;align-items:baseline;gap:6px;background:var(--card);border-radius:12px;padding:6px 10px;font-size:12px;color:var(--mute);box-shadow:var(--shadow)}
-.idate b{font-family:var(--f-display);font-size:16px;color:var(--ink)}
-.idone{display:inline-flex;align-items:center;gap:3px;font-size:12px;color:var(--mint-ink);background:var(--mint);border-radius:10px;padding:4px 8px}
-.idone svg{width:12px;height:12px}
+.itop{position:absolute;left:10px;top:12px;right:48px;display:flex;align-items:center;gap:6px;z-index:1;white-space:nowrap;overflow:hidden}
+.idate{display:inline-flex;align-items:baseline;gap:4px;background:var(--card);border-radius:12px;padding:5px 9px;font-size:11.5px;color:var(--mute);box-shadow:var(--shadow);white-space:nowrap;flex:none}
+.idate b{font-family:var(--f-display);font-size:15px;color:var(--ink)}
+.ist{font-size:11px;border-radius:9px;padding:4px 8px;font-weight:600;white-space:nowrap;flex:none}
+.st-today{background:var(--accent);color:var(--on-accent)}
+.st-done{background:var(--mint);color:var(--mint-ink)}
+.st-plan{background:var(--butter);color:var(--butter-ink)}
+.st-past{background:var(--card);color:var(--mute)}
+.icard .immbtn{opacity:0;pointer-events:none;transition:opacity .2s}
+.icard.on .immbtn{opacity:1;pointer-events:auto}
 .ibot{position:absolute;left:0;right:0;bottom:12px;text-align:center;font-size:12.5px;color:var(--ink2)}
 .a3[disabled]{opacity:.4;pointer-events:none}
 .emptyhint{position:absolute;left:12px;right:12px;bottom:14px;z-index:1;text-align:center;font-size:14px;font-weight:600;color:var(--ink2);background:color-mix(in srgb,var(--card) 85%,transparent);border-radius:14px;padding:10px 12px;line-height:1.5}
@@ -797,7 +802,7 @@ function render(keep) {
   sc.innerHTML = SCREENS[c.n](c.p);
   sc.scrollTop = st;
   const root = ROOTS.includes(c.n) && NAV.length === 1;
-  $('#tabbar').hidden = !root || (c.n === 'today' && UI.immersive);
+  $('#tabbar').hidden = !root;
   document.querySelectorAll('#tabbar [data-tab]').forEach(b => { const on = b.dataset.tab === c.n; b.classList.toggle('on', on); on ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'); });
   const fab = $('#fab'); fab.classList.remove('away');
   if (c.n === 'wardrobe') { fab.hidden = false; fab.dataset.act = 'add'; fab.innerHTML = I.plus + '添加单品'; }
@@ -1505,20 +1510,23 @@ function setIds(e, date, ids) {
 }
 
 // 沉浸模式：全屏大图卡片，左右滑动切换日期，两侧露出前后一天的预览
+const immEyebrow = onToday => `${onToday ? '今天' : '<button class="backtoday" data-act="immToday">回到今天</button>'} · ${wdOf(todayStr())}`;
 function immersiveHTML(p) {
   const t = todayStr(), date = p.sel || t, ws = weekStart(date);
   const days = Array.from({ length: 21 }, (_, n) => addDays(ws, n - 7));
   const cards = days.map(d => {
     const e = planOf(d, false), ids = e ? e.ids : [], n = ids.length;
-    const tag = d === t ? '今天' : wdOf(d);
+    // 卡片左上角：日期 + 一个状态小标签
+    const st = d === t ? ['今天', 'st-today'] : e && e.done ? ['已定', 'st-done'] : d < t ? ['已过去', 'st-past'] : ['提前安排', 'st-plan'];
     return `<div class="icard${d === date ? ' on' : ''}" data-d="${d}">
       <div class="ifig">${figureSVG(piecesOf(ids), UI.mode, S.body, S.look, { bg: 0, vb: '10 12 180 400' })}</div>
-      <div class="itop"><span class="idate"><b>${parseYmd(d).getMonth() + 1}/${parseYmd(d).getDate()}</b>${tag}</span>${e && e.done ? `<span class="idone">${I.check}已定</span>` : ''}</div>
+      <div class="itop"><span class="idate"><b>${parseYmd(d).getMonth() + 1}/${parseYmd(d).getDate()}</b>${wdOf(d)}</span><span class="ist ${st[1]}">${st[0]}</span></div>
       <button class="immbtn" data-act="immOff" aria-label="退出全屏，回到编辑">${I.collapse}</button>
       <div class="ibot">${n ? `${n} 件单品` : d < t ? '这天没有记录' : '还没安排'}</div>
     </div>`;
   }).join('');
-  return `<div class="imm"><div class="imm-hd"><div><div class="eyebrow" id="immEyebrow">${date === t ? '今天' : date < t ? '已经过去' : '提前安排'} · ${wdOf(date)}</div><h1 class="big" id="immTitle">${md(date)}</h1></div></div>
+  // 顶部始终显示今天；滑到别的日子时，「今天」变成可点的「回到今天」
+  return `<div class="imm"><div class="imm-hd"><div class="eyebrow" id="immEyebrow">${immEyebrow(date === t)}</div><h1 class="big">${md(t)}</h1></div>
     <div class="icarousel" id="icar">${cards}</div></div>`;
 }
 SCREENS.today = p => {
@@ -1561,11 +1569,11 @@ AFTER.today = p => {
     if (!best) return;
     const d = best.dataset.d; p.sel = d === t ? undefined : d;
     car.querySelectorAll('.icard').forEach(c => c.classList.toggle('on', c === best));
-    $('#immTitle').textContent = md(d);
-    $('#immEyebrow').textContent = `${d === t ? '今天' : d < t ? '已经过去' : '提前安排'} · ${wdOf(d)}`;
+    $('#immEyebrow').innerHTML = immEyebrow(d === t);
   }, 90); }, { passive: true });
   car.addEventListener('click', e => { const c = e.target.closest('.icard'); if (c && !c.classList.contains('on') && !e.target.closest('[data-act]')) car.scrollTo({ left: c.offsetLeft - (car.clientWidth - c.offsetWidth) / 2, behavior: 'smooth' }); });
 };
+ACT.immToday = () => { cur().p.sel = undefined; render(); };
 ACT.immOn = () => { UI.immersive = true; render(); };
 ACT.immOff = () => { UI.immersive = false; render(); };
 ACT.wkShift = el => { const p = cur().p; p.sel = addDays(p.sel || todayStr(), +el.dataset.v); if (p.sel === todayStr()) p.sel = undefined; rerender(); };

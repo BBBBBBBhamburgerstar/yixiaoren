@@ -277,7 +277,9 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .fillres.warn{background:var(--butter);color:var(--butter-ink)}
 .fillres span{flex:1;min-width:0}
 .fillres button{font-weight:600;text-decoration:underline;color:inherit;flex:none}
-.fillres svg{width:16px;height:16px}
+.fillres .fthumb{width:36px;height:36px;flex:none;border-radius:9px;background:var(--card);display:grid;place-items:center;overflow:hidden}
+.fillres .fthumb>svg,.fillres .fthumb>img{width:86%;height:86%;object-fit:contain}
+.fillres>span:nth-child(2){display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .ib-btn.mic{touch-action:none;user-select:none;-webkit-user-select:none}
 .ib-btn.mic.on{background:var(--accent);color:var(--on-accent)}
 .flash{animation:flash 1.8s ease-out;border-radius:12px}
@@ -879,12 +881,7 @@ SCREENS.itemForm = p => {
   const d = p.d, r = S.rules[d.cat];
   const preview = art({ ...d, color: colorHex(d.colorName), name: d.name || d.sub });
   return hdr(p.editId ? '编辑单品' : '单品信息', `<button class="tbtn" data-act="saveItem">${p.editId ? '保存' : '入库'}</button>`) + `
-  <div style="display:flex;gap:14px;align-items:center;margin-top:4px">
-    <div class="thumb checker" style="width:112px;flex:none;border-radius:20px">${preview}</div>
-    ${d.ai ? `<div class="aibox" style="flex:1">${I.spark}<span>AI 识别${d.ai.guess ? '（Demo 按主色估算）' : '（模拟）'}：<b>${CATS[d.ai.cat].n} · ${d.ai.sub} · ${d.ai.colorName}</b><br>已帮你填好，不对的直接改</span></div>`
-      : `<div class="tip" style="flex:1">${d.img ? '' : '没有照片的单品会用插画占位，之后可以补拍。'}</div>`}
-  </div>
-  <div class="sec">
+  <div class="sec" style="margin-top:4px">
     <div class="fl"><label class="lab" for="f-name">名称</label><input class="inp" id="f-name" data-bind="name" value="${esc(d.name)}" placeholder="比如：${esc(d.colorName + d.sub)}"></div>
     <div class="fl"><div class="lab">类别</div>${seg('fcat', CAT_KEYS.map(k => [k, CATS[k].n]), d.cat)}
       <div class="chips wrapc">${CATS[d.cat].subs.map(s => `<button class="chip${d.sub === s ? ' on' : ''}" data-act="fsub" data-v="${s}">${s}</button>`).join('')}</div></div>
@@ -905,7 +902,9 @@ SCREENS.itemForm = p => {
   </div>
   <button class="btn pri block" style="margin:16px 0" data-act="saveItem">${p.editId ? '保存修改' : '放进衣柜'}</button>
   <div class="ibar fillbar">
-    ${p.fillMsg ? `<div class="fillres${p.fillMsg.ok ? '' : ' warn'}" role="status">${I.spark}<span>${esc(p.fillMsg.text)}</span>${p.undo ? '<button data-act="fillUndo">撤销</button>' : ''}</div>` : ''}
+    <div class="fillres${p.fillMsg && !p.fillMsg.ok ? ' warn' : ''}" role="status"><span class="fthumb${d.img ? ' checker' : ''}">${preview}</span>
+      <span>${p.fillMsg ? esc(p.fillMsg.text) : d.ai ? `AI 识别${d.ai.guess ? '（按主色估算）' : '（模拟）'}：<b>${CATS[d.ai.cat].n} · ${d.ai.sub} · ${d.ai.colorName}</b>，不对的直接改，或者说一句` : '说一句话或打字，AI 帮你填好这件衣服的信息'}</span>
+      ${p.undo ? '<button data-act="fillUndo">撤销</button>' : ''}</div>
     <div class="fillrow"><button class="ib-btn mic" id="fillmic" aria-label="按住说话，让 AI 帮你填">${I.mic}</button>
       <input id="fillin" class="cin" placeholder="一句话告诉 AI：M 码，199 块，春秋穿…" enterkeyhint="send" autocomplete="off" aria-label="用一句话描述这件衣服，AI 帮你填">
       <button class="ib-btn send" data-act="fillSend" aria-label="让 AI 填写">${I.send}</button></div>
@@ -962,13 +961,13 @@ const SUB_SYN = [['短袖', 'top', 'T恤'], ['T恤', 'top', 'T恤'], ['衬衫', 
 const FILL_LABEL = { name: '名称', cat: '类别', size: '尺码', color: '颜色', seasons: '季节', brand: '品牌', price: '价格', source: '来源', tags: '标签', note: '备注' };
 function parseFill(text, d) {
   let t = ' ' + String(text).replace(/[，。；;！!？?]/g, '，') + ' ';
-  const got = [], set = (k, ok) => { if (ok && !got.includes(k)) got.push(k); };
+  const got = [], same = [], set = (k, changed) => { if (got.includes(k) || same.includes(k)) return; (changed ? got : same).push(k); };
   const cut = m => { t = t.replace(m, '，'); };
   // 标签：「打通勤和百搭标签」「标签是通勤、法式」
   let m = t.match(/(?:打上?|加上?)([^，]+?)(?:的)?标签/) || t.match(/标签(?:是|为|:|：)?([^，]+)/);
-  if (m) { const add = splitTags(m[1].replace(/和|跟|还有|、|\s/g, '，')).filter(x => !d.tags.includes(x)); d.tags.push(...add); set('tags', add.length); cut(m[0]); }
+  if (m) { const all = splitTags(m[1].replace(/和|跟|还有|、|\s/g, '，')), add = all.filter(x => !d.tags.includes(x)); d.tags.push(...add); if (all.length) set('tags', add.length); cut(m[0]); }
   // 备注：洗涤、起球、偏大偏小这类句子
-  const notes = t.split('，').filter(c => /洗|起球|偏大|偏小|掉色|缩水|备注|记得|注意/.test(c)).map(c => c.trim()).filter(Boolean);
+  const notes = t.split(/[，、]/).filter(c => /洗|起球|偏大|偏小|掉色|缩水|备注|记得|注意/.test(c)).map(c => c.trim()).filter(Boolean);
   if (notes.length) { d.note = [d.note, ...notes].filter(Boolean).join('；'); set('note', 1); notes.forEach(c => cut(c)); }
   // 名称
   if ((m = t.match(/(?:叫|名字是|名称是)「?([^，」]+)」?/))) { d.name = m[1].trim(); set('name', 1); cut(m[0]); }
@@ -997,13 +996,15 @@ function parseFill(text, d) {
   // 来源
   if (/淘宝|天猫/.test(t)) { set('source', d.source !== '淘宝'); d.source = '淘宝'; }
   else if (/商场|实体店|门店|专柜/.test(t)) { set('source', d.source !== '其他'); d.source = '其他'; }
-  return got;
+  return { got, same };
 }
 function applyFill(text) {
   text = String(text || '').trim(); if (!text) return;
   const p = cur().p; if (cur().n !== 'itemForm') return;
-  const before = clone(p.d), got = parseFill(text, p.d);
-  if (got.length) { p.undo = before; p.flash = got; p.fillMsg = { ok: 1, text: `「${text}」→ 已填好 ${got.length} 项：${got.map(k => FILL_LABEL[k]).join('、')}` }; }
+  const before = clone(p.d), { got, same } = parseFill(text, p.d), L = ks => ks.map(k => FILL_LABEL[k]).join('、');
+  const sameTxt = same.length ? `${got.length ? '；' : ''}${L(same)}和原来一样` : '';
+  if (got.length) { p.undo = before; p.flash = got; p.fillMsg = { ok: 1, text: `已填好 ${got.length} 项：${L(got)}${sameTxt}` }; }
+  else if (same.length) { p.undo = null; p.fillMsg = { ok: 1, text: `识别到${L(same)}，和原来一样，不用改` }; }
   else { p.undo = null; p.fillMsg = { ok: 0, text: `「${text}」里没听出能填的信息，试试说「M 码，199 块，春秋穿，打通勤标签」` }; }
   rerender();
 }

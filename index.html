@@ -206,6 +206,109 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .dth .thumb{width:42px;flex:none;border-radius:10px}
 .st{font-size:11px;color:var(--mint-ink);display:flex;align-items:center;gap:2px;flex:none}
 
+/* 对话 · 小衣 */
+.chathdr{position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:10px;margin:0 -16px;padding:10px 16px 10px;background:var(--app);border-bottom:1px solid var(--line)}
+.chathdr .who{flex:1;display:flex;align-items:center;gap:10px;min-width:0}
+.chathdr .who b{display:block;font-size:16px}
+.chathdr .who small{font-size:11.5px;color:var(--mute)}
+.botav{width:34px;height:34px;border-radius:12px;background:linear-gradient(140deg,var(--accent),#F7A3C0);color:#fff;display:grid;place-items:center;flex:none}
+.botav svg{width:19px;height:19px}
+.meav{width:38px;height:38px;border-radius:50%;overflow:hidden;background:var(--accent-soft);box-shadow:0 0 0 2px var(--card),var(--shadow);flex:none}
+.meav svg{width:100%;height:100%;display:block}
+.pastbar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--butter);color:var(--butter-ink);border-radius:12px;padding:8px 12px;margin-top:10px;font-size:12.5px}
+.pastbar button{font-weight:600;color:var(--butter-ink);text-decoration:underline}
+.msgs{display:flex;flex-direction:column;gap:10px;padding:12px 0 8px}
+.tsep{align-self:center;font-size:11px;color:var(--mute);font-family:var(--f-mono);padding:4px 0}
+.mrow{display:flex;gap:8px;align-items:flex-start;max-width:100%}
+.mrow.me{justify-content:flex-end}
+.mrow .botav{width:30px;height:30px;border-radius:10px}
+.mcol{display:flex;flex-direction:column;gap:6px;min-width:0;max-width:80%}
+.mrow.me .mcol{align-items:flex-end}
+.bub{padding:10px 13px;border-radius:18px;font-size:14.5px;line-height:1.55;background:var(--card);box-shadow:var(--shadow);border-top-left-radius:6px;overflow-wrap:anywhere;white-space:pre-wrap}
+.mrow.me .bub{background:var(--accent);color:var(--on-accent);border-top-left-radius:18px;border-top-right-radius:6px;box-shadow:none}
+.bub.voice{display:flex;align-items:center;gap:6px;min-width:84px;justify-content:flex-end;font-family:var(--f-mono);font-size:13px}
+.vtext{font-size:12.5px;color:var(--ink2);background:var(--tile);padding:6px 10px;border-radius:12px;max-width:100%}
+.vtext em{font-style:normal;color:var(--mute);font-size:11px;margin-left:4px}
+.bimg{width:150px;border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+.bimg img{display:block;width:100%}
+.typing{display:flex;gap:4px;padding:14px 14px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--mute);animation:blink 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes blink{50%{opacity:.25}}
+.qchips{display:flex;flex-wrap:wrap;gap:8px;padding-left:38px}
+.qchips .chip{height:34px;background:var(--card);color:var(--accent-2);box-shadow:inset 0 0 0 1.5px var(--accent-soft)}
+.ccard{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:12px;display:flex;flex-direction:column;gap:10px;width:268px;max-width:100%}
+.ccard .chd{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--mute)}
+.ccard .chd b{font-size:14px;color:var(--ink)}
+.ccard .row1{display:flex;gap:10px;align-items:center}
+.ccard .thumb{width:72px;flex:none;border-radius:12px}
+.ccard .price{font-family:var(--f-display);font-weight:600;font-size:18px}
+.ccard .kv div{padding:7px 0;font-size:13px}
+.ccard .tags{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
+.ccard .tags .tag{height:22px;font-size:11.5px;padding:0 8px}
+.demo-tag{font-size:10.5px;color:var(--butter-ink);background:var(--butter);padding:2px 6px;border-radius:6px}
+.savedline{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--mint);color:var(--mint-ink);border-radius:12px;padding:9px 12px;font-size:13px;font-weight:600}
+.savedline button{color:var(--mint-ink);text-decoration:underline;font-weight:600}
+.callrec{align-self:center;width:86%;background:var(--card);border-radius:16px;box-shadow:var(--shadow);font-size:13px}
+.callrec summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:11px 14px;color:var(--ink2)}
+.callrec summary::-webkit-details-marker{display:none}
+.callrec summary b{color:var(--ink);font-weight:600}
+.callrec summary span{margin-left:auto;font-size:12px;color:var(--accent-2)}
+.callrec .clines{padding:0 14px 12px;display:flex;flex-direction:column;gap:6px;line-height:1.5}
+.callrec .clines div b{color:var(--mute);font-weight:500;margin-right:4px}
+.welcome{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:30px 10px 10px}
+.welcome .botav{width:64px;height:64px;border-radius:22px}
+.welcome .botav svg{width:34px;height:34px}
+.welcome h3{margin:6px 0 0;font-size:18px}
+.welcome p{margin:0;color:var(--ink2);line-height:1.6;font-size:13.5px}
+.welcome .qchips{padding:8px 0 0;justify-content:center}
+.ibar{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;gap:8px;margin:0 -16px;padding:10px 12px 12px;background:var(--app);border-top:1px solid var(--line)}
+.screen.chatmode{padding-bottom:0}
+.ib-btn{width:38px;height:38px;flex:none;border-radius:50%;display:grid;place-items:center;color:var(--ink2);background:var(--card);box-shadow:var(--shadow);cursor:pointer}
+.ib-btn.call{background:var(--accent-soft);color:var(--accent-2);box-shadow:none}
+.ib-btn.send{background:var(--accent);color:var(--on-accent);box-shadow:none}
+.cin{flex:1;min-width:0;height:40px;border-radius:20px;border:0;background:var(--card);box-shadow:var(--shadow);padding:0 14px;font-size:15px;outline:none}
+.cin:focus{box-shadow:inset 0 0 0 2px var(--accent)}
+.hold{flex:1;min-width:0;height:40px;border-radius:20px;background:var(--card);box-shadow:var(--shadow);font-weight:600;font-size:15px;touch-action:none;user-select:none;-webkit-user-select:none}
+.hold.on{background:var(--accent-soft);color:var(--accent-2)}
+.vrec{position:absolute;left:50%;bottom:110px;transform:translateX(-50%);z-index:35;width:220px;background:rgba(30,22,38,.92);color:#fff;border-radius:22px;padding:18px 16px 14px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.vrec .wave{display:flex;gap:4px;align-items:center;height:30px}
+.vrec .wave i{width:4px;border-radius:2px;background:#FF8FB1;animation:wv .9s ease-in-out infinite}
+.vrec .wave i:nth-child(odd){animation-delay:.2s}.vrec .wave i:nth-child(3n){animation-delay:.4s}
+@keyframes wv{0%,100%{height:6px}50%{height:28px}}
+.vrec .vt{font-size:14px;line-height:1.5;min-height:21px;max-width:100%;overflow-wrap:anywhere}
+.vrec small{font-size:11.5px;opacity:.65}
+.callui{position:absolute;inset:0;z-index:45;background:linear-gradient(180deg,#3A2742,#140E19);color:#fff;display:flex;flex-direction:column;align-items:center;padding:28px 20px 34px;animation:fade .25s}
+.callui .c-top{display:flex;flex-direction:column;align-items:center;gap:4px}
+.callui .c-top b{font-size:22px;font-weight:600}
+.callui .c-top span{font-family:var(--f-mono);font-size:13px;opacity:.75}
+.c-demo{font-size:11px!important;font-family:var(--f-body)!important;background:rgba(255,255,255,.14);padding:3px 8px;border-radius:8px;margin-bottom:8px}
+.c-av{position:relative;width:132px;height:132px;margin:44px 0 30px;display:grid;place-items:center}
+.c-av .botav{width:112px;height:112px;border-radius:38px;position:relative;z-index:1}
+.c-av .botav svg{width:56px;height:56px}
+.c-av .ring{position:absolute;inset:0;border-radius:46px;border:2px solid rgba(255,143,177,.6);animation:ring 1.8s ease-out infinite}
+.c-av .ring.r2{animation-delay:.9s}
+@keyframes ring{from{transform:scale(.85);opacity:1}to{transform:scale(1.35);opacity:0}}
+.c-cap{flex:1;width:100%;display:flex;flex-direction:column;justify-content:flex-end;gap:10px;font-size:15px;line-height:1.55;overflow:hidden}
+.c-cap div{opacity:.55}
+.c-cap div:last-child{opacity:1}
+.c-cap b{font-weight:500;opacity:.7;margin-right:4px}
+.c-btns{display:flex;gap:56px;margin-top:22px}
+.c-b{display:flex;flex-direction:column;align-items:center;gap:8px;color:#fff;font-size:12px}
+.c-b>svg{width:62px;height:62px;padding:18px;border-radius:50%;background:rgba(255,255,255,.14)}
+.c-b.on>svg{background:#fff;color:#2A1F33}
+.c-b.end>svg{background:#E5484D}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.calgrid .wh{font-size:11px;color:var(--mute);padding:4px 0}
+.cd{position:relative;height:40px;border-radius:12px;font-family:var(--f-display);font-size:15px;font-weight:500}
+.cd i{position:absolute;left:50%;bottom:5px;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--accent)}
+.cd.today{box-shadow:inset 0 0 0 1.5px var(--accent)}
+.cd.on{background:var(--ink);color:var(--app)}
+.cd[disabled]{color:var(--mute);opacity:.45}
+.calhd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.calhd b{font-size:16px}
+.calhd .ibtn{box-shadow:none;background:var(--tile)}
+
 /* 标签输入 */
 .tagin{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:44px;border-radius:12px;background:var(--tile);padding:6px 8px}
 .tagin:focus-within{box-shadow:inset 0 0 0 2px var(--accent)}
@@ -350,6 +453,8 @@ input[type=range]{width:100%;accent-color:var(--accent);margin:0}
       <button id="fab" class="fab" hidden></button>
       <div id="sheet" class="sheet" hidden></div>
       <div id="toast" class="toast" hidden></div>
+      <div id="vrec" class="vrec" hidden></div>
+      <div id="call" hidden></div>
     </div>
     <nav id="tabbar" class="tabbar" aria-label="主导航"></nav>
   </div>
@@ -395,6 +500,14 @@ const I = (() => {
     pages: s('<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>'),
     replay: s('<path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M4 4v4h4"/>'),
     check: s('<path d="m5 12 5 5 9-10"/>', 'width="14" height="14" stroke-width="2.6"'),
+    chat: s('<path d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7l-4.5 3.5V17H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/><path d="M8 10.5h.01M12 10.5h.01M16 10.5h.01"/>'),
+    mic: s('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>', 'width="20" height="20"'),
+    keyboard: s('<rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M7 10h.01M11 10h.01M15 10h.01M7 14h10"/>', 'width="20" height="20"'),
+    phone: s('<path d="M5 4h3.5l1.8 4.4-2.2 1.4a11 11 0 0 0 6.1 6.1l1.4-2.2L20 15.5V19a1.5 1.5 0 0 1-1.6 1.5C10.7 20 4 13.3 3.5 5.6A1.5 1.5 0 0 1 5 4Z"/>', 'width="20" height="20"'),
+    phoneDown: s('<path d="M3.3 13.6c4.8-4.3 12.6-4.3 17.4 0l-1.5 2.9-3.8-1-.4-2.6a10.4 10.4 0 0 0-6 0l-.4 2.6-3.8 1Z"/>'),
+    speaker: s('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4Z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>'),
+    wave: s('<path d="M6 10v4M10 7v10M14 9v6M18 11v2"/>', 'width="16" height="16"'),
+    send: s('<path d="M12 19V5M6 11l6-6 6 6"/>', 'width="20" height="20" stroke-width="2.2"'),
     cal: s('<rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M9 3v4M15 3v4"/>'),
     dice: s('<rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1.2" fill="currentColor"/><circle cx="15" cy="15" r="1.2" fill="currentColor"/><circle cx="15" cy="9" r="1.2" fill="currentColor"/><circle cx="9" cy="15" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>', 'width="20" height="20"'),
     lock: s('<rect x="6" y="11" width="12" height="9" rx="2"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/>', 'width="16" height="16"'),
@@ -499,6 +612,7 @@ function loadState() {
   try { const raw = localStorage.getItem(KEY); if (raw) S = JSON.parse(raw); } catch (e) {}
   if (!S) S = seed();
   S.plan = S.plan || {};
+  if (!S.chats) S.chats = seedChats();
   // 旧数据迁移：没有永久序号的单品，从编号末尾的数字取
   S.items.forEach(i => { if (i.no == null) { const m = String(i.code).match(/(\d+)$/); i.no = m ? +m[1] : (S.seq[i.cat] = (S.seq[i.cat] || 0) + 1); } });
   CAT_KEYS.forEach(k => S.seq[k] = Math.max(S.seq[k] || 0, ...S.items.filter(i => i.cat === k).map(i => i.no)));
@@ -538,7 +652,7 @@ const miniHTML = o => `<div class="mini">${o.pieces.map((p, i) => pieceHTML(p, i
 
 /* ---------- 路由 ---------- */
 const UI = { mode: 'real', F: { cat: 'all', q: '', colors: [], seasons: [] }, occ: '全部', dcat: 'top' };
-const ROOTS = ['wardrobe', 'outfits', 'today', 'avatar', 'me'];
+const ROOTS = ['wardrobe', 'outfits', 'today', 'chat', 'me'];
 let NAV = [{ n: 'wardrobe', p: {} }];
 const cur = () => NAV[NAV.length - 1];
 function go(n, p = {}) { NAV.push({ n, p }); render(); }
@@ -547,6 +661,7 @@ function tabTo(n) { NAV = [{ n, p: {} }]; render(); }
 const rerender = () => render(true);
 function render(keep) {
   const sc = $('#screen'), st = keep ? sc.scrollTop : 0, c = cur();
+  sc.classList.toggle('chatmode', c.n === 'chat');
   sc.innerHTML = SCREENS[c.n](c.p);
   sc.scrollTop = st;
   const root = ROOTS.includes(c.n) && NAV.length === 1;
@@ -675,6 +790,8 @@ document.addEventListener('change', async e => {
   try {
     const url = await readImage(el.files[0]);
     const ai = await guessAI(url);
+    el.value = '';
+    if (src === 'chat') return chatPhoto(url, ai);
     go('cutout', { orig: url, cut: url, source: src === '截图' ? '淘宝' : src, ai, upload: true });
   } catch (err) { toast('这张图片读不出来，换一张试试'); }
 });
@@ -757,7 +874,7 @@ ACT.cutNext = () => {
 /* 单品信息 */
 function newDraft(ai = {}, extra = {}) {
   const cat = ai.cat || 'top';
-  return { cat, sub: ai.sub || CATS[cat].subs[0], name: ai.name || '', colorName: ai.colorName || '白',
+  return { cat, sub: ai.sub || CATS[cat].subs[0], name: ai.name || '', size: '', colorName: ai.colorName || '白',
     seasons: [], brand: '', price: '', source: '拍照', tags: [], note: '', img: null, ai: ai.sub ? ai : null, ...extra };
 }
 SCREENS.itemForm = p => {
@@ -781,6 +898,7 @@ SCREENS.itemForm = p => {
     <div class="fl"><div class="lab">适合季节</div><div class="chips wrapc">${SEASONS.map(s => `<button class="chip${d.seasons.includes(s) ? ' on' : ''}" data-act="fseason2" data-v="${s}">${s}</button>`).join('')}</div></div>
   </div>
   <div class="sec">
+    <div class="fl"><label class="lab" for="f-size">尺码</label><input class="inp" id="f-size" data-bind="size" value="${esc(d.size || '')}" placeholder="比如 M、38、均码"></div>
     <div class="two"><div class="fl"><label class="lab" for="f-brand">品牌</label><input class="inp" id="f-brand" data-bind="brand" value="${esc(d.brand)}" placeholder="选填"></div>
       <div class="fl"><label class="lab" for="f-price">价格（元）</label><input class="inp" id="f-price" type="number" inputmode="decimal" data-bind="price" value="${esc(d.price)}" placeholder="选填"></div></div>
     <div class="fl"><div class="lab">来源</div><div class="chips wrapc">${SOURCES.map(s => `<button class="chip${d.source === s ? ' on' : ''}" data-act="fsource" data-v="${s}">${s}</button>`).join('')}</div></div>
@@ -834,17 +952,24 @@ ACT.fsource = el => { cur().p.d.source = el.dataset.v; rerender(); };
 ACT.saveItem = () => {
   const p = cur().p, d = p.d, old = p.editId && itemById(p.editId);
   const pend = $('#f-tag') && $('#f-tag').value.trim(); if (pend) splitTags(pend).forEach(t => { if (!d.tags.includes(t)) d.tags.push(t); });
-  const no = old && old.cat === d.cat ? old.no : (S.seq[d.cat] = (S.seq[d.cat] || 0) + 1), code = fmtCode(d.cat, no);
-  const data = { code, no, name: String(d.name || '').trim() || d.colorName + d.sub, cat: d.cat, sub: d.sub, colorName: d.colorName, color: colorHex(d.colorName),
-    seasons: d.seasons.slice(), brand: String(d.brand || '').trim(), price: d.price === '' || d.price == null ? null : Number(d.price), source: d.source,
-    tags: d.tags.slice(), note: d.note || '', img: d.img };
-  let id = p.editId;
-  if (id) Object.assign(itemById(id), data);
-  else { id = uid(); S.items.push({ id, worn: 0, created: Date.now(), ...data }); }
-  save();
+  const id = commitItem(d, p.editId), code = itemById(id).code;
   toast(p.editId ? '修改已保存' : `已放进衣柜，编号 ${code}`);
+  if (p.fromChat) { const m = findMsg(p.fromChat); if (m) { m.card.saved = id; save(); } chatAfterSave(id); NAV = [{ n: 'chat', p: {} }]; return render(); }
   NAV = [{ n: 'wardrobe', p: {} }, { n: 'item', p: { id } }]; render();
 };
+// 新增或修改单品，返回单品 id（表单和小衣对话共用）
+function commitItem(d, editId) {
+  const old = editId && itemById(editId);
+  const no = old && old.cat === d.cat ? old.no : (S.seq[d.cat] = (S.seq[d.cat] || 0) + 1), code = fmtCode(d.cat, no);
+  const data = { code, no, name: String(d.name || '').trim() || d.colorName + d.sub, cat: d.cat, sub: d.sub, size: String(d.size || '').trim(), colorName: d.colorName, color: colorHex(d.colorName),
+    seasons: (d.seasons || []).slice(), brand: String(d.brand || '').trim(), price: d.price === '' || d.price == null ? null : Number(d.price), source: d.source,
+    tags: (d.tags || []).slice(), note: d.note || '', img: d.img || null };
+  let id = editId;
+  if (id) Object.assign(old, data);
+  else { id = uid(); S.items.push({ id, worn: 0, created: Date.now(), ...data }); }
+  save();
+  return id;
+}
 
 /* 单品详情 */
 SCREENS.item = p => {
@@ -861,6 +986,7 @@ SCREENS.item = p => {
     <div><span>编号</span><b>${esc(it.code)} <span class="sub">· 永久不变</span></b></div>
     <div><span>排序</span><b>${CATS[it.cat].n}第 ${rankOf(it)[0]} 件 / 共 ${rankOf(it)[1]} 件</b></div>
     <div><span>类别</span><b>${CATS[it.cat].n} · ${it.sub}</b></div>
+    <div><span>尺码</span><b>${esc(it.size) || '—'}</b></div>
     <div><span>颜色</span><b><i class="sw" style="display:inline-block;width:12px;height:12px;vertical-align:-1px;background:${it.color};margin-right:6px"></i>${it.colorName}</b></div>
     <div><span>季节</span><b>${(it.seasons || []).join(' / ') || '—'}</b></div>
     <div><span>品牌</span><b>${esc(it.brand) || '—'}</b></div>
@@ -1178,6 +1304,286 @@ ACT.rerollDay = el => { const d = el.dataset.d, had = !!S.plan[d], e = planOf(d,
 ACT.fillWeek = () => { let n = 0; openDays().forEach(d => { if (!S.plan[d]) { planOf(d, true); n++; } }); save(); rerender(); toast(n ? `排好了 ${n} 天` : '这周已经都排好了'); };
 ACT.rerollWeek = () => { let n = 0; openDays().forEach(d => { const e = planOf(d, true); if (!e.done) { e.ids = drawIds(e.ids, e.locks); n++; } }); save(); rerender(); toast(`重新摇了 ${n} 天`); };
 
+/* ---------- 对话 · 小衣（Demo：按关键词走预设流程，数据操作真实生效） ---------- */
+const botav = () => `<span class="botav" aria-hidden="true">${I.hanger}</span>`;
+const hm = ts => { const d = new Date(ts); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
+const mmss = sec => `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
+const chatOf = d => S.chats[d] || (S.chats[d] = []);
+function pushMsg(m) { m.id = uid(); m.t = Date.now(); chatOf(todayStr()).push(m); save(); return m; }
+function findMsg(id) { for (const k in S.chats) { const m = S.chats[k].find(x => x.id === id); if (m) return m; } return null; }
+function seedChats() {
+  const t = todayStr(), at = (d, h, mi) => parseYmd(d).getTime() + (h * 60 + mi) * 60000, d3 = addDays(t, -3), d1 = addDays(t, -1);
+  const id = () => uid();
+  return {
+    [d3]: [
+      { id: id(), t: at(d3, 20, 12), role: 'me', type: 'text', text: '帮我录一下这件 https://m.tb.cn/h.demo001' },
+      { id: id(), t: at(d3, 20, 12), role: 'bot', type: 'text', text: '找到了！这件是「浅蓝牛津衬衫」。你买的是什么尺码？' },
+      { id: id(), t: at(d3, 20, 13), role: 'me', type: 'voice', text: 'M 码', dur: 2 },
+      { id: id(), t: at(d3, 20, 13), role: 'bot', type: 'text', text: '好的，M 码。已经放进衣柜，编号 T-002，还顺手打上了「通勤」标签。' },
+    ],
+    [d1]: [
+      { id: id(), t: at(d1, 22, 40), role: 'sys', type: 'call', dur: 74, lines: [{ r: 'bot', t: '喂～我是小衣，今天想聊点什么？' }, { r: 'me', t: '明天要见客户，穿什么好？' }, { r: 'bot', t: '黑色西装外套配灰色西裤，再配棕色乐福鞋，干练又不会太严肃。' }, { r: 'me', t: '可以，就这套。' }] },
+      { id: id(), t: at(d1, 22, 42), role: 'bot', type: 'text', text: '通话里说的那套已经记下了，明天在「今天」页就能看到。' },
+    ],
+  };
+}
+const CH_LINK = { l: '导入一个淘宝链接（示例）', s: '帮我录一下这件 https://m.tb.cn/h.demo123' };
+const CH_CALL = { l: '打电话给小衣', call: 1 };
+const CH_PHOTO = { l: '拍一件衣服', photo: 1 };
+const CH_DEFAULT = [CH_LINK, CH_PHOTO, CH_CALL];
+const SIZE_CH = ['XS', 'S', 'M', 'L', 'XL', '均码'].map(x => ({ l: x }));
+const SHOE_CH = ['35', '36', '37', '38', '39', '40'].map(x => ({ l: x }));
+const TAG_GUESS = { 'T恤': ['百搭', '基础款'], '衬衫': ['通勤', '法式'], '卫衣': ['舒服', '休闲'], '针织': ['温柔', '通勤'], '外套': ['通勤', '正式'], '牛仔裤': ['百搭', '休闲'], '半身裙': ['约会', '温柔'], '短裤': ['度假', '休闲'], '西裤': ['通勤', '正式'], '运动鞋': ['运动', '百搭'], '乐福鞋': ['复古', '通勤'], '靴子': ['秋冬', '帅气'], '包': ['通勤', '百搭'], '帽子': ['度假', '休闲'], '耳饰': ['约会', '精致'] };
+function activeFlow() { if (S.flow && S.flow.date !== todayStr()) S.flow = null; return S.flow; }
+function cnNum(str) {
+  const m = String(str).match(/[零一二两三四五六七八九十百千]+/); if (!m) return null;
+  const D = { 零: 0, 一: 1, 二: 2, 两: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 }, U = { 十: 10, 百: 100, 千: 1000 };
+  let total = 0, n = 0;
+  for (const c of m[0]) { if (c in D) n = D[c]; else { total += (n || 1) * U[c]; n = 0; } }
+  return total + n || null;
+}
+function botSay(msgs, delay = 700) {
+  UI.typing = true; chatRefresh();
+  setTimeout(() => { UI.typing = false; msgs.forEach(m => pushMsg({ role: 'bot', type: 'text', ...m })); chatRefresh(); }, delay);
+}
+function chatRefresh() { if (cur().n === 'chat' && !cur().p.date && NAV.length === 1) render(); }
+function userSend(text, type = 'text', extra = {}) {
+  text = String(text || '').trim(); if (!text) return;
+  pushMsg({ role: 'me', type, text, ...extra }); chatRefresh(); respond(text);
+}
+function respond(text) {
+  const f = activeFlow();
+  if (f && /取消|算了|不录了/.test(text)) { S.flow = null; save(); return botSay([{ text: '好，这件先不录了。还有别的需要吗？', chips: CH_DEFAULT }]); }
+  if (f) return flowStep(f, text);
+  if (/https?:\/\/|tb\.cn|淘宝|天猫/i.test(text)) return startLinkFlow();
+  if (/录|添加|新买|买了/.test(text)) return botSay([{ text: '好呀！发一个商品链接给我，或者点下面的 ＋ 拍一张照片。', chips: [CH_LINK, CH_PHOTO] }]);
+  if (/标签/.test(text)) return botSay([{ text: '批量整理标签还在做，下个版本就能用。现在录入单品时，我会顺便帮你打好标签。', chips: CH_DEFAULT }]);
+  if (/穿什么|搭配|搭一套/.test(text)) return botSay([{ text: '帮你挑搭配还在做～先去「今天」页摇一套试试？', chips: CH_DEFAULT }]);
+  if (/博主/.test(text)) return botSay([{ text: '分析博主风格还在做，之后发几张截图给我就行。', chips: CH_DEFAULT }]);
+  botSay([{ text: '我现在最擅长帮你录衣服：发淘宝链接或照片给我，我会问你尺码、颜色和价格，再帮你打好标签。', chips: CH_DEFAULT }]);
+}
+function startLinkFlow() {
+  const d = newDraft({ cat: 'top', sub: '衬衫', colorName: '米', name: '法式方领泡泡袖衬衫' }, { source: '淘宝', note: '小衣从淘宝链接导入 · 示例女装店', seasons: ['春', '夏'] });
+  S.flow = { date: todayStr(), step: 'size', d, pagePrice: 159 }; save();
+  botSay([{ type: 'card', card: { k: 'link', name: '法式方领泡泡袖衬衫', shop: '示例女装店', price: 159, sub: '衬衫', colorName: '米' } },
+    { text: '找到了！这件是「法式方领泡泡袖衬衫」。你买的是什么尺码？', chips: SIZE_CH }], 1000);
+}
+function chatPhoto(img, ai) {
+  pushMsg({ role: 'me', type: 'image', img, text: '[照片]' });
+  const d = newDraft(ai, { img, source: '拍照' });
+  S.flow = { date: todayStr(), step: 'sub', d }; save(); chatRefresh();
+  botSay([{ type: 'card', card: { k: 'photo', img, colorName: ai.colorName } },
+    { text: `看起来是一件${ai.colorName}色的衣服。它是哪一类？`, chips: [...CATS.top.subs, '下装', '鞋子', '饰品'].map(l => ({ l })) }], 1000);
+}
+function askNext(f, lead) {
+  const d = f.d, q = {
+    size: () => ({ text: `${lead}你买的是什么尺码？`, chips: d.cat === 'shoes' ? SHOE_CH : SIZE_CH }),
+    color: () => ({ text: `${lead}颜色是「${d.colorName}」对吗？`, chips: [{ l: '对' }, ...COLORS.filter(c => c[0] !== d.colorName).slice(0, 4).map(c => ({ l: c[0] }))] }),
+    price: () => ({ text: `${lead}实付多少钱？${f.pagePrice ? `页面价是 ¥${f.pagePrice}。` : ''}`, chips: [...(f.pagePrice ? [{ l: `就是 ${f.pagePrice}` }] : []), { l: '跳过' }] }),
+    tags: () => { const g = TAG_GUESS[d.sub] || ['百搭']; return { text: `${lead}要打标签吗？我猜可以是这些：`, chips: [{ l: g.join('，') }, { l: g[0] }, { l: '不用了' }] }; },
+  }[f.step]();
+  botSay([q]);
+}
+function flowStep(f, text) {
+  const d = f.d;
+  if (f.step === 'sub') {
+    const catHit = CAT_KEYS.find(k => text.includes(CATS[k].n) && k !== d.cat);
+    const subHit = CAT_KEYS.flatMap(k => CATS[k].subs.map(s => [k, s])).find(([, s]) => text.includes(s));
+    if (subHit) { d.cat = subHit[0]; d.sub = subHit[1]; d.name = d.colorName + d.sub; f.step = 'size'; save(); return askNext(f, `${d.sub}，好的。`); }
+    if (catHit) { d.cat = catHit; d.sub = CATS[catHit].subs[0]; save(); return botSay([{ text: `是${CATS[catHit].n}呀，具体是哪种？`, chips: CATS[catHit].subs.map(l => ({ l })) }]); }
+    return botSay([{ text: '没太听明白，选一个就好～', chips: [...CATS[d.cat].subs, '下装', '鞋子', '饰品'].map(l => ({ l })) }]);
+  }
+  if (f.step === 'size') {
+    const m = text.toUpperCase().match(/XXS|XXL|XS|XL|均码|\d{2,3}|\bS\b|\bM\b|\bL\b|S|M|L/);
+    if (!m) return botSay([{ text: '没听清尺码，选一个就好～', chips: d.cat === 'shoes' ? SHOE_CH : SIZE_CH }]);
+    d.size = m[0]; f.step = 'color'; save(); return askNext(f, `${d.size} 码，记下了。`);
+  }
+  if (f.step === 'color') {
+    if (!/^(对|是|没错|嗯|对的|是的)/.test(text)) {
+      const c = COLORS.map(c => c[0]).sort((a, b) => b.length - a.length).find(n => text.includes(n));
+      if (!c) return botSay([{ text: '没听出是什么颜色，选一个吧：', chips: COLORS.slice(0, 8).map(c => ({ l: c[0] })) }]);
+      d.colorName = c; if (!d.img && f.pagePrice == null) d.name = c + d.sub;
+    }
+    f.step = 'price'; save(); return askNext(f, `${d.colorName}色，好的。`);
+  }
+  if (f.step === 'price') {
+    if (/跳过|不记得|忘了|不知道/.test(text)) d.price = '';
+    else { const n = text.match(/\d+(\.\d+)?/); const v = n ? +n[0] : cnNum(text); if (v == null && /就是|对|是/.test(text) && f.pagePrice) d.price = String(f.pagePrice); else if (v != null) d.price = String(v); else return botSay([{ text: '多少钱呢？直接说数字就行，或者跳过。', chips: [{ l: '跳过' }] }]); }
+    f.step = 'tags'; save(); return askNext(f, d.price ? `¥${d.price}，记下了。` : '好，价格先空着。');
+  }
+  if (f.step === 'tags') {
+    d.tags = /不用|不要|没有|跳过|算了/.test(text) ? [] : splitTags(text.replace(/打上|打|就|吧|标签|这两个|这些|都/g, '').replace(/和|跟|还有/g, '，'));
+    S.flow = null; save();
+    return botSay([{ text: '信息齐了，确认一下 👇', }, { type: 'card', card: { k: 'item', d: clone(d) } }]);
+  }
+}
+function chatAfterSave(id) { const it = itemById(id); botSay([{ text: `放进衣柜啦，编号 ${it.code}。还要录别的吗？`, chips: [CH_LINK, CH_PHOTO] }], 500); }
+
+function cardHTML(m) {
+  const c = m.card;
+  if (c.k === 'link') return `<div class="ccard"><div class="chd"><span>淘宝商品</span><span class="demo-tag">Demo 模拟解析</span></div><div class="row1"><div class="thumb">${art({ sub: c.sub, color: colorHex(c.colorName), name: c.name })}</div><div class="meta" style="padding:0"><span class="name" style="white-space:normal">${esc(c.name)}</span><span class="sub">${esc(c.shop)}</span><span class="price">¥${c.price}</span></div></div></div>`;
+  if (c.k === 'photo') return `<div class="ccard"><div class="chd"><span>识别结果</span><span class="demo-tag">Demo 按主色估算</span></div><div class="row1"><div class="thumb"><img src="${c.img}" alt="上传的照片"></div><div class="meta" style="padding:0"><span class="name">主色：${c.colorName}</span><span class="sub">类别需要你确认一下</span></div></div></div>`;
+  if (c.k === 'item') {
+    const d = c.d, it = c.saved && itemById(c.saved);
+    return `<div class="ccard"><div class="chd"><b>单品预览</b>${it ? '' : '<span>确认后放进衣柜</span>'}</div>
+      <div class="row1"><div class="thumb ${d.img ? 'checker' : ''}">${art({ ...d, color: colorHex(d.colorName), name: d.name || d.sub })}</div><div class="meta" style="padding:0"><span class="code">${it ? esc(it.code) : esc(nextCode(d.cat)) + ' · 待分配'}</span><span class="name" style="white-space:normal">${esc(d.name || d.colorName + d.sub)}</span></div></div>
+      <div class="kv"><div><span>类别</span><b>${CATS[d.cat].n} · ${d.sub}</b></div><div><span>尺码</span><b>${esc(d.size) || '—'}</b></div><div><span>颜色</span><b>${d.colorName}</b></div><div><span>价格</span><b>${d.price ? '¥' + esc(d.price) : '—'}</b></div>
+      <div><span>标签</span><b class="tags">${(d.tags || []).length ? d.tags.map(t => `<span class="tag">${esc(t)}</span>`).join('') : '—'}</b></div></div>
+      ${it ? `<div class="savedline">${I.check} 已放进衣柜 · ${esc(it.code)}<button data-act="openItem" data-id="${it.id}">查看</button></div>`
+        : c.saved ? '<div class="sub">这件单品已经删除了</div>'
+        : `<div class="row"><button class="btn sm" data-act="chatEdit" data-m="${m.id}">修改</button><button class="btn sm pri" data-act="chatSave" data-m="${m.id}">放进衣柜</button></div>`}</div>`;
+  }
+  return '';
+}
+function msgHTML(m, prevT, isLast, live) {
+  let h = !prevT || m.t - prevT > 10 * 60000 ? `<div class="tsep">${hm(m.t)}</div>` : '';
+  if (m.type === 'call') return h + `<details class="callrec"><summary>${I.phone}<b>语音通话</b> ${mmss(m.dur)}<span>查看记录</span></summary><div class="clines">${m.lines.map(l => `<div><b>${l.r === 'bot' ? '小衣' : '我'}</b>${esc(l.t)}</div>`).join('') || '<div class="sub">没有说话内容</div>'}</div></details>`;
+  const me = m.role === 'me';
+  let body;
+  if (m.type === 'voice') body = `<div class="bub voice">${m.dur}"${I.wave}</div><div class="vtext">${esc(m.text)}${m.sim ? '<em>示例语音</em>' : ''}</div>`;
+  else if (m.type === 'image') body = `<div class="bimg"><img src="${m.img}" alt="发送的照片"></div>`;
+  else if (m.type === 'card') body = cardHTML(m);
+  else body = `<div class="bub">${esc(m.text)}</div>`;
+  h += `<div class="mrow ${me ? 'me' : ''}">${me ? '' : botav()}<div class="mcol">${body}</div></div>`;
+  if (isLast && live && m.chips && !UI.typing) h += `<div class="qchips">${m.chips.map((c, i) => c.photo ? `<label class="chip"><input type="file" accept="image/*" hidden data-file="chat">${c.l}</label>` : `<button class="chip" data-act="qchip" data-i="${i}">${esc(c.l)}</button>`).join('')}</div>`;
+  return h;
+}
+SCREENS.chat = p => {
+  const t = todayStr(), date = p.date || t, live = date === t, list = S.chats[date] || [];
+  const head = `<div class="chathdr"><div class="who">${botav()}<div><b>小衣</b><small>你的衣橱助手</small></div></div>
+    <button class="ibtn" data-act="chatCal" aria-label="聊天记录日历">${I.cal}</button>
+    <button class="meav" data-act="goAvatar" aria-label="我的形象：等比和 Q 版">${figureSVG([], 'q', S.body, S.look, { bg: false, vb: '34 40 132 132' })}</button></div>`;
+  const past = live ? '' : `<div class="pastbar"><span>${md(date)} ${wdOf(date)} 的聊天记录</span><button data-act="chatToday">回到今天</button></div>`;
+  let msgs = '';
+  if (!list.length && live) msgs = `<div class="welcome">${botav()}<h3>我是小衣，你的衣橱助手</h3><p>发淘宝链接或照片给我，我来问你尺码、颜色，帮你录进衣柜、打好标签。<br>也可以按住说话，或者直接给我打电话。</p><div class="qchips">${CH_DEFAULT.map((c, i) => c.photo ? `<label class="chip"><input type="file" accept="image/*" hidden data-file="chat">${c.l}</label>` : `<button class="chip" data-act="qwel" data-i="${i}">${c.l}</button>`).join('')}</div></div>`;
+  else msgs = list.map((m, i) => msgHTML(m, i ? list[i - 1].t : 0, i === list.length - 1, live)).join('');
+  if (UI.typing && live) msgs += `<div class="mrow">${botav()}<div class="bub typing"><i></i><i></i><i></i></div></div>`;
+  const bar = live ? `<div class="ibar">
+    <button class="ib-btn" data-act="vmode" aria-label="${UI.voice ? '切换到键盘' : '切换到语音'}">${UI.voice ? I.keyboard : I.mic}</button>
+    ${UI.voice ? '<button class="hold" id="holdbtn">按住 说话</button>' : '<input id="chatin" class="cin" placeholder="发消息或粘贴链接…" data-inp="chatin" enterkeyhint="send" autocomplete="off" aria-label="给小衣发消息">'}
+    <button class="ib-btn send" id="sendbtn" data-act="chatSend" aria-label="发送" hidden>${I.send}</button>
+    <label class="ib-btn" id="attbtn" aria-label="发照片"><input type="file" accept="image/*" hidden data-file="chat">${I.plus}</label>
+    <button class="ib-btn call" data-act="startCall" aria-label="给小衣打电话">${I.phone}</button></div>` : '';
+  return head + past + `<div class="msgs">${msgs}</div>` + bar;
+};
+AFTER.chat = p => {
+  const sc = $('#screen'); sc.scrollTop = sc.scrollHeight;
+  const inp = $('#chatin');
+  if (inp) {
+    if (UI.refocus) { inp.focus(); UI.refocus = false; }
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); ACT.chatSend(); } });
+  }
+  const hb = $('#holdbtn');
+  if (hb) {
+    hb.addEventListener('pointerdown', e => { e.preventDefault(); hb.setPointerCapture(e.pointerId); hb.classList.add('on'); hb.textContent = '松开 发送'; recStart(); });
+    const end = ok => () => { hb.classList.remove('on'); hb.textContent = '按住 说话'; recStop(ok); };
+    hb.addEventListener('pointerup', end(true)); hb.addEventListener('pointercancel', end(false));
+  }
+};
+INP.chatin = el => { const has = !!el.value.trim(); $('#sendbtn').hidden = !has; $('#attbtn').hidden = has; };
+ACT.chatSend = () => { const inp = $('#chatin'); if (!inp || !inp.value.trim()) return; const v = inp.value; UI.refocus = true; userSend(v); };
+ACT.qchip = el => { const list = chatOf(todayStr()), c = list[list.length - 1].chips[+el.dataset.i]; if (c.call) return startCall(); userSend(c.s || c.l); };
+ACT.qwel = el => { const c = CH_DEFAULT[+el.dataset.i]; if (c.call) return startCall(); userSend(c.s || c.l); };
+ACT.vmode = () => { UI.voice = !UI.voice; render(); };
+ACT.goAvatar = () => go('avatar', {});
+ACT.chatToday = () => { cur().p.date = undefined; render(); };
+ACT.chatSave = el => { const m = findMsg(el.dataset.m); if (!m || m.card.saved) return; m.card.saved = commitItem(m.card.d); save(); toast(`已放进衣柜，编号 ${itemById(m.card.saved).code}`); chatAfterSave(m.card.saved); chatRefresh(); };
+ACT.chatEdit = el => { const m = findMsg(el.dataset.m); go('itemForm', { d: clone(m.card.d), fromChat: m.id }); };
+
+/* 聊天记录日历：当天只显示当天，切日期看历史 */
+function calHTML() {
+  const [y, mo] = UI.calYM.split('-').map(Number), t = todayStr(), sel = cur().p.date || t;
+  const lead = (new Date(y, mo - 1, 1).getDay() + 6) % 7, days = new Date(y, mo, 0).getDate();
+  let cells = ['一', '二', '三', '四', '五', '六', '日'].map(w => `<span class="wh">${w}</span>`).join('') + '<span></span>'.repeat(lead);
+  for (let n = 1; n <= days; n++) {
+    const d = ymd(new Date(y, mo - 1, n)), has = (S.chats[d] || []).length > 0;
+    cells += `<button class="cd${d === sel ? ' on' : ''}${d === t ? ' today' : ''}" data-act="chatPick" data-d="${d}" ${d > t || (!has && d !== t) ? 'disabled' : ''} aria-label="${md(d)}${has ? ' 有记录' : ''}">${n}${has ? '<i></i>' : ''}</button>`;
+  }
+  return `<div class="sheet-title">聊天记录</div><div class="sheet-sub">有小圆点的日子有记录，点一下查看那天的对话</div>
+    <div class="calhd"><button class="ibtn" data-act="calMon" data-v="-1" aria-label="上个月">${I.back}</button><b>${y}年${mo}月</b><button class="ibtn" data-act="calMon" data-v="1" aria-label="下个月">${I.chev}</button></div>
+    <div class="calgrid">${cells}</div>`;
+}
+ACT.chatCal = () => { UI.calYM = (cur().p.date || todayStr()).slice(0, 7); openSheet(calHTML()); };
+ACT.calMon = el => { const [y, m] = UI.calYM.split('-').map(Number), d = new Date(y, m - 1 + +el.dataset.v, 1); UI.calYM = ymd(d).slice(0, 7); setSheet(calHTML()); };
+ACT.chatPick = el => { const d = el.dataset.d; cur().p.date = d === todayStr() ? undefined : d; closeSheet(); render(); };
+
+/* 语音模式：按住说话。支持浏览器语音识别时用真识别，否则模拟一段示例语音 */
+const REC = {};
+function demoUtter() {
+  const f = activeFlow();
+  if (!f) return '我在淘宝买了件法式衬衫，帮我录一下';
+  return { sub: '衬衫', size: 'M 码', color: '对', price: '一百五十九', tags: '打通勤和法式吧' }[f.step];
+}
+function recStart() {
+  Object.assign(REC, { t0: Date.now(), text: '', rec: null });
+  const v = $('#vrec'); v.hidden = false;
+  v.innerHTML = `<div class="wave">${'<i></i>'.repeat(9)}</div><div class="vt" id="vt">正在听…</div><small>松开发送</small>`;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  try {
+    const r = new SR(); r.lang = 'zh-CN'; r.interimResults = true; r.continuous = true;
+    r.onresult = e => { REC.text = Array.from(e.results).map(x => x[0].transcript).join(''); const vt = $('#vt'); if (vt) vt.textContent = REC.text; };
+    r.onerror = () => { REC.rec = null; };
+    r.start(); REC.rec = r;
+  } catch (e) { REC.rec = null; }
+}
+function recStop(ok) {
+  const dur = Math.round((Date.now() - REC.t0) / 1000);
+  if (REC.rec) try { REC.rec.stop(); } catch (e) {}
+  setTimeout(() => {
+    $('#vrec').hidden = true;
+    if (!ok) return;
+    if (Date.now() - REC.t0 < 500) return toast('说话时间太短了');
+    const real = REC.text.trim();
+    userSend(real || demoUtter(), 'voice', { dur: Math.max(1, dur), sim: !real });
+  }, REC.rec ? 450 : 150);
+}
+
+/* 打电话模式：Demo 自动演示一段通话，挂断后记录留在当天的聊天里 */
+const CALL_SCRIPT = [['bot', '喂～我是小衣。今天想录衣服，还是聊聊穿搭？'], ['me', '我刚在淘宝买了件衬衫，帮我录进衣柜。'], ['bot', '好呀！什么颜色、什么尺码的？'], ['me', '米白色的，M 码，一百五十九块。'], ['bot', '记下了：米白色衬衫，M 码，159 元。要打什么标签吗？'], ['me', '就打通勤和法式吧。'], ['bot', '好嘞～挂断后我把单品卡发到聊天里，你点一下就能放进衣柜。']];
+let CALL = null;
+function speak(text) { try { if (!CALL || !CALL.spk || !window.speechSynthesis) return; const u = new SpeechSynthesisUtterance(text); u.lang = 'zh-CN'; u.rate = 1.05; speechSynthesis.speak(u); } catch (e) {} }
+function callUI() {
+  const c = $('#call'); c.hidden = false;
+  c.innerHTML = `<div class="callui" role="dialog" aria-label="和小衣通话中"><div class="c-top"><span class="c-demo">演示通话 · 自动播放示例对话</span><b>小衣</b><span id="ctime">正在接通…</span></div>
+    <div class="c-av"><span class="ring"></span><span class="ring r2"></span>${botav()}</div>
+    <div class="c-cap" id="ccap" aria-live="polite"></div>
+    <div class="c-btns"><button class="c-b${CALL.spk ? ' on' : ''}" data-act="callSpk" aria-pressed="${CALL.spk}">${I.speaker}<span>${CALL.spk ? '朗读开' : '朗读关'}</span></button><button class="c-b end" data-act="hangup">${I.phoneDown}<span>挂断</span></button></div></div>`;
+}
+function callCaps() { const el = $('#ccap'); if (el) el.innerHTML = CALL.lines.slice(-3).map(([r, t]) => `<div><b>${r === 'bot' ? '小衣' : '我'}</b>${esc(t)}</div>`).join(''); }
+function startCall() {
+  if (CALL) return;
+  closeSheet();
+  if (cur().n !== 'chat' || cur().p.date) { NAV = [{ n: 'chat', p: {} }]; render(); }
+  CALL = { t0: 0, i: 0, lines: [], spk: true, timers: [] };
+  callUI();
+  CALL.timers.push(setTimeout(() => {
+    CALL.t0 = Date.now();
+    CALL.tick = setInterval(() => { const el = $('#ctime'); if (el) el.textContent = mmss(Math.floor((Date.now() - CALL.t0) / 1000)); }, 500);
+    const next = () => {
+      if (!CALL || CALL.i >= CALL_SCRIPT.length) return;
+      const line = CALL_SCRIPT[CALL.i++]; CALL.lines.push(line); callCaps(); if (line[0] === 'bot') speak(line[1]);
+      CALL.timers.push(setTimeout(next, Math.max(1800, line[1].length * 190)));
+    };
+    next();
+  }, 1200));
+}
+ACT.startCall = startCall;
+ACT.callSpk = () => { CALL.spk = !CALL.spk; if (!CALL.spk) try { speechSynthesis.cancel(); } catch (e) {} callUI(); callCaps(); const el = $('#ctime'); if (el && CALL.t0) el.textContent = mmss(Math.floor((Date.now() - CALL.t0) / 1000)); };
+ACT.hangup = () => {
+  const c = CALL; if (!c) return;
+  c.timers.forEach(clearTimeout); clearInterval(c.tick); try { speechSynthesis.cancel(); } catch (e) {}
+  CALL = null; $('#call').hidden = true; $('#call').innerHTML = '';
+  pushMsg({ role: 'sys', type: 'call', dur: c.t0 ? Math.max(1, Math.round((Date.now() - c.t0) / 1000)) : 0, lines: c.lines.map(([r, t]) => ({ r, t })) });
+  if (c.i >= CALL_SCRIPT.length) {
+    S.flow = null;
+    const d = newDraft({ cat: 'top', sub: '衬衫', colorName: '米', name: '米白色衬衫' }, { size: 'M', price: '159', tags: ['通勤', '法式'], source: '淘宝', seasons: ['春', '夏'], note: '电话里和小衣说的' });
+    pushMsg({ role: 'bot', type: 'text', text: '刚才电话里说的那件衬衫，确认一下就能放进衣柜 👇' });
+    pushMsg({ role: 'bot', type: 'card', card: { k: 'item', d } });
+  }
+  render();
+};
+
 /* ---------- 3D 小人 ---------- */
 const T3 = { r: null, scene: null, cam: null, grp: null, drag: null, auto: true, raf: 0, w: 0, h: 0, mode: 'real' };
 const BASE_TOP = '#EAE4F2', BASE_BOT = '#6B6480', BASE_SHOE = '#F4F2F7';
@@ -1314,7 +1720,7 @@ function t3build(body, look, mode) {
 
 /* 形象 */
 const t3host = (cls = '') => `<div class="t3 ${cls}" id="t3"><span class="hint3">${I.rotate}左右拖动旋转</span></div>`;
-SCREENS.avatar = () => `<div class="tblock"><div><div class="eyebrow">我的形象</div><h1 class="big">${UI.mode === 'q' ? '可爱的我' : '等比的我'}</h1></div></div>
+SCREENS.avatar = () => hdr('我的形象') + `<div class="tblock" style="padding-top:2px"><div><div class="eyebrow">我的形象</div><h1 class="big">${UI.mode === 'q' ? '可爱的我' : '等比的我'}</h1></div></div>
   ${seg('mode', [['real', '等比'], ['q', 'Q 版']], UI.mode)}
   <div style="margin-top:12px">${t3host()}</div>
   <div class="statchips">${BODY_FIELDS.map(([k, l, u]) => `<span><b>${S.body[k]}</b>${l} ${u}</span>`).join('')}</div>
@@ -1384,6 +1790,7 @@ const PAGES = [['首次打开', [['0', 'onboard', '首次引导']]],
   ['今天', [['14', 'today', '今天穿什么'], ['15', 'week', '本周排期']]],
   ['衣柜', [['1', 'wardrobe', '衣柜首页'], ['2', 'add', '添加方式'], ['2b', 'taobao', '淘宝导入'], ['3', 'cutout', '抠图确认'], ['4', 'itemForm', '单品信息'], ['5', 'item', '单品详情'], ['6', 'rules', '编号规则']]],
   ['搭配', [['7', 'outfits', '搭配列表'], ['8', 'outfitEdit', '搭配画布'], ['9', 'tryon', 'AI 试穿']]],
+  ['对话', [['16', 'chat', '对话 · 小衣'], ['17', 'call', '打电话模式'], ['18', 'chatCal', '聊天记录日历']]],
   ['形象', [['10', 'avatar', '我的形象'], ['11', 'body', '身材编辑'], ['12', 'look', '外观设置']]],
   ['我的', [['13', 'me', '我的']]]];
 const pagesHTML = () => PAGES.map(([g, list]) => `<div class="grp">${g}</div>` + list.map(([no, k, n]) => `<button data-act="jump" data-k="${k}"><span class="no">${no}</span>${n}</button>`).join('')).join('');
@@ -1401,7 +1808,10 @@ ACT.jump = async el => {
   else if (k === 'outfitEdit') NAV = [{ n: 'outfits', p: {} }, { n: 'outfitEdit', p: { d: o0 ? clone(o0) : { name: '', occasion: '休闲', pieces: [] }, sel: -1 } }];
   else if (k === 'tryon') NAV = [{ n: 'outfits', p: {} }, { n: 'tryon', p: { pieces: o0 ? clone(o0.pieces) : [] } }];
   else if (k === 'week') NAV = [{ n: 'today', p: {} }, { n: 'week', p: {} }];
-  else if (k === 'body' || k === 'look') NAV = [{ n: 'avatar', p: {} }, { n: k, p: {} }];
+  else if (k === 'body' || k === 'look') NAV = [{ n: 'chat', p: {} }, { n: 'avatar', p: {} }, { n: k, p: {} }];
+  else if (k === 'avatar') NAV = [{ n: 'chat', p: {} }, { n: 'avatar', p: {} }];
+  else if (k === 'call') { NAV = [{ n: 'chat', p: {} }]; render(); return startCall(); }
+  else if (k === 'chatCal') { NAV = [{ n: 'chat', p: {} }]; render(); return ACT.chatCal(); }
   else if (k === 'onboard') NAV = [{ n: 'onboard', p: { step: 0 } }];
   else NAV = [{ n: k, p: {} }];
   render();
@@ -1423,7 +1833,7 @@ document.addEventListener('input', e => {
 });
 
 /* ---------- 启动 ---------- */
-$('#tabbar').innerHTML = [['wardrobe', I.hanger, '衣柜'], ['outfits', I.shirt, '搭配'], ['today', I.sun, '今天'], ['avatar', I.person, '形象'], ['me', I.smile, '我的']].map(([k, ic, n]) => k === 'today'
+$('#tabbar').innerHTML = [['wardrobe', I.hanger, '衣柜'], ['outfits', I.shirt, '搭配'], ['today', I.sun, '今天'], ['chat', I.chat, '对话'], ['me', I.smile, '我的']].map(([k, ic, n]) => k === 'today'
   ? `<button class="mid" data-act="tab" data-tab="${k}"><span class="tc">${ic}</span><span>${n}</span></button>`
   : `<button data-act="tab" data-tab="${k}">${ic}<span>${n}</span></button>`).join('');
 $('#pnav').innerHTML = pagesHTML();

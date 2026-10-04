@@ -158,16 +158,23 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .hscroll::-webkit-scrollbar{display:none}
 
 /* 今天 */
-.drawcard{background:var(--card);border-radius:26px;box-shadow:var(--shadow);padding:12px;display:grid;grid-template-columns:44% minmax(0,1fr);gap:12px;align-items:center}
-.drawcard .fig{border-radius:20px;overflow:hidden;background:var(--accent-soft)}
-.drawcard .fig svg{display:block;width:100%;height:auto}
-.dlist{display:flex;flex-direction:column;gap:8px;min-width:0}
-.ditm{display:flex;align-items:center;gap:8px;padding:6px;border-radius:14px;background:var(--tile);text-align:left;width:100%;min-width:0}
-.ditm .thumb{width:44px;flex:none;border-radius:10px;background:var(--card)}
-.ditm .meta{padding:0;flex:1}
-.ditm .lk{color:var(--mute);flex:none;display:grid;place-items:center;width:22px}
-.ditm.add{justify-content:center;color:var(--accent-2);font-size:13px;padding:12px;background:none;box-shadow:inset 0 0 0 1.5px var(--line)}
-.drawcard .fig{position:relative}
+.drawcard{background:var(--card);border-radius:26px;box-shadow:var(--shadow);padding:12px}
+.drawcard .fig{position:relative;border-radius:20px;overflow:hidden;background:linear-gradient(180deg,#FDE4EE,#F1ECFF);display:flex;justify-content:center}
+.drawcard .fig svg{display:block;height:min(420px,50vh);width:auto;max-width:100%}
+.swaprow{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:8px -12px 0;padding:2px 12px 4px}
+.swaprow::-webkit-scrollbar{display:none}
+.swit{flex:none;width:74px;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center}
+.swit .thumb{width:74px;border-radius:14px}
+.swit .nm{font-size:11.5px;color:var(--ink2);width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.swit.add .thumb{background:none;box-shadow:inset 0 0 0 1.5px var(--line);color:var(--accent-2);font-size:24px}
+.act3{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:12px;margin-top:18px}
+.a3{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13px;color:var(--ink2)}
+.a3i{width:52px;height:52px;border-radius:50%;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;color:var(--ink)}
+.a3.main{color:var(--accent-2);font-weight:600}
+.a3.main .a3i{width:72px;height:72px;background:var(--accent);color:var(--on-accent);box-shadow:0 12px 24px -10px var(--accent)}
+.a3.main .a3i svg{width:30px;height:30px}
+.a3.done{color:var(--mint-ink)}
+.a3.done .a3i{background:var(--mint);color:var(--mint-ink);box-shadow:none}
 .figmode{position:absolute;left:8px;top:8px;font-size:11.5px;font-weight:600;background:var(--card);color:var(--ink2);padding:4px 9px;border-radius:10px;box-shadow:var(--shadow)}
 .btn.done{background:var(--mint);color:var(--mint-ink);box-shadow:none;cursor:default}
 .card.cur{box-shadow:inset 0 0 0 2px var(--accent)}
@@ -175,7 +182,6 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .flipin{animation:flipin .55s cubic-bezier(.2,.8,.2,1)}
 @keyframes flipin{from{transform:perspective(900px) rotateY(-100deg) scale(.95);opacity:.2}}
 .donebadge{margin-top:10px;display:flex;gap:6px;align-items:center;justify-content:center;background:var(--mint);color:var(--mint-ink);border-radius:12px;padding:9px;font-size:12.5px}
-.linkbtn{display:block;margin:12px auto 0;color:var(--accent-2);font-size:13px}
 .weekstrip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:8px}
 .wd{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 3px 8px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);font-size:11px;color:var(--mute);position:relative}
 .wd b{font-family:var(--f-display);font-size:15px;color:var(--ink);font-weight:600}
@@ -1214,17 +1220,18 @@ SCREENS.today = p => {
   if (!e) return head + `<div class="empty">这天没有记录穿搭<br><button class="btn soft" style="margin-top:12px" data-act="makeDay">补记这天穿了什么</button></div>`;
   if (!e.ids.length) return head + '<div class="empty">衣柜里还没有衣服<br>先去添加几件吧</div>';
   const its = e.ids.map(itemById), hasAcc = its.some(i => i.cat === 'acc') || !S.items.some(i => i.cat === 'acc');
-  const okText = isToday ? '就穿这套' : past ? '那天穿的就是这套' : '定下这套';
+  const okText = isToday ? '就穿这套' : past ? '就是这套' : '定下这套';
   return head + `
   <div class="drawcard" id="drawcard" style="margin-top:14px">
     <div class="fig">${figureSVG(piecesOf(e.ids), UI.mode, S.body, S.look, { bg: 0, vb: '10 12 180 400' })}<button class="figmode" data-act="figmode">${UI.mode === 'q' ? 'Q 版' : '等比'} ⇄</button></div>
-    <div class="dlist">${its.map(i => `<button class="ditm" data-act="swapItem" data-id="${i.id}" aria-label="换掉 ${esc(i.name)}"><div class="thumb">${art(i)}</div><div class="meta"><span class="code">${esc(i.code)}</span><span class="name">${esc(i.name)}</span></div><span class="lk">${I.chev}</span></button>`).join('')}
-      ${hasAcc ? '' : `<button class="ditm add" data-act="swapItem" data-id="">＋ 加一件饰品</button>`}
-      <div class="sub" style="font-size:11.5px;line-height:1.5">点单品可以单独换</div></div>
+    <div class="lab" style="margin-top:12px"><span>这套的单品</span><span>点一件可以单独换</span></div>
+    <div class="swaprow">${its.map(i => `<button class="swit" data-act="swapItem" data-id="${i.id}" aria-label="换掉 ${esc(i.name)}"><span class="thumb">${art(i)}</span><span class="code">${esc(i.code)}</span><span class="nm">${esc(i.name)}</span></button>`).join('')}${hasAcc ? '' : '<button class="swit add" data-act="swapItem" data-id="" aria-label="加一件饰品"><span class="thumb">＋</span><span class="nm">加饰品</span></button>'}</div>
   </div>
-  <div class="row" style="margin-top:12px"><button class="btn soft" data-act="redraw">${I.dice}随机换一套</button>
-    ${e.done ? `<div class="btn done" role="status">${I.check}已定下</div>` : `<button class="btn pri" data-act="confirmDay">${I.check}${okText}</button>`}</div>
-  <button class="linkbtn" data-act="pickOutfit">从我的搭配里选一套</button>`;
+  <div class="act3">
+    <button class="a3" data-act="redraw"><span class="a3i">${I.dice}</span><span>随机</span></button>
+    ${e.done ? `<div class="a3 main done" role="status"><span class="a3i">${I.check}</span><span>已定下</span></div>` : `<button class="a3 main" data-act="confirmDay"><span class="a3i">${I.check}</span><span>${okText}</span></button>`}
+    <button class="a3" data-act="pickOutfit"><span class="a3i">${I.shirt}</span><span>我来选</span></button>
+  </div>`;
 };
 ACT.figmode = () => { UI.mode = UI.mode === 'q' ? 'real' : 'q'; rerender(); };
 ACT.goWeek = () => go('week', {});

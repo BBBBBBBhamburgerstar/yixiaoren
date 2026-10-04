@@ -1130,19 +1130,24 @@ function rulesValid(r) {
 }
 ACT.saveRules = () => { const p = cur().p, e = rulesValid(p.r); if (e) return toast(e); S.rules = clone(p.r); syncCodes(); save(); toast('已保存，所有编号已按新格式显示'); back(); };
 /* 搭配列表 */
+const UNCAT = '未分类';
 // 搭配筛选：场合 + 包含某件单品（按单品编号、名称、款式、品牌搜）
 function outfitGridHTML() {
   const q = UI.oq.trim().toLowerCase();
   const hit = it => it && [it.code, it.name, it.sub, it.brand, it.colorName].join(' ').toLowerCase().includes(q);
-  const list = S.outfits.filter(o => (UI.occ === '全部' || o.occasions.includes(UI.occ)) && (!q || o.pieces.some(p => hit(itemById(p.iid)))));
+  const list = S.outfits.filter(o => (UI.occ === '全部' || (UI.occ === UNCAT ? !o.occasions.length : o.occasions.includes(UI.occ))) && (!q || o.pieces.some(p => hit(itemById(p.iid)))));
   const head = q ? `<div class="sub" style="margin-top:12px">包含「${esc(UI.oq.trim())}」的搭配 ${list.length} 套</div>` : '';
   if (!list.length) return head + `<div class="empty">${q ? `没有包含「${esc(UI.oq.trim())}」的搭配<br>点右下角，用它新建一套吧` : '这个场合还没有搭配<br>点右下角新建一套'}</div>`;
   return head + `<div class="grid">${list.map(o => `<button class="card" data-act="openOutfit" data-id="${o.id}">${miniHTML(o)}<div class="meta"><span class="name">${esc(o.name)}</span><span class="sub">${(o.occasions.length ? o.occasions.join('、') : '未分类')} · ${o.pieces.length} 件</span></div></button>`).join('')}</div>`;
 }
-SCREENS.outfits = () => `<div class="tblock"><div><div class="eyebrow">搭配</div><h1 class="big"><span class="num">${S.outfits.length}</span> 套搭配</h1></div>${meBtn()}</div>
+SCREENS.outfits = () => {
+  const hasUncat = S.outfits.some(o => !o.occasions.length);
+  if (UI.occ === UNCAT && !hasUncat) UI.occ = '全部';
+  return `<div class="tblock"><div><div class="eyebrow">搭配</div><h1 class="big"><span class="num">${S.outfits.length}</span> 套搭配</h1></div>${meBtn()}</div>
   <div class="search">${I.search}<input id="oq" type="search" placeholder="搜单品名称或编号，看它能怎么搭" value="${esc(UI.oq)}" data-inp="oq" aria-label="按单品搜索搭配">${UI.oq ? `<button data-act="oqClear" aria-label="清除搜索">${I.x}</button>` : ''}</div>
-  <div class="chips">${['全部', ...S.occasions].map(o => `<button class="chip${UI.occ === o ? ' on' : ''}" data-act="occ" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>
+  <div class="chips">${['全部', ...S.occasions, ...(hasUncat ? [UNCAT] : [])].map(o => `<button class="chip${UI.occ === o ? ' on' : ''}" data-act="occ" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>
   <div id="ogrid">${outfitGridHTML()}</div><div style="height:70px"></div>`;
+};
 // 选中的场合可能在横向滚动行的后面，自动滚到看得见的位置
 AFTER.outfits = () => { const on = $('.chips .chip.on'), row = on && on.parentNode; if (row) row.scrollLeft = on.offsetLeft - (row.clientWidth - on.offsetWidth) / 2; };
 INP.oq = el => { UI.oq = el.value; $('#ogrid').innerHTML = outfitGridHTML(); };
@@ -1212,6 +1217,7 @@ ACT.occNew = () => openSheet(`<div class="sheet-title">新建场合</div><div cl
 ACT.occAdd = () => {
   const v = ($('#occname').value || '').trim(), err = $('#occerr');
   if (!v) { err.textContent = '先输入场合名称'; err.hidden = false; return; }
+  if (v === UNCAT) { err.textContent = '「未分类」是系统自带的，换个名字吧'; err.hidden = false; return; }
   if (S.occasions.includes(v)) { err.textContent = `「${v}」已经有了`; err.hidden = false; return; }
   S.occasions.push(v); save(); closeSheet();
   if (cur().n === 'outfitEdit') { cur().p.d.occasions.push(v); toast(`已新建「${v}」，并选上了`); }

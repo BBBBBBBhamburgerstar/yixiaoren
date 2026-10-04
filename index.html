@@ -703,7 +703,7 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .miniact svg{width:15px;height:15px}
 .newof{width:110px;flex:none;text-align:left;display:flex;flex-direction:column;gap:6px}
 .newof .mini{display:grid;place-items:center;background:none;border:1.5px dashed var(--accent);color:var(--accent-2)}
-.newof .mini svg{width:28px;height:28px}
+.newof .mini svg{position:absolute;inset:0;margin:auto;width:28px;height:28px}
 .newof .name{font-size:13px;color:var(--accent-2)}
 .ititle-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px;margin-bottom:2px}
 .infobtn{width:34px;height:34px;flex:none;border-radius:50%;display:grid;place-items:center;color:var(--mute)}
@@ -901,6 +901,9 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .welcome .qchips{padding:8px 0 0;justify-content:center}
 .ibar{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;gap:8px;margin:0 -16px;padding:10px 12px 12px;background:var(--app);border-top:1px solid var(--line)}
 .screen.chatmode,.screen.formmode{padding-bottom:0}
+.screen.chatmode{display:flex;flex-direction:column}
+.screen.chatmode>*{flex-shrink:0}
+.screen.chatmode>.ibar{margin-top:auto}
 .fillbar{flex-direction:column;align-items:stretch;gap:8px}
 .fillrow{display:flex;align-items:center;gap:8px}
 .fillres{display:flex;align-items:center;gap:8px;background:var(--mint);color:var(--mint-ink);border-radius:12px;padding:8px 10px;font-size:12.5px;line-height:1.45}
@@ -985,7 +988,7 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .stage-empty{position:absolute;inset:0;display:grid;place-items:center;color:var(--mute);font-size:13px;padding:24px;text-align:center}
 .tools{display:flex;justify-content:center;gap:8px;margin-top:12px;min-height:38px;align-items:center}
 .tools .hint{color:var(--mute);font-size:12.5px}
-.mini{position:relative;isolation:isolate;aspect-ratio:3/4;border-radius:14px;background:var(--tile);overflow:hidden}
+.mini{position:relative;isolation:isolate;width:100%;height:0;padding-bottom:133.333%;flex:none;border-radius:14px;background:var(--tile);overflow:hidden}
 .mini .piece{pointer-events:none;cursor:default}
 .drawer .ditems{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin:0 -14px;padding:2px 14px 4px}
 .drawer .ditems::-webkit-scrollbar{display:none}
@@ -2608,8 +2611,8 @@ SCREENS.onboard = p => {
 };
 AFTER.onboard = p => { if ((p.step || 0) >= 1) t3mount($('#t3'), p.b, S.look, UI.mode); };
 ACT.onbNext = () => { const p = cur().p; if (p.step === 1) { S.body = { ...p.b }; save(); } p.step = (p.step || 0) + 1; render(); };
-ACT.onbSkip = () => { S.onboarded = true; save(); tabTo('today'); };
-ACT.onbDone = () => { S.onboarded = true; save(); toast('欢迎！先看看今天穿什么'); tabTo('today'); };
+ACT.onbSkip = () => { S.onboarded = true; save(); tabTo('wardrobe'); };
+ACT.onbDone = () => { S.onboarded = true; save(); toast('欢迎！先看看你的衣柜'); tabTo('wardrobe'); };
 
 /* ---------- 原型页面导航 ---------- */
 const PAGES = [['首次打开', [['0', 'onboard', '首次引导']]],

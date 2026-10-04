@@ -240,6 +240,10 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .weeknav b{display:block;font-size:15px}
 .weeknav span{font-size:12px;color:var(--mute)}
 .weeknav .ibtn{box-shadow:none;background:var(--tile)}
+.fillline{margin-top:12px;font-size:12.5px;color:var(--mute)}
+.fillline button{color:var(--mute);font-size:12.5px}
+.fillline u{text-underline-offset:3px}
+.dgo{color:var(--line);flex:none;display:grid;place-items:center}
 .days{display:flex;flex-direction:column;gap:10px;margin-top:12px}
 .dayrow{display:flex;align-items:center;gap:8px;background:var(--card);border-radius:18px;padding:10px;box-shadow:var(--shadow)}
 .dayrow.today{box-shadow:inset 0 0 0 2px var(--accent),var(--shadow)}
@@ -1498,6 +1502,7 @@ ACT.useOutfit = el => {
   setIds(e, d, ids); closeSheet(); rerender(); toast(`换成了「${o.name}」`);
 };
 
+// 排期页只做一周总览：看每天安排、点进某天去编辑；唯一的批量操作是一行小字「随机排一下」，可撤销
 SCREENS.week = p => {
   p.off = p.off || 0;
   const t = todayStr(), ws = addDays(weekStart(t), p.off * 7), days = [0, 1, 2, 3, 4, 5, 6].map(n => addDays(ws, n));
@@ -1505,20 +1510,24 @@ SCREENS.week = p => {
   const rows = days.map(d => {
     const past = d < t, e = planOf(d, false), its = e ? e.ids.map(itemById) : [];
     return `<div class="dayrow${d === t ? ' today' : ''}"><button class="dmain" data-act="openDay" data-d="${d}"><span class="dl"><b>${d === t ? '今天' : wdOf(d)}</b><span>${d.slice(5).replace('-', '/')}</span></span>
-      <span class="dth">${its.length ? its.map(i => `<span class="thumb">${art(i)}</span>`).join('') : `<span class="sub">${past ? '没有记录' : '还没排'}</span>`}</span>${e && e.done ? `<span class="st">${I.check}已定</span>` : ''}</button>
-      ${!past && !(e && e.done) ? `<button class="ibtn" data-act="rerollDay" data-d="${d}" aria-label="重新摇${wdOf(d)}">${I.dice}</button>` : ''}</div>`;
+      <span class="dth">${its.length ? its.map(i => `<span class="thumb">${art(i)}</span>`).join('') : `<span class="sub">${past ? '没有记录' : '还没安排'}</span>`}</span>${e && e.done ? `<span class="st">${I.check}已定</span>` : `<span class="dgo">${I.chev}</span>`}</button></div>`;
   }).join('');
-  const open = days.some(d => d >= t);
+  const emptyDays = openDays().filter(d => { const e = planOf(d, false); return !e || !e.ids.length; });
+  const fillLine = p.undoFill ? `<div class="fillline">已随机排好 ${p.undoFill.length} 天 · <button data-act="undoFill"><u>撤销</u></button></div>`
+    : emptyDays.length ? `<div class="fillline">还有 ${emptyDays.length} 天没安排 · <button data-act="fillWeek"><u>随机排一下</u></button></div>` : '';
   return hdr('穿搭排期') + `<div class="weeknav"><button class="ibtn" data-act="wk" data-v="-1" aria-label="上一周">${I.back}</button><div><b>${label}</b><span>${md(days[0])} – ${md(days[6])}</span></div><button class="ibtn" data-act="wk" data-v="1" aria-label="下一周">${I.chev}</button></div>
-  ${open ? `<div class="row" style="margin-top:12px"><button class="btn sm" data-act="fillWeek">把空着的排满</button><button class="btn sm soft" data-act="rerollWeek">${I.dice}全部重新摇</button></div>` : ''}
+  ${fillLine}
   <div class="days">${rows}</div>
-  <p class="sub" style="line-height:1.6;margin-top:14px">现在是纯随机排的。点某一天可以单独换单品或整套；已经定下的日子不会被重新摇。</p>`;
+  <p class="sub" style="line-height:1.6;margin-top:14px">点某一天进去挑选或修改穿搭。</p>`;
 };
 const openDays = () => { const p = cur().p, t = todayStr(), ws = addDays(weekStart(t), (p.off || 0) * 7); return [0, 1, 2, 3, 4, 5, 6].map(n => addDays(ws, n)).filter(d => d >= t); };
-ACT.wk = el => { cur().p.off = (cur().p.off || 0) + +el.dataset.v; rerender(); };
-ACT.rerollDay = el => { const d = el.dataset.d, e = planOf(d, true); e.ids = drawIds(e.ids, e.locks); save(); rerender(); };
-ACT.fillWeek = () => { let n = 0; openDays().forEach(d => { const e = planOf(d, true); if (!e.ids.length) { e.ids = drawIds(); n++; } }); save(); rerender(); toast(n ? `排好了 ${n} 天` : '这周已经都排好了'); };
-ACT.rerollWeek = () => { let n = 0; openDays().forEach(d => { const e = planOf(d, true); if (!e.done) { e.ids = drawIds(e.ids, e.locks); n++; } }); save(); rerender(); toast(`重新摇了 ${n} 天`); };
+ACT.wk = el => { const p = cur().p; p.off = (p.off || 0) + +el.dataset.v; p.undoFill = null; rerender(); };
+ACT.fillWeek = () => {
+  const p = cur().p, filled = [];
+  openDays().forEach(d => { const e = planOf(d, true); if (!e.ids.length && !e.done) { e.ids = drawIds(); filled.push(d); } });
+  p.undoFill = filled; save(); rerender();
+};
+ACT.undoFill = () => { const p = cur().p; (p.undoFill || []).forEach(d => { const e = S.plan[d]; if (e && !e.done) delete S.plan[d]; }); p.undoFill = null; save(); rerender(); toast('已撤销'); };
 
 /* ---------- 对话 · 小衣（Demo：按关键词走预设流程，数据操作真实生效） ---------- */
 const botav = () => `<span class="botav" aria-hidden="true">${I.hanger}</span>`;

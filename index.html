@@ -158,16 +158,21 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .hscroll::-webkit-scrollbar{display:none}
 
 /* 今天 */
-.drawcard{background:var(--card);border-radius:26px;box-shadow:var(--shadow);padding:12px}
-.drawcard .fig{position:relative;border-radius:20px;overflow:hidden;background:linear-gradient(180deg,#FDE4EE,#F1ECFF);display:flex;justify-content:center}
-.drawcard .fig svg{display:block;height:min(420px,50vh);width:auto;max-width:100%}
+/* 今天页铺满一屏：小人区域自动伸缩，单品和三个按钮始终在屏幕内 */
+.screen.fitmode{padding-bottom:14px}
+.today{min-height:100%;display:flex;flex-direction:column}
+.drawcard{background:var(--card);border-radius:26px;box-shadow:var(--shadow);padding:12px;flex:1;min-height:0;display:flex;flex-direction:column}
+.drawcard .fig{position:relative;flex:1;min-height:150px;border-radius:20px;overflow:hidden;background:linear-gradient(180deg,#FDE4EE,#F1ECFF)}
+.drawcard .fig svg{position:absolute;top:0;bottom:0;left:0;right:0;margin:auto;height:100%;width:auto;max-width:100%}
+.drawcard .fig .figmode{z-index:1}
+@media (max-height:800px){.today .tblock{padding:8px 0 10px}.today .drawcard{margin-top:10px!important}.today .drawcard>.lab{display:none}.swaprow{margin-top:10px}.swit{width:58px}.swit .thumb{width:58px}.swit .nm{display:none}.a3i{width:44px;height:44px}.a3.main .a3i{width:56px;height:56px}.a3.main .a3i svg{width:24px;height:24px}.a3{gap:4px;font-size:12px}.act3{margin-top:10px}.weekstrip .wd .th{display:none}}
 .swaprow{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:8px -12px 0;padding:2px 12px 4px}
 .swaprow::-webkit-scrollbar{display:none}
 .swit{flex:none;width:74px;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center}
 .swit .thumb{width:74px;border-radius:14px}
 .swit .nm{font-size:11.5px;color:var(--ink2);width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .swit.add .thumb{background:none;box-shadow:inset 0 0 0 1.5px var(--line);color:var(--accent-2);font-size:24px}
-.act3{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:12px;margin-top:18px}
+.act3{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:12px;margin-top:16px;flex:none}
 .a3{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13px;color:var(--ink2)}
 .a3i{width:52px;height:52px;border-radius:50%;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;color:var(--ink)}
 .a3.main{color:var(--accent-2);font-weight:600}
@@ -642,6 +647,7 @@ const rerender = () => render(true);
 function render(keep) {
   const sc = $('#screen'), st = keep ? sc.scrollTop : 0, c = cur();
   sc.classList.toggle('chatmode', c.n === 'chat');
+  sc.classList.toggle('fitmode', c.n === 'today');
   sc.innerHTML = SCREENS[c.n](c.p);
   sc.scrollTop = st;
   const root = ROOTS.includes(c.n) && NAV.length === 1;
@@ -1217,11 +1223,11 @@ SCREENS.today = p => {
     return `<button class="wd${d === date ? ' on' : ''}" data-act="openDay" data-d="${d}" aria-pressed="${d === date}" aria-label="${md(d)}${pe && pe.done ? ' 已定' : ''}">${d === t ? '今天' : wdOf(d).slice(1)}<b>${parseYmd(d).getDate()}</b><span class="th">${first ? art(first) : ''}</span>${pe && pe.done ? `<i class="ok">${I.check}</i>` : ''}</button>`;
   }).join('')}</div>`;
   const head = `<div class="tblock"><div><div class="eyebrow">${isToday ? '今天' : past ? '已经过去' : '提前安排'} · ${wdOf(date)}</div><h1 class="big">${md(date)}</h1></div><div class="tbr"><button class="ibtn" data-act="goWeek" aria-label="穿搭排期">${I.cal}</button>${meBtn()}</div></div>` + strip;
-  if (!e) return head + `<div class="empty">这天没有记录穿搭<br><button class="btn soft" style="margin-top:12px" data-act="makeDay">补记这天穿了什么</button></div>`;
-  if (!e.ids.length) return head + '<div class="empty">衣柜里还没有衣服<br>先去添加几件吧</div>';
+  if (!e) return `<div class="today">` + head + `<div class="empty">这天没有记录穿搭<br><button class="btn soft" style="margin-top:12px" data-act="makeDay">补记这天穿了什么</button></div></div>`;
+  if (!e.ids.length) return `<div class="today">` + head + '<div class="empty">衣柜里还没有衣服<br>先去添加几件吧</div></div>';
   const its = e.ids.map(itemById), hasAcc = its.some(i => i.cat === 'acc') || !S.items.some(i => i.cat === 'acc');
   const okText = isToday ? '就穿这套' : past ? '就是这套' : '定下这套';
-  return head + `
+  return `<div class="today">` + head + `
   <div class="drawcard" id="drawcard" style="margin-top:14px">
     <div class="fig">${figureSVG(piecesOf(e.ids), UI.mode, S.body, S.look, { bg: 0, vb: '10 12 180 400' })}<button class="figmode" data-act="figmode">${UI.mode === 'q' ? 'Q 版' : '等比'} ⇄</button></div>
     <div class="lab" style="margin-top:12px"><span>这套的单品</span><span>点一件可以单独换</span></div>
@@ -1231,7 +1237,7 @@ SCREENS.today = p => {
     <button class="a3" data-act="redraw"><span class="a3i">${I.dice}</span><span>随机</span></button>
     ${e.done ? `<div class="a3 main done" role="status"><span class="a3i">${I.check}</span><span>已定下</span></div>` : `<button class="a3 main" data-act="confirmDay"><span class="a3i">${I.check}</span><span>${okText}</span></button>`}
     <button class="a3" data-act="pickOutfit"><span class="a3i">${I.shirt}</span><span>我来选</span></button>
-  </div>`;
+  </div></div>`;
 };
 ACT.figmode = () => { UI.mode = UI.mode === 'q' ? 'real' : 'q'; rerender(); };
 ACT.goWeek = () => go('week', {});

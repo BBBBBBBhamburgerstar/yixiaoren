@@ -549,7 +549,7 @@ input[type=range]{width:100%;accent-color:var(--accent);margin:0}
   --bg:#E8E6EE; --app:#F7F6FA; --card:#FFFFFF; --tile:#F0EEF4;
   --ink:#24202C; --ink2:#5D5768; --mute:#9690A1; --line:#E4E1EA;
   --accent:#EC5A8A; --accent-2:#C93D6F; --accent-soft:#FCE4EC; --on-accent:#FFFFFF;
-  --mint:#D6F0E5; --mint-ink:#1F6F53; --butter:#FFF0C4; --butter-ink:#7E5A06; --danger:#D23F4D;
+  --mint:#D6F0E5; --mint-ink:#1F6F53; --butter:#FFF0C4; --butter-ink:#7E5A06; --danger:#D23F4D; --period:#E0475F; --period-soft:#FDE6EA;
   --frame:#1C1A21; --shadow:0 1px 2px rgba(36,32,44,.05),0 6px 18px rgba(36,32,44,.06);
   --f-display:"Fredoka","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",system-ui,sans-serif;
   --f-body:"PingFang SC","HarmonyOS Sans SC","Hiragino Sans GB","Microsoft YaHei",system-ui,-apple-system,sans-serif;
@@ -559,13 +559,13 @@ input[type=range]{width:100%;accent-color:var(--accent);margin:0}
   --bg:#0F0E13; --app:#17151C; --card:#221F29; --tile:#2A2732;
   --ink:#F2EFF6; --ink2:#C4BECE; --mute:#8B8596; --line:#34303D;
   --accent:#FF79A3; --accent-2:#FF9BBB; --accent-soft:#3F1F2C; --on-accent:#2A0D19;
-  --mint:#173A2E; --mint-ink:#8BDDBB; --butter:#3A3120; --butter-ink:#F1CF77; --danger:#FF6B77;
+  --mint:#173A2E; --mint-ink:#8BDDBB; --butter:#3A3120; --butter-ink:#F1CF77; --danger:#FF6B77; --period:#FF7A8C; --period-soft:#3F1C24;
   --frame:#000; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0F0E13; --app:#17151C; --card:#221F29; --tile:#2A2732;
   --ink:#F2EFF6; --ink2:#C4BECE; --mute:#8B8596; --line:#34303D;
   --accent:#FF79A3; --accent-2:#FF9BBB; --accent-soft:#3F1F2C; --on-accent:#2A0D19;
-  --mint:#173A2E; --mint-ink:#8BDDBB; --butter:#3A3120; --butter-ink:#F1CF77; --danger:#FF6B77;
+  --mint:#173A2E; --mint-ink:#8BDDBB; --butter:#3A3120; --butter-ink:#F1CF77; --danger:#FF6B77; --period:#FF7A8C; --period-soft:#3F1C24;
   --frame:#000; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25); color-scheme:dark}
 
 *{box-sizing:border-box}
@@ -792,6 +792,41 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .wd.on b{color:var(--app)}
 .wd .ok{position:absolute;top:-4px;right:-3px;width:16px;height:16px;border-radius:50%;background:var(--mint-ink);color:var(--card);display:grid;place-items:center}
 .wd .ok svg{width:10px;height:10px}
+.wd .pdot{position:absolute;top:6px;left:6px;width:6px;height:6px;border-radius:50%;background:var(--period)}
+.chkrow{display:flex;gap:8px;margin-top:12px}
+.chk{height:32px;padding:0 12px 0 10px;border-radius:16px;background:var(--card);box-shadow:inset 0 0 0 1px var(--line);display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--mute);white-space:nowrap}
+.chk svg{color:var(--mute)}
+.chk.on{color:var(--ink2)}
+.chk b{font-family:var(--f-display);font-size:14px;color:var(--ink);font-weight:600}
+.chk.on svg{color:var(--accent)}
+.pchk.on{background:var(--period-soft);box-shadow:none}
+.pchk.on svg{color:var(--period)}
+.wbig{display:flex;align-items:center;justify-content:center;gap:14px}
+.wbig label{display:flex;align-items:baseline;gap:4px}
+.wbig label span{color:var(--mute);font-size:14px}
+.wnum{width:110px;text-align:center;border:0;background:none;outline:none;font-family:var(--f-display);font-size:40px;font-weight:600;color:var(--ink);padding:0;border-bottom:2px solid var(--line)}
+.wnum:focus{border-color:var(--accent)}
+.wstep{width:44px;height:44px;border-radius:22px;background:var(--tile);font-size:20px;color:var(--ink2)}
+.blh{display:flex;align-items:center;justify-content:space-between}
+.wnow{display:flex;align-items:baseline;gap:4px}
+.wnow b{font-family:var(--f-display);font-size:28px;font-weight:600}
+.wnow>span{color:var(--mute)}
+.wnow em{font-style:normal;font-size:12px;color:var(--ink2);background:var(--tile);border-radius:8px;padding:2px 7px;margin-left:6px}
+.wnow small{margin-left:auto;color:var(--mute);font-size:12px}
+.spark{width:100%;height:64px;display:block}
+.pnow{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--ink2)}
+.pnow b{font-family:var(--f-display);font-size:22px;color:var(--period);font-weight:600}
+.pnow small{color:var(--mute);font-size:12px}
+.plist{display:flex;flex-direction:column}
+.plist div{display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid var(--line);font-size:13px;color:var(--ink2)}
+.plist em{font-style:normal;color:var(--mute)}
+.cmprow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.cmpcol{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:10px 8px 12px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.cmpfig{width:100%;height:320px;position:relative}
+.cmpfig svg{position:absolute;inset:0;margin:auto;height:100%;width:auto;max-width:100%}
+.cmplab{display:flex;align-items:baseline;gap:3px;color:var(--mute);font-size:12px}
+.cmplab b{font-family:var(--f-display);font-size:18px;color:var(--ink)}
+.cmplab small{margin-left:6px}
 .weeknav{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--card);border-radius:18px;padding:8px;box-shadow:var(--shadow)}
 .weeknav>div{text-align:center}
 .weeknav b{display:block;font-size:15px}
@@ -1145,6 +1180,8 @@ const I = (() => {
     info: s('<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6h.01"/>', 'width="20" height="20"'),
     expand: s('<path d="M5 9V5h4M19 9V5h-4M5 15v4h4M19 15v4h-4"/>', 'width="16" height="16"'),
     collapse: s('<path d="M9 5v4H5M15 5v4h4M9 19v-4H5M15 19v-4h4"/>', 'width="16" height="16"'),
+    scale: s('<rect x="4" y="4" width="16" height="16" rx="4.5"/><path d="M8.5 10a5 5 0 0 1 7 0M12 12.5l1.3-2"/>', 'width="16" height="16"'),
+    drop: s('<path d="M12 4s-5.5 5.9-5.5 9.7a5.5 5.5 0 0 0 11 0C17.5 9.9 12 4 12 4z"/>', 'width="16" height="16"'),
     cal: s('<rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M9 3v4M15 3v4"/>'),
     dice: s('<rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1.2" fill="currentColor"/><circle cx="15" cy="15" r="1.2" fill="currentColor"/><circle cx="15" cy="9" r="1.2" fill="currentColor"/><circle cx="9" cy="15" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>', 'width="20" height="20"'),
     lock: s('<rect x="6" y="11" width="12" height="9" rx="2"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/>', 'width="16" height="16"'),
@@ -1262,7 +1299,21 @@ function seed() {
     mkO('周末出街', '休闲', ['T-003', 'B-001', 'S-001', 'A-002']),
     mkO('约会穿搭', '约会', ['T-005', 'B-002', 'S-003', 'A-003']),
   ];
+  seedBodyLogs(st);
   return st;
+}
+// 体重 & 经期示例数据：近 40 天体重缓慢下降，两次过去的经期
+function seedBodyLogs(st) {
+  const t = todayStr(), w0 = st.body.w;
+  st.wlog = [];
+  for (let n = 40; n >= 0; n--) {
+    if (n % 3 === 1 || n % 7 === 5) continue;
+    const w = Math.round((w0 + 1.2 * n / 40 + 0.25 * Math.sin(n * 1.7)) * 10) / 10;
+    st.wlog.push({ d: addDays(t, -n), w, ...(n % 14 === 0 ? { waist: Math.round(st.body.waist + n / 14) } : {}) });
+  }
+  st.body.w = st.wlog[st.wlog.length - 1].w;
+  st.periods = [{ s: addDays(t, -38), e: addDays(t, -33) }, { s: addDays(t, -10), e: addDays(t, -5) }];
+  st.pday = { [addDays(t, -10)]: { flow: '中', sym: ['痛经'] }, [addDays(t, -9)]: { flow: '多', sym: ['痛经', '疲惫'] } };
 }
 let S;
 function loadState() {
@@ -1277,6 +1328,7 @@ function loadState() {
   S.customSubs = S.customSubs || {};
   S.outfits.forEach(o => { if (!o.occasions) o.occasions = o.occasion ? [o.occasion] : []; delete o.occasion; });
   if (!S.chats) S.chats = seedChats();
+  if (!S.wlog) seedBodyLogs(S);
   // 旧数据迁移：没有永久序号的单品，从编号末尾的数字取
   S.items.forEach(i => { if (i.no == null) { const m = String(i.code).match(/(\d+)$/); i.no = m ? +m[1] : (S.seq[i.cat] = (S.seq[i.cat] || 0) + 1); } });
   CAT_KEYS.forEach(k => S.seq[k] = Math.max(S.seq[k] || 0, ...S.items.filter(i => i.cat === k).map(i => i.no)));
@@ -2060,6 +2112,67 @@ function immersiveHTML(p) {
   return `<div class="imm"><div class="imm-hd"><div class="eyebrow" id="immEyebrow">${immEyebrow(date === t)}</div><h1 class="big">${md(t)}</h1></div>
     <div class="icarousel" id="icar">${cards}</div></div>`;
 }
+/* 体重 & 经期：先只做记录入口，不影响推荐 */
+const dayDiff = (a, b) => Math.round((parseYmd(b) - parseYmd(a)) / 864e5);
+const wOf = d => S.wlog.find(x => x.d === d);
+const wBefore = d => S.wlog.filter(x => x.d <= d).pop();
+const periodEnd = p => p.e || [todayStr(), addDays(p.s, 9)].sort()[0];
+const periodAt = d => S.periods.find(p => p.s <= d && d <= periodEnd(p));
+const lastPeriod = d => S.periods.filter(p => p.s <= d).sort((a, b) => a.s < b.s ? -1 : 1).pop();
+function chkRowHTML(date) {
+  if (date > todayStr()) return '';
+  const w = wOf(date), pr = periodAt(date);
+  return `<div class="chkrow"><button class="chk${w ? ' on' : ''}" data-act="wSheet" data-d="${date}">${I.scale}${w ? `<b>${w.w}</b>kg` : '记体重'}</button><button class="chk pchk${pr ? ' on' : ''}" data-act="pSheet" data-d="${date}">${I.drop}${pr ? `经期第 <b>${dayDiff(pr.s, date) + 1}</b> 天` : '记姨妈'}</button></div>`;
+}
+const whoDay = d => d === todayStr() ? '今天' : md(d);
+function wSheetHTML(d) {
+  const w = wOf(d), prev = S.wlog.filter(x => x.d < d).pop(), lw = (w || prev || {}).w || S.body.w;
+  const lastWaist = (S.wlog.filter(x => x.d <= d && x.waist).pop() || {}).waist || S.body.waist;
+  return `<div class="sheet-title">${whoDay(d)}的体重</div><div class="sheet-sub">${prev ? `上次 ${prev.w} kg（${md(prev.d)}）` : '第一次记录'}</div>
+  <div class="wbig"><button class="wstep" data-act="wStep" data-v="-0.1" aria-label="减 0.1">−</button><label><input id="wIn" class="wnum" inputmode="decimal" value="${lw}" aria-label="体重"><span>kg</span></label><button class="wstep" data-act="wStep" data-v="0.1" aria-label="加 0.1">＋</button></div>
+  <div class="fl" style="margin-top:14px"><div class="lab"><span>腰围（选填）</span><span>上次 ${lastWaist} cm</span></div><input id="wWaist" class="inp" inputmode="numeric" placeholder="不填就不记" value="${w && w.waist ? w.waist : ''}"></div>
+  <div class="row" style="margin-top:16px">${w ? `<button class="btn" data-act="wDel" data-d="${d}">删除</button>` : ''}<button class="btn pri" style="flex:1" data-act="wSave" data-d="${d}">记下</button></div>`;
+}
+ACT.wSheet = el => openSheet(wSheetHTML(el.dataset.d || todayStr()));
+ACT.wStep = el => { const i = $('#wIn'), v = parseFloat(i.value) || S.body.w; i.value = (Math.round((v + +el.dataset.v) * 10) / 10).toFixed(1); };
+function syncBodyFromLog() {
+  const last = S.wlog[S.wlog.length - 1], lw = S.wlog.filter(x => x.waist).pop();
+  if (last) S.body.w = last.w;
+  if (lw && lw.d === last.d) S.body.waist = lw.waist;
+}
+ACT.wSave = el => {
+  const d = el.dataset.d, w = Math.round(parseFloat($('#wIn').value) * 10) / 10, wa = parseInt($('#wWaist').value, 10);
+  if (!(w >= 25 && w <= 200)) return toast('体重好像不太对，再看一下？');
+  S.wlog = S.wlog.filter(x => x.d !== d);
+  S.wlog.push({ d, w, ...(wa >= 40 && wa <= 150 ? { waist: wa } : {}) });
+  S.wlog.sort((a, b) => a.d < b.d ? -1 : 1);
+  const before = S.body.w; syncBodyFromLog(); save(); closeSheet(); rerender();
+  toast(S.body.w !== before ? '记好了，小人也跟着变了' : '记好了');
+};
+ACT.wDel = el => { S.wlog = S.wlog.filter(x => x.d !== el.dataset.d); syncBodyFromLog(); save(); closeSheet(); rerender(); toast('已删除这条记录'); };
+const FLOWS = ['少', '中', '多'], SYMS = ['痛经', '腹胀', '腰酸', '情绪低', '长痘', '疲惫'];
+function pSheetHTML(d) {
+  const pr = periodAt(d);
+  if (!pr) {
+    const lp = lastPeriod(d);
+    return `<div class="sheet-title">姨妈来了吗？</div><div class="sheet-sub">${lp ? `上次 ${md(lp.s)} 开始，到${whoDay(d)}是第 ${dayDiff(lp.s, d) + 1} 天` : '记下第一次，之后就能看到周期了'}</div>
+    <button class="btn pri block" data-act="pStart" data-d="${d}">${I.drop}${whoDay(d)}来了</button>`;
+  }
+  const n = dayDiff(pr.s, d) + 1, pd = S.pday[d] || {};
+  return `<div class="sheet-title">经期第 ${n} 天</div><div class="sheet-sub">${md(pr.s)} 开始${pr.e ? ` · ${md(pr.e)} 结束` : ' · 还没结束'}</div>
+  <div class="fl"><div class="lab">流量</div><div class="chips wrapc">${FLOWS.map(v => `<button class="chip${pd.flow === v ? ' on' : ''}" data-act="pFlow" data-d="${d}" data-v="${v}">${v}</button>`).join('')}</div></div>
+  <div class="fl" style="margin-top:12px"><div class="lab">身体感觉（可多选）</div><div class="chips wrapc">${SYMS.map(v => `<button class="chip${(pd.sym || []).includes(v) ? ' on' : ''}" data-act="pSym" data-d="${d}" data-v="${v}">${v}</button>`).join('')}</div></div>
+  <div class="row" style="margin-top:16px">${pr.e === d ? `<button class="btn" style="flex:1" data-act="pOpen" data-d="${d}">其实还没走</button>` : `<button class="btn" style="flex:1" data-act="pEnd" data-d="${d}">${whoDay(d)}走了</button>`}<button class="btn" style="flex:1" data-act="pDel" data-d="${d}">记错了，删掉</button></div>`;
+}
+ACT.pSheet = el => openSheet(pSheetHTML(el.dataset.d || todayStr()));
+const pRefresh = d => { save(); rerender(); setSheet(pSheetHTML(d)); };
+ACT.pStart = el => { const d = el.dataset.d; S.periods.push({ s: d, e: null }); S.periods.sort((a, b) => a.s < b.s ? -1 : 1); pRefresh(d); };
+ACT.pEnd = el => { const d = el.dataset.d; periodAt(d).e = d; save(); closeSheet(); rerender(); toast('记下了，辛苦啦'); };
+ACT.pOpen = el => { const d = el.dataset.d; periodAt(d).e = null; pRefresh(d); };
+ACT.pDel = el => { const pr = periodAt(el.dataset.d); S.periods = S.periods.filter(p => p !== pr); save(); closeSheet(); rerender(); toast('这次记录已删除'); };
+ACT.pFlow = el => { const d = el.dataset.d, pd = S.pday[d] = S.pday[d] || {}; pd.flow = pd.flow === el.dataset.v ? undefined : el.dataset.v; save(); setSheet(pSheetHTML(d)); };
+ACT.pSym = el => { const d = el.dataset.d, pd = S.pday[d] = S.pday[d] || {}, v = el.dataset.v; pd.sym = (pd.sym || []).includes(v) ? pd.sym.filter(x => x !== v) : [...(pd.sym || []), v]; save(); setSheet(pSheetHTML(d)); };
+
 SCREENS.today = p => {
   if (UI.immersive) return immersiveHTML(p);
   const t = todayStr(), date = p.sel || t, isToday = date === t, past = date < t;
@@ -2067,16 +2180,16 @@ SCREENS.today = p => {
   const e = planOf(date, false) || { ids: [], locks: [], done: false }, ws = weekStart(date);
   const strip = `<div class="wkrow"><button class="wkarrow" data-act="wkShift" data-v="-7" aria-label="上一周">${I.back}</button><div class="weekstrip">${[0, 1, 2, 3, 4, 5, 6].map(n => {
     const d = addDays(ws, n), pe = planOf(d, false), first = pe && pe.ids.length && itemById(pe.ids[0]);
-    return `<button class="wd${d === date ? ' on' : ''}" data-act="openDay" data-d="${d}" aria-pressed="${d === date}" aria-label="${md(d)}${pe && pe.done ? ' 已定' : ''}">${d === t ? '今天' : wdOf(d).slice(1)}<b>${parseYmd(d).getDate()}</b><span class="th">${first ? art(first) : ''}</span>${pe && pe.done ? `<i class="ok">${I.check}</i>` : ''}</button>`;
+    return `<button class="wd${d === date ? ' on' : ''}" data-act="openDay" data-d="${d}" aria-pressed="${d === date}" aria-label="${md(d)}${pe && pe.done ? ' 已定' : ''}">${d === t ? '今天' : wdOf(d).slice(1)}<b>${parseYmd(d).getDate()}</b><span class="th">${first ? art(first) : ''}</span>${pe && pe.done ? `<i class="ok">${I.check}</i>` : ''}${periodAt(d) ? '<i class="pdot" aria-label="经期"></i>' : ''}</button>`;
   }).join('')}</div><button class="wkarrow" data-act="wkShift" data-v="7" aria-label="下一周">${I.chev}</button></div>`;
-  const head = `<div class="tblock"><div><div class="eyebrow">${isToday ? '今天' : past ? '已经过去' : '提前安排'} · ${wdOf(date)}${isToday ? '' : ' · <button class="backtoday" data-act="goToday">回到今天</button>'}</div><h1 class="big">${md(date)}</h1></div><div class="tbr"><button class="ibtn" data-act="goWeek" aria-label="穿搭排期">${I.cal}</button>${meBtn()}</div></div>` + strip;
+  const head = `<div class="tblock"><div><div class="eyebrow">${isToday ? '今天' : past ? '已经过去' : '提前安排'} · ${wdOf(date)}${isToday ? '' : ' · <button class="backtoday" data-act="goToday">回到今天</button>'}</div><h1 class="big">${md(date)}</h1></div><div class="tbr"><button class="ibtn" data-act="goWeek" aria-label="穿搭排期">${I.cal}</button>${meBtn()}</div></div>` + strip + chkRowHTML(date);
   if (!S.items.length) return `<div class="today">` + head + '<div class="empty">衣柜里还没有衣服<br>先去添加几件吧</div></div>';
   const empty = !e.ids.length;
   const its = e.ids.map(itemById), hasDress = its.some(i => i.cat === 'dress');
   const missing = (hasDress ? ['top', 'shoes', 'acc'] : ['top', 'bottom', 'shoes', 'acc', ...(its.length ? [] : ['dress'])]).filter(k => !its.some(i => i.cat === k));
   const okText = isToday ? '就穿这套' : past ? '就是这套' : '定下这套';
   return `<div class="today">` + head + `
-  <div class="drawcard" id="drawcard" style="margin-top:14px">
+  <div class="drawcard" id="drawcard" style="margin-top:12px">
     <div class="fig">${figureSVG(piecesOf(e.ids), UI.mode, S.body, S.look, { bg: 0, vb: '10 12 180 400' })}<button class="figmode" data-act="figmode">${UI.mode === 'q' ? 'Q 版' : '等比'} ⇄</button><button class="immbtn" data-act="immOn" aria-label="全屏浏览">${I.expand}</button>${empty ? `<div class="emptyhint">${past ? '这天没有记录' : '这天还没安排'}<br><small>点下面的 ＋ 自己挑，或者「随机」「我来选」</small></div>` : ''}</div>
     <div class="lab" style="margin-top:12px"><span>${empty ? '添加单品' : '这套的单品'}</span><span>${empty ? '' : '点一件可以单独换'}</span></div>
     <div class="swaprow">${its.map(i => `<button class="swit" data-act="swapItem" data-id="${i.id}" aria-label="换掉 ${esc(i.name)}"><span class="thumb">${art(i)}</span><span class="code">${esc(i.code)}</span><span class="nm">${esc(i.name)}</span></button>`).join('')}${missing.map(k => `<button class="swit add" data-act="swapItem" data-id="" data-cat="${k}" aria-label="加一件${CATS[k].n}"><span class="thumb">＋</span><span class="nm">加${CATS[k].n}</span></button>`).join('')}</div>
@@ -2576,6 +2689,46 @@ ACT.lhair = el => lookSet('hair', el);
 ACT.lhcol = el => lookSet('hairColor', el);
 ACT.lsave = () => { S.look = { ...cur().p.l }; save(); toast('外观已保存'); back(); };
 
+/* 我的 · 体重 & 经期卡片 */
+function sparkHTML(list) {
+  if (list.length < 2) return '';
+  const W = 300, H = 64, ws = list.map(x => x.w), lo = Math.min(...ws) - 0.2, hi = Math.max(...ws) + 0.2, d0 = list[0].d, span = Math.max(1, dayDiff(d0, list[list.length - 1].d));
+  const pts = list.map(x => [dayDiff(d0, x.d) / span * (W - 12) + 6, H - 6 - (x.w - lo) / (hi - lo) * (H - 12)]);
+  const last = pts[pts.length - 1];
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts.map(p => p.map(v => v.toFixed(1)).join(',')).join(' ')}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/><circle cx="${last[0]}" cy="${last[1]}" r="3.5" fill="var(--accent)"/></svg>`;
+}
+function weightCardHTML() {
+  const t = todayStr(), last = S.wlog[S.wlog.length - 1];
+  if (!last) return `<div class="sec"><div class="blh"><h3>体重</h3><button class="miniact" data-act="wSheet" data-d="${t}">${I.plus}<span>记一笔</span></button></div><div class="sub">还没有记录。每天早上称一下，小人会跟着你变。</div></div>`;
+  const recent = S.wlog.filter(x => x.d >= addDays(t, -30)), base = recent[0], diff = base && base !== last ? Math.round((last.w - base.w) * 10) / 10 : null;
+  return `<div class="sec"><div class="blh"><h3>体重</h3><button class="miniact" data-act="wSheet" data-d="${t}">${I.plus}<span>记一笔</span></button></div>
+  <div class="wnow"><b>${last.w}</b><span>kg</span>${diff != null ? `<em>近 30 天 ${diff > 0 ? '+' : diff < 0 ? '−' : '±'}${Math.abs(diff)} kg</em>` : ''}<small>${last.d === t ? '今天' : md(last.d)}</small></div>
+  ${sparkHTML(recent)}
+  ${recent.length > 1 ? `<button class="btn block" data-act="goCompare">${I.person}对比一个月前的我</button>` : ''}</div>`;
+}
+function periodCardHTML() {
+  const t = todayStr(), ps = S.periods.slice().sort((a, b) => a.s < b.s ? -1 : 1), pr = periodAt(t), lp = ps[ps.length - 1];
+  const cyc = ps.slice(1).map((p, i) => dayDiff(ps[i].s, p.s)), len = ps.filter(p => p.e).map(p => dayDiff(p.s, p.e) + 1);
+  const avg = a => Math.round(a.reduce((x, y) => x + y, 0) / a.length);
+  return `<div class="sec"><div class="blh"><h3>经期</h3><button class="miniact" data-act="pSheet" data-d="${t}">${I.drop}<span>${pr ? '今天' : '记姨妈'}</span></button></div>
+  <div class="pnow"><div>${pr ? `经期第 <b>${dayDiff(pr.s, t) + 1}</b> 天` : lp ? `距上次开始 <b>${dayDiff(lp.s, t) + 1}</b> 天` : '还没有记录'}</div>${cyc.length ? `<small>平均周期 ${avg(cyc)} 天${len.length ? ` · 每次 ${avg(len)} 天` : ''}</small>` : ''}</div>
+  ${ps.length ? `<div class="plist">${ps.slice(-3).reverse().map(p => `<div><span>${md(p.s)} – ${p.e ? md(p.e) : '至今'}</span><em>${p.e ? dayDiff(p.s, p.e) + 1 + ' 天' : '进行中'}</em></div>`).join('')}</div>` : ''}</div>`;
+}
+ACT.goCompare = () => go('compare', {});
+SCREENS.compare = p => {
+  const t = todayStr(), span = p.span || 30, from = S.wlog.find(x => x.d >= addDays(t, -span)) || S.wlog[0], last = S.wlog[S.wlog.length - 1];
+  const waistThen = (S.wlog.filter(x => x.d <= from.d && x.waist).pop() || {}).waist;
+  const then = { ...S.body, w: from.w, ...(waistThen ? { waist: waistThen } : {}) };
+  const pe = planOf(t, false), ids = pe && pe.ids.length ? pe.ids : (S.outfits[0] ? S.outfits[0].pieces.map(q => q.iid) : []);
+  const pc = piecesOf(ids.filter(itemById)), diff = Math.round((last.w - from.w) * 10) / 10;
+  const col = (b, l, w) => `<div class="cmpcol"><div class="cmpfig">${figureSVG(pc, 'real', b, S.look, { bg: 0, vb: '10 12 180 400' })}</div><div class="cmplab"><b>${w}</b> kg<small>${l}</small></div></div>`;
+  return hdr('身材对比') + seg('cmpSpan', [['30', '1 个月'], ['90', '3 个月']], String(span)) + `
+  <div class="cmprow">${col(then, md(from.d), from.w)}${col(S.body, '现在', last.w)}</div>
+  <p class="sub" style="text-align:center;margin-top:12px">${diff === 0 ? '体重没变化' : `${diff < 0 ? '瘦了' : '重了'} ${Math.abs(diff)} kg`} · 穿的是${pe && pe.ids.length ? '今天这套' : '「' + esc(S.outfits[0] ? S.outfits[0].name : '') + '」'}</p>
+  <p class="sub" style="text-align:center;line-height:1.6">变化小的时候小人看起来差不多，坚持记录，越往后越明显。</p>`;
+};
+ACT.cmpSpan = el => { cur().p.span = +el.dataset.v; rerender(); };
+
 /* 我的 */
 SCREENS.me = () => {
   const total = S.items.reduce((a, i) => a + (i.price || 0), 0), worn = S.items.reduce((a, i) => a + i.worn, 0);
@@ -2586,6 +2739,7 @@ SCREENS.me = () => {
     <div class="segmini">${seg('mode', [['real', '等比'], ['q', 'Q 版']], UI.mode)}</div></div>
   ${t3host('', `<div class="bstats" aria-label="身材数据">${BODY_FIELDS.map(([k, l, u]) => `<span><b>${S.body[k]}</b>${l} ${u}</span>`).join('')}</div>`)}
   <div class="row" style="margin-top:14px"><button class="btn" data-act="goBody">${I.ruler}编辑身材</button><button class="btn" data-act="goLook">${I.palette}外观</button></div>
+  ${weightCardHTML()}${periodCardHTML()}
   <div class="stats"><div class="stat"><b>${S.items.length}</b><span>件单品</span></div><div class="stat"><b>${S.outfits.length}</b><span>套搭配</span></div><div class="stat"><b>¥${total.toLocaleString()}</b><span>衣柜总价</span></div><div class="stat"><b>${worn}</b><span>累计穿着次数</span></div></div>
   <div class="sec"><h3>分类占比</h3><div class="bars">${CAT_KEYS.map(k => { const n = S.items.filter(i => i.cat === k).length; return `<div class="br"><span>${CATS[k].n}</span><div class="tr"><i style="width:${n / max * 100}%"></i></div><em>${n}</em></div>`; }).join('')}</div></div>
   <div class="sec"><h3>最常穿</h3><div>${top3.map(i => `<button class="toprow" style="width:100%;text-align:left" data-act="openItem" data-id="${i.id}"><div class="thumb">${art(i)}</div><div class="meta"><span class="code">${esc(i.code)}</span><span class="name">${esc(i.name)}</span></div><span class="sub">${i.worn} 次</span></button>`).join('')}</div></div>
@@ -2622,7 +2776,7 @@ const PAGES = [['首次打开', [['0', 'onboard', '首次引导']]],
   ['搭配', [['7', 'outfits', '搭配列表'], ['8', 'outfitEdit', '搭配画布'], ['9', 'tryon', 'AI 试穿']]],
   ['对话', [['16', 'chat', '对话 · 小衣'], ['18', 'chatCal', '聊天记录日历']]],
 
-  ['我的', [['13', 'me', '我的 · 形象'], ['11', 'body', '身材编辑'], ['12', 'look', '外观设置']]]];
+  ['我的', [['13', 'me', '我的 · 形象'], ['11', 'body', '身材编辑'], ['12', 'look', '外观设置'], ['14', 'compare', '身材对比']]]];
 const pagesHTML = () => PAGES.map(([g, list]) => `<div class="grp">${g}</div>` + list.map(([no, k, n]) => `<button data-act="jump" data-k="${k}"><span class="no">${no}</span>${n}</button>`).join('')).join('');
 function markNav() { const n = cur().n; document.querySelectorAll('#pnav [data-k]').forEach(b => b.classList.toggle('on', b.dataset.k === n)); }
 ACT.pagesSheet = () => openSheet(`<div class="sheet-title">原型页面导航</div><div class="sheet-sub">直接跳到任意一页</div><nav class="pnav">${pagesHTML()}</nav>`);

@@ -793,7 +793,13 @@ textarea.inp{height:76px;padding:10px 12px;resize:none;line-height:1.5}
 .wd .ok{position:absolute;top:-4px;right:-3px;width:16px;height:16px;border-radius:50%;background:var(--mint-ink);color:var(--card);display:grid;place-items:center}
 .wd .ok svg{width:10px;height:10px}
 .wd .pdot{position:absolute;top:6px;left:6px;width:6px;height:6px;border-radius:50%;background:var(--period)}
-.chkrow{display:flex;gap:8px;margin-top:12px}
+.wd .pdot.pred{background:none;box-shadow:inset 0 0 0 1.5px var(--period)}
+.chkrow{display:flex;gap:8px;margin-top:12px;min-width:0}
+.chk small{font-size:12px;color:var(--mute);margin-left:2px}
+.pchk{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.chk.pred{background:none;box-shadow:inset 0 0 0 1px var(--period-soft);color:var(--ink2)}
+.chk.pred svg{color:var(--period)}
+.ppred{font-size:13px;color:var(--period)}
 .chk{height:32px;padding:0 12px 0 10px;border-radius:16px;background:var(--card);box-shadow:inset 0 0 0 1px var(--line);display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--mute);white-space:nowrap}
 .chk svg{color:var(--mute)}
 .chk.on{color:var(--ink2)}
@@ -2119,10 +2125,28 @@ const wBefore = d => S.wlog.filter(x => x.d <= d).pop();
 const periodEnd = p => p.e || [todayStr(), addDays(p.s, 9)].sort()[0];
 const periodAt = d => S.periods.find(p => p.s <= d && d <= periodEnd(p));
 const lastPeriod = d => S.periods.filter(p => p.s <= d).sort((a, b) => a.s < b.s ? -1 : 1).pop();
+// 预测：周期取历史平均（15–60 天才算数），经期长度取平均（2–10 天）；数据不够时默认 28 / 5 天
+const avgOf = a => Math.round(a.reduce((x, y) => x + y, 0) / a.length);
+const mdS = d => { const x = parseYmd(d); return `${x.getMonth() + 1}/${x.getDate()}`; };
+function periodPred() {
+  const t = todayStr(), ps = S.periods.slice().sort((a, b) => a.s < b.s ? -1 : 1), lp = ps[ps.length - 1];
+  if (!lp) return null;
+  const cyc = ps.slice(1).map((p, i) => dayDiff(ps[i].s, p.s)).filter(n => n >= 15 && n <= 60);
+  const lens = ps.filter(p => p.e).map(p => dayDiff(p.s, p.e) + 1).filter(n => n >= 2 && n <= 10);
+  const r = { ps, cyc, lens, cycle: cyc.length ? avgOf(cyc) : 28, len: lens.length ? avgOf(lens) : 5, ranges: [], late: 0 };
+  if (!lp.e) { const pe = addDays(lp.s, r.len - 1); r.endBy = pe < t ? t : pe; if (r.endBy > t) r.ranges.push([addDays(t, 1), r.endBy, lp.s]); }
+  r.next = addDays(lp.s, r.cycle);
+  if (lp.e && r.next <= t) r.late = dayDiff(r.next, t);
+  else for (let k = 0; k < 2; k++) { const a = addDays(r.next, k * r.cycle); r.ranges.push([a, addDays(a, r.len - 1), a]); }
+  return r;
+}
+const predAt = (d, pp = periodPred()) => pp && d > todayStr() && !periodAt(d) ? pp.ranges.find(([a, b]) => a <= d && d <= b) : null;
 function chkRowHTML(date) {
-  if (date > todayStr()) return '';
-  const w = wOf(date), pr = periodAt(date);
-  return `<div class="chkrow"><button class="chk${w ? ' on' : ''}" data-act="wSheet" data-d="${date}">${I.scale}${w ? `<b>${w.w}</b>kg` : '记体重'}</button><button class="chk pchk${pr ? ' on' : ''}" data-act="pSheet" data-d="${date}">${I.drop}${pr ? `经期第 <b>${dayDiff(pr.s, date) + 1}</b> 天` : '记姨妈'}</button></div>`;
+  const t = todayStr(), pp = periodPred();
+  if (date > t) { const pr = predAt(date, pp); return pr ? `<div class="chkrow"><span class="chk pchk pred">${I.drop}预计经期第 <b>${dayDiff(pr[2], date) + 1}</b> 天</span></div>` : ''; }
+  const w = wOf(date), pr = periodAt(date), isT = date === t;
+  const hint = !isT || !pp ? '' : pr ? (pp.endBy ? `<small>· 预计 ${mdS(pp.endBy)} 结束</small>` : '') : pp.late ? `<small>· 推迟 ${pp.late} 天</small>` : `<small>· 预计 ${mdS(pp.next)} 来</small>`;
+  return `<div class="chkrow"><button class="chk${w ? ' on' : ''}" data-act="wSheet" data-d="${date}">${I.scale}${w ? `<b>${w.w}</b>kg` : '记体重'}</button><button class="chk pchk${pr ? ' on' : ''}" data-act="pSheet" data-d="${date}">${I.drop}${pr ? `经期第 <b>${dayDiff(pr.s, date) + 1}</b> 天` : '记姨妈'}${hint}</button></div>`;
 }
 const whoDay = d => d === todayStr() ? '今天' : md(d);
 function wSheetHTML(d) {
@@ -2155,11 +2179,11 @@ function pSheetHTML(d) {
   const pr = periodAt(d);
   if (!pr) {
     const lp = lastPeriod(d);
-    return `<div class="sheet-title">姨妈来了吗？</div><div class="sheet-sub">${lp ? `上次 ${md(lp.s)} 开始，到${whoDay(d)}是第 ${dayDiff(lp.s, d) + 1} 天` : '记下第一次，之后就能看到周期了'}</div>
+    return `<div class="sheet-title">姨妈来了吗？</div><div class="sheet-sub">${lp ? `上次 ${md(lp.s)} 开始，到${whoDay(d)}是第 ${dayDiff(lp.s, d) + 1} 天` : '记下第一次，之后就能看到周期了'}${(pp => pp && d === todayStr() ? (pp.late ? `<br>按周期算已经推迟 ${pp.late} 天` : `<br>预计 ${md(pp.next)} 来`) : '')(periodPred())}</div>
     <button class="btn pri block" data-act="pStart" data-d="${d}">${I.drop}${whoDay(d)}来了</button>`;
   }
   const n = dayDiff(pr.s, d) + 1, pd = S.pday[d] || {};
-  return `<div class="sheet-title">经期第 ${n} 天</div><div class="sheet-sub">${md(pr.s)} 开始${pr.e ? ` · ${md(pr.e)} 结束` : ' · 还没结束'}</div>
+  return `<div class="sheet-title">经期第 ${n} 天</div><div class="sheet-sub">${md(pr.s)} 开始${pr.e ? ` · ${md(pr.e)} 结束` : (pp => pp && pp.endBy ? ` · 预计 ${md(pp.endBy)} 结束` : ' · 还没结束')(periodPred())}</div>
   <div class="fl"><div class="lab">流量</div><div class="chips wrapc">${FLOWS.map(v => `<button class="chip${pd.flow === v ? ' on' : ''}" data-act="pFlow" data-d="${d}" data-v="${v}">${v}</button>`).join('')}</div></div>
   <div class="fl" style="margin-top:12px"><div class="lab">身体感觉（可多选）</div><div class="chips wrapc">${SYMS.map(v => `<button class="chip${(pd.sym || []).includes(v) ? ' on' : ''}" data-act="pSym" data-d="${d}" data-v="${v}">${v}</button>`).join('')}</div></div>
   <div class="row" style="margin-top:16px">${pr.e === d ? `<button class="btn" style="flex:1" data-act="pOpen" data-d="${d}">其实还没走</button>` : `<button class="btn" style="flex:1" data-act="pEnd" data-d="${d}">${whoDay(d)}走了</button>`}<button class="btn" style="flex:1" data-act="pDel" data-d="${d}">记错了，删掉</button></div>`;
@@ -2177,10 +2201,10 @@ SCREENS.today = p => {
   if (UI.immersive) return immersiveHTML(p);
   const t = todayStr(), date = p.sel || t, isToday = date === t, past = date < t;
   // 周条跟着所选日期走：选到下周的某天，就显示下周
-  const e = planOf(date, false) || { ids: [], locks: [], done: false }, ws = weekStart(date);
+  const e = planOf(date, false) || { ids: [], locks: [], done: false }, ws = weekStart(date), pp = periodPred();
   const strip = `<div class="wkrow"><button class="wkarrow" data-act="wkShift" data-v="-7" aria-label="上一周">${I.back}</button><div class="weekstrip">${[0, 1, 2, 3, 4, 5, 6].map(n => {
     const d = addDays(ws, n), pe = planOf(d, false), first = pe && pe.ids.length && itemById(pe.ids[0]);
-    return `<button class="wd${d === date ? ' on' : ''}" data-act="openDay" data-d="${d}" aria-pressed="${d === date}" aria-label="${md(d)}${pe && pe.done ? ' 已定' : ''}">${d === t ? '今天' : wdOf(d).slice(1)}<b>${parseYmd(d).getDate()}</b><span class="th">${first ? art(first) : ''}</span>${pe && pe.done ? `<i class="ok">${I.check}</i>` : ''}${periodAt(d) ? '<i class="pdot" aria-label="经期"></i>' : ''}</button>`;
+    return `<button class="wd${d === date ? ' on' : ''}" data-act="openDay" data-d="${d}" aria-pressed="${d === date}" aria-label="${md(d)}${pe && pe.done ? ' 已定' : ''}">${d === t ? '今天' : wdOf(d).slice(1)}<b>${parseYmd(d).getDate()}</b><span class="th">${first ? art(first) : ''}</span>${pe && pe.done ? `<i class="ok">${I.check}</i>` : ''}${periodAt(d) ? '<i class="pdot" aria-label="经期"></i>' : predAt(d, pp) ? '<i class="pdot pred" aria-label="预计经期"></i>' : ''}</button>`;
   }).join('')}</div><button class="wkarrow" data-act="wkShift" data-v="7" aria-label="下一周">${I.chev}</button></div>`;
   const head = `<div class="tblock"><div><div class="eyebrow">${isToday ? '今天' : past ? '已经过去' : '提前安排'} · ${wdOf(date)}${isToday ? '' : ' · <button class="backtoday" data-act="goToday">回到今天</button>'}</div><h1 class="big">${md(date)}</h1></div><div class="tbr"><button class="ibtn" data-act="goWeek" aria-label="穿搭排期">${I.cal}</button>${meBtn()}</div></div>` + strip + chkRowHTML(date);
   if (!S.items.length) return `<div class="today">` + head + '<div class="empty">衣柜里还没有衣服<br>先去添加几件吧</div></div>';
@@ -2707,11 +2731,12 @@ function weightCardHTML() {
   ${recent.length > 1 ? `<button class="btn block" data-act="goCompare">${I.person}对比一个月前的我</button>` : ''}</div>`;
 }
 function periodCardHTML() {
-  const t = todayStr(), ps = S.periods.slice().sort((a, b) => a.s < b.s ? -1 : 1), pr = periodAt(t), lp = ps[ps.length - 1];
-  const cyc = ps.slice(1).map((p, i) => dayDiff(ps[i].s, p.s)), len = ps.filter(p => p.e).map(p => dayDiff(p.s, p.e) + 1);
-  const avg = a => Math.round(a.reduce((x, y) => x + y, 0) / a.length);
+  const t = todayStr(), pp = periodPred(), ps = pp ? pp.ps : [], pr = periodAt(t), lp = ps[ps.length - 1];
+  const cyc = pp ? pp.cyc : [], len = pp ? pp.lens : [], avg = avgOf;
+  const nx = pp && pp.ranges.find(r => r[2] !== lp.s);
+  const pl = !pp ? '' : pr && pp.endBy ? `预计 ${md(pp.endBy)} 结束 · 下次 ${md(pp.next)} 来` : pp.late ? `按周期算已经推迟 ${pp.late} 天` : nx ? `下次预计 ${md(nx[0])} 来 · ${md(nx[1])} 走` : '';
   return `<div class="sec"><div class="blh"><h3>经期</h3><button class="miniact" data-act="pSheet" data-d="${t}">${I.drop}<span>${pr ? '今天' : '记姨妈'}</span></button></div>
-  <div class="pnow"><div>${pr ? `经期第 <b>${dayDiff(pr.s, t) + 1}</b> 天` : lp ? `距上次开始 <b>${dayDiff(lp.s, t) + 1}</b> 天` : '还没有记录'}</div>${cyc.length ? `<small>平均周期 ${avg(cyc)} 天${len.length ? ` · 每次 ${avg(len)} 天` : ''}</small>` : ''}</div>
+  <div class="pnow"><div>${pr ? `经期第 <b>${dayDiff(pr.s, t) + 1}</b> 天` : lp ? `距上次开始 <b>${dayDiff(lp.s, t) + 1}</b> 天` : '还没有记录'}</div>${pl ? `<span class="ppred">${pl}</span>` : ''}${cyc.length ? `<small>平均周期 ${avg(cyc)} 天${len.length ? ` · 每次 ${avg(len)} 天` : ''}</small>` : ''}</div>
   ${ps.length ? `<div class="plist">${ps.slice(-3).reverse().map(p => `<div><span>${md(p.s)} – ${p.e ? md(p.e) : '至今'}</span><em>${p.e ? dayDiff(p.s, p.e) + 1 + ' 天' : '进行中'}</em></div>`).join('')}</div>` : ''}</div>`;
 }
 ACT.goCompare = () => go('compare', {});
